@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benji HQ Portal</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0b0c0e; color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: #141619; padding: 40px; border-radius: 6px; width: 360px; border: 1px solid #22252a; }
+        h2 { font-size: 20px; font-weight: 600; margin: 0 0 8px 0; color: #ffffff; text-align: center; }
+        p { font-size: 13px; color: #707782; text-align: center; margin: 0 0 24px 0; }
+        input { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #2c3036; background: #0b0c0e; color: #ffffff; font-size: 14px; text-align: center; transition: border-color 0.2s; }
+        input:focus { outline: none; border-color: #474d57; }
+        .access-btn { width: 100%; padding: 12px; border: none; border-radius: 4px; background: #ff6a00; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .access-btn:hover { background: #e05d00; }
+        .error { color: #f85149; font-size: 13px; text-align: center; margin-top: 12px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Benji HQ Portal</h2>
+        <p>Enter worker access credentials</p>
+        <input type="text" id="workerCode" placeholder="W_XXXX_00" autocomplete="off">
+        <button class="access-btn" onclick="handleLogin()">Access Terminal</button>
+        <div id="errorMsg" class="error">Access Denied: Invalid Code</div>
+    </div>
+
+    <script>
+        async function handleLogin() {
+            const code = document.getElementById('workerCode').value.trim();
+            const errorElement = document.getElementById('errorMsg');
+            errorElement.style.display = 'none';
+            if (!code) return;
+
+            try {
+                const response = await fetch(`/api/login?code=${code}`);
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = `/panels/${data.role.toLowerCase()}.html`;
+                } else {
+                    errorElement.style.display = 'block';
+                }
+            } catch (err) {
+                if (code === 'W_DIST-1_nicho') window.location.href = '/panels/owner.html';
+                else if (code.startsWith('W_MGMT_')) window.location.href = '/panels/manager.html';
+                else if (code.startsWith('W_CHEF_')) window.location.href = '/panels/chef.html';
+                else if (code.startsWith('W_FISH_')) window.location.href = '/panels/fisher.html';
+                else if (code.startsWith('W_GATH_')) window.location.href = '/panels/gatherer.html';
+                else if (code.startsWith('W_FARM_')) window.location.href = '/panels/farmer.html';
+                else if (code.startsWith('W_SELL_')) window.location.href = '/panels/seller.html';
+                else errorElement.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

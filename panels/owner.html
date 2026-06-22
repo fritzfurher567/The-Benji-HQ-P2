@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Administration Panel</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0b0c0e; color: #f0f2f5; padding: 40px; margin: 0; }
+        .wrapper { max-width: 950px; margin: 0 auto; background: #141619; border: 1px solid #22252a; border-radius: 6px; padding: 32px; }
+        h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px 0; color: #ffffff; }
+        .subtitle { font-size: 13px; color: #707782; margin-bottom: 24px; }
+
+        .add-worker-form { display: flex; gap: 12px; background: #0b0c0e; padding: 16px; border: 1px solid #2c3036; border-radius: 4px; margin-bottom: 24px; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        label { font-size: 11px; font-weight: 600; color: #b1b8c4; text-transform: uppercase; }
+        .add-worker-form input, .add-worker-form select { background: #141619; color: #ffffff; padding: 10px; border: 1px solid #2c3036; border-radius: 4px; font-size: 13px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th, td { padding: 12px; text-align: left; font-size: 14px; border-bottom: 1px solid #2c3036; }
+        th { background: #0b0c0e; color: #b1b8c4; font-weight: 600; text-transform: uppercase; font-size: 12px; }
+
+        .table-input { background: transparent; color: #ffffff; border: 1px solid transparent; padding: 6px; border-radius: 4px; font-size: 13px; width: 100%; font-family: monospace; transition: all 0.2s; }
+        .table-input:focus { background: #0b0c0e; border-color: #474d57; outline: none; }
+        select { background: #0b0c0e; color: #ffffff; padding: 6px 10px; border: 1px solid #2c3036; border-radius: 4px; font-size: 13px; cursor: pointer; }
+
+        .add-btn { background: #ff6a00; color: #ffffff; border: none; padding: 10px 20px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; text-transform: uppercase; }
+        .add-btn:hover { background: #e05d00; }
+
+        .btn-group { display: flex; gap: 6px; }
+        .cycle-btn { background: rgba(255, 106, 0, 0.1); color: #ff6a00; border: 1px solid #ff6a00; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .cycle-btn:hover { background: #ff6a00; color: #ffffff; }
+        .kick-btn { background: rgba(248, 81, 73, 0.1); color: #f85149; border: 1px solid #f85149; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .kick-btn:hover { background: #f85149; color: #ffffff; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Administration Control</h2>
+        <div class="subtitle">System Authorization Level: Owner Bypass Ledger</div>
+
+        <div class="add-worker-form">
+            <div class="form-group">
+                <label>Worker Code</label>
+                <input type="text" id="newWorkerCode" placeholder="W_FISH_02">
+            </div>
+            <div class="form-group">
+                <label>Assign Panel Node</label>
+                <select id="newWorkerRole">
+                    <option value="Fisher">Fisher</option>
+                    <option value="Farmer">Farmer</option>
+                    <option value="Gatherer">Gatherer</option>
+                    <option value="Chef">Chef</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Seller">Seller</option>
+                </select>
+            </div>
+            <button class="add-btn" onclick="addNewWorkerRow()">Add Worker</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Worker Code</th>
+                    <th>Current Assignment</th>
+                    <th>Security Actions</th>
+                </tr>
+            </thead>
+            <tbody id="rosterTemplateBody">
+                <tr id="row-worker1">
+                    <td>
+                        <input type="text" class="table-input" id="code-worker1" value="W_FISH_02">
+                    </td>
+                    <td>
+                        <select id="role-worker1">
+                            <option value="Fisher" selected>Fisher</option>
+                            <option value="Farmer">Farmer</option>
+                            <option value="Gatherer">Gatherer</option>
+                            <option value="Chef">Chef</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Seller">Seller</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="cycle-btn" onclick="cycleWorkerCode('worker1')">Cycle Code</button>
+                            <button class="kick-btn" onclick="evictStaff('row-worker1')">Kick</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr id="row-worker2">
+                    <td>
+                        <input type="text" class="table-input" id="code-worker2" value="W_SELL_14">
+                    </td>
+                    <td>
+                        <select id="role-worker2">
+                            <option value="Fisher">Fisher</option>
+                            <option value="Farmer">Farmer</option>
+                            <option value="Gatherer">Gatherer</option>
+                            <option value="Chef">Chef</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Seller" selected>Seller</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="cycle-btn" onclick="cycleWorkerCode('worker2')">Cycle Code</button>
+                            <button class="kick-btn" onclick="evictStaff('row-worker2')">Kick</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="../api.js"></script>
+    <script>
+        let workerCounter = 3;
+
+        // Automatically randomizes a fresh four-digit code string matching the job prefix
+        function generateRandomCode(role) {
+            const prefixMap = {
+                'Fisher': 'W_FISH',
+                'Farmer': 'W_FARM',
+                'Gatherer': 'W_GATH',
+                'Chef': 'W_CHEF',
+                'Manager': 'W_MGMT',
+                'Seller': 'W_SELL'
+            };
+            const prefix = prefixMap[role] || 'W_WORK';
+            const randomNum = Math.floor(1000 + Math.random() * 9000); // Guarantees a clean 4-digit number
+            return `${prefix}_${randomNum}`;
+        }
+
+        // Overwrites the existing input value with a newly generated random code sequence
+        function cycleWorkerCode(suffixId) {
+            const roleSelect = document.getElementById(`role-${suffixId}`);
+            const codeInput = document.getElementById(`code-${suffixId}`);
+
+            const oldCode = codeInput.value;
+            const newCode = generateRandomCode(roleSelect.value);
+
+            if (confirm(`Cycle authentication codes? This will immediately replace ${oldCode} with ${newCode}.`)) {
+                codeInput.value = newCode;
+                console.log(`Database sync: Code rotated from ${oldCode} -> ${newCode}`);
+            }
+        }
+
+        function addNewWorkerRow() {
+            const codeInput = document.getElementById('newWorkerCode');
+            const roleSelect = document.getElementById('newWorkerRole');
+            const code = codeInput.value.trim();
+            const role = roleSelect.value;
+
+            if (!code) return alert("Please type a valid worker code layout first.");
+
+            const tableBody = document.getElementById('rosterTemplateBody');
+            const suffixId = `worker${workerCounter}`;
+            const uniqueRowId = `row-${suffixId}`;
+
+            const newRowHtml = `
+                <tr id="${uniqueRowId}">
+                    <td>
+                        <input type="text" class="table-input" id="code-${suffixId}" value="${code}">
+                    </td>
+                    <td>
+                        <select id="role-${suffixId}">
+                            <option value="Fisher" ${role === 'Fisher' ? 'selected' : ''}>Fisher</option>
+                            <option value="Farmer" ${role === 'Farmer' ? 'selected' : ''}>Farmer</option>
+                            <option value="Gatherer" ${role === 'Gatherer' ? 'selected' : ''}>Gatherer</option>
+                            <option value="Chef" ${role === 'Chef' ? 'selected' : ''}>Chef</option>
+                            <option value="Manager" ${role === 'Manager' ? 'selected' : ''}>Manager</option>
+                            <option value="Seller" ${role === 'Seller' ? 'selected' : ''}>Seller</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="cycle-btn" onclick="cycleWorkerCode('${suffixId}')">Cycle Code</button>
+                            <button class="kick-btn" onclick="evictStaff('${uniqueRowId}')">Kick</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            tableBody.insertAdjacentHTML('beforeend', newRowHtml);
+            codeInput.value = '';
+            workerCounter++;
+        }
+
+        function evictStaff(rowId) {
+            const targetRow = document.getElementById(rowId);
+            const currentCode = targetRow.querySelector('.table-input').value;
+
+            if (confirm(`Are you sure you want to completely kick worker ${currentCode}?`)) {
+                targetRow.remove();
+            }
+        }
+    </script>
+</body>
+</html>

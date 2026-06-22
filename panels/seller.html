@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Desk - Benji HQ</title>
+    <style>
+        body { background: #121214; color: #e1e1e6; font-family: sans-serif; padding: 40px; }
+        .container { max-width: 600px; background: #202024; padding: 30px; border-radius: 8px; margin: 0 auto; }
+        .calc-box { background: #121214; padding: 20px; border-radius: 6px; margin-bottom: 20px; border-top: 4px solid #e76f51; }
+        input { width: 100%; padding: 12px; margin: 10px 0 15px 0; border-radius: 4px; border: 1px solid #4d4d57; background: #121214; color: #fff; box-sizing: border-box; }
+        .receipt-line { display: flex; justify-content: space-between; margin: 8px 0; font-size: 15px; }
+        .total-line { font-size: 18px; font-weight: bold; border-top: 1px dashed #4d4d57; padding-top: 10px; color: #e76f51; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>💼 Sales Desk Terminal</h2>
+        <p style="color: #8d8d99;">Calculate customer checkouts and track incoming buyer orders (Limits: 1 - 500 Benjis).</p>
+
+        <div class="calc-box">
+            <h3>Order Price Calculator</h3>
+            <label>Quantity Ordered:</label>
+            <input type="number" id="benjiQty" min="1" max="500" placeholder="Enter Benjis (1-500)..." oninput="runSalesMath()">
+
+            <div class="receipt-line">Base Price Per Benji: <span id="rateLabel">350p</span></div>
+            <div class="receipt-line">Subtotal: <span id="subtotalLabel">0p</span></div>
+            <div class="receipt-line" style="color: #00b37e;">Bulk Discount (55+ Orders): <span id="discountLabel">0% (-0p)</span></div>
+            <div class="receipt-line total-line">Final Invoice Total: <span id="finalLabel">0p</span></div>
+        </div>
+    </div>
+
+    <script src="../api.js"></script>
+    <script>
+        function runSalesMath() {
+            const qty = parseInt(document.getElementById('benjiQty').value) || 0;
+            let rate = 350;
+
+            if (qty >= 10 && qty <= 19) rate = 340;
+            else if (qty >= 20 && qty <= 29) rate = 330;
+            else if (qty >= 30 && qty <= 39) rate = 320;
+            else if (qty >= 40 && qty <= 49) rate = 310;
+            else if (qty >= 50) rate = 300;
+
+            let subtotal = qty * rate;
+            let discount = 0;
+            let finalTotal = subtotal;
+
+            if (qty >= 55) {
+                discount = subtotal * 0.10;
+                finalTotal = subtotal - discount;
+                document.getElementById('discountLabel').innerText = `10% (-${discount.toLocaleString()}p)`;
+            } else {
+                document.getElementById('discountLabel').innerText = `0% (-0p)`;
+            }
+
+            document.getElementById('rateLabel').innerText = `${rate}p`;
+            document.getElementById('subtotalLabel').innerText = `${subtotal.toLocaleString()}p`;
+            document.getElementById('finalLabel').innerText = `${finalTotal.toLocaleString()}p`;
+        }
+    </script>
+</body>
+</html>

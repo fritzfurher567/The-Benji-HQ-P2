@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chef Kitchen Terminal</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0b0c0e; color: #f0f2f5; padding: 40px; margin: 0; }
+        .wrapper { max-width: 500px; margin: 0 auto; background: #141619; border: 1px solid #22252a; border-radius: 6px; padding: 32px; }
+        h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px 0; color: #ffffff; }
+        .subtitle { font-size: 13px; color: #707782; margin-bottom: 24px; }
+        .status-box { background: #0b0c0e; border: 1px solid #2c3036; border-radius: 4px; padding: 16px; margin-bottom: 24px; }
+        .status-line { display: flex; justify-content: space-between; font-size: 13px; color: #b1b8c4; padding: 4px 0; }
+        .slider-container { margin: 24px 0; }
+        label { display: block; font-size: 12px; font-weight: 600; color: #b1b8c4; text-transform: uppercase; margin-bottom: 8px; }
+        input[type="range"] { width: 100%; margin: 10px 0; accent-color: #ff6a00; }
+        .dispatch-btn { width: 100%; padding: 14px; border: none; border-radius: 4px; background: #ff6a00; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; text-transform: uppercase; }
+        .dispatch-btn:hover { background: #e05d00; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Kitchen Production Terminal</h2>
+        <div class="subtitle">Verify warehouse ingredients and track active cooking batches.</div>
+
+        <div class="status-box">
+            <div class="status-line"><span>Required Tuna</span><span>50 Units</span></div>
+            <div class="status-line"><span>Required Salt</span><span>20 Units</span></div>
+        </div>
+
+        <div class="slider-container">
+            <label>Batch Progress (<span id="progressVal">0</span>%)</label>
+            <input type="range" id="productionSlider" min="0" max="100" value="0" oninput="updateProgress(this.value)">
+        </div>
+
+        <button class="dispatch-btn" onclick="dispatchOrder()">Dispatch Location Alert</button>
+    </div>
+
+    <script src="../api.js"></script>
+    <script>
+        function updateProgress(val) {
+            document.getElementById('progressVal').innerText = val;
+        }
+        function dispatchOrder() {
+            const progress = document.getElementById('productionSlider').value;
+            if (progress < 100) return alert("Batch must reach 100% before dispatch.");
+            alert("Location verification coordinates pushed to communication channels.");
+        }
+    </script>
+</body>
+</html>
