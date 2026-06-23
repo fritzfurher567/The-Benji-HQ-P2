@@ -1,62 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Sales Desk - Benji HQ</title>
     <style>
-        body { background: #121214; color: #e1e1e6; font-family: sans-serif; padding: 40px; }
-        .container { max-width: 600px; background: #202024; padding: 30px; border-radius: 8px; margin: 0 auto; }
-        .calc-box { background: #121214; padding: 20px; border-radius: 6px; margin-bottom: 20px; border-top: 4px solid #e76f51; }
-        input { width: 100%; padding: 12px; margin: 10px 0 15px 0; border-radius: 4px; border: 1px solid #4d4d57; background: #121214; color: #fff; box-sizing: border-box; }
-        .receipt-line { display: flex; justify-content: space-between; margin: 8px 0; font-size: 15px; }
-        .total-line { font-size: 18px; font-weight: bold; border-top: 1px dashed #4d4d57; padding-top: 10px; color: #e76f51; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0b0c0e; color: #f0f2f5; padding: 40px; margin: 0; }
+        .wrapper { max-width: 500px; margin: 0 auto; background: #141619; border: 1px solid #22252a; border-radius: 6px; padding: 32px; }
+        h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px 0; color: #ffffff; }
+        .subtitle { font-size: 13px; color: #707782; margin-bottom: 24px; }
+
+        label { display: block; font-size: 12px; font-weight: 600; color: #b1b8c4; text-transform: uppercase; margin-bottom: 8px; }
+        input { width: 100%; padding: 12px; background: #0b0c0e; border: 1px solid #2c3036; border-radius: 4px; color: #ffffff; font-size: 14px; margin-bottom: 20px; }
+
+        .pricing-box { background: #0b0c0e; border: 1px solid #2c3036; border-radius: 4px; padding: 16px; margin-bottom: 24px; font-size: 13px; color: #707782; }
+        .total-display { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .total-amount { color: #ff6a00; font-size: 24px; font-weight: 700; }
+
+        .buy-btn { width: 100%; padding: 14px; border: none; border-radius: 4px; background: #ff6a00; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; text-transform: uppercase; }
+        .buy-btn:hover { background: #e05d00; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>💼 Sales Desk Terminal</h2>
-        <p style="color: #8d8d99;">Calculate customer checkouts and track incoming buyer orders (Limits: 1 - 500 Benjis).</p>
+    <div class="wrapper">
+        <h2>Sales Desk</h2>
+        <div class="subtitle">Standardized Benji wholesale dispatch terminal.</div>
 
-        <div class="calc-box">
-            <h3>Order Price Calculator</h3>
-            <label>Quantity Ordered:</label>
-            <input type="number" id="benjiQty" min="1" max="500" placeholder="Enter Benjis (1-500)..." oninput="runSalesMath()">
+        <label>Quantity</label>
+        <input type="number" value="10" readonly>
 
-            <div class="receipt-line">Base Price Per Benji: <span id="rateLabel">350p</span></div>
-            <div class="receipt-line">Subtotal: <span id="subtotalLabel">0p</span></div>
-            <div class="receipt-line" style="color: #00b37e;">Bulk Discount (55+ Orders): <span id="discountLabel">0% (-0p)</span></div>
-            <div class="receipt-line total-line">Final Invoice Total: <span id="finalLabel">0p</span></div>
+        <div class="pricing-box">
+            Base Unit: 350p<br>
+            Bulk Rate (55+): 300p (10% Discount)
         </div>
+
+        <div class="total-display">
+            <span>Total Due</span>
+            <span class="total-amount">3,500p</span>
+        </div>
+
+        <button class="buy-btn">Buy Benjis</button>
     </div>
-
-    <script src="../api.js"></script>
-    <script>
-        function runSalesMath() {
-            const qty = parseInt(document.getElementById('benjiQty').value) || 0;
-            let rate = 350;
-
-            if (qty >= 10 && qty <= 19) rate = 340;
-            else if (qty >= 20 && qty <= 29) rate = 330;
-            else if (qty >= 30 && qty <= 39) rate = 320;
-            else if (qty >= 40 && qty <= 49) rate = 310;
-            else if (qty >= 50) rate = 300;
-
-            let subtotal = qty * rate;
-            let discount = 0;
-            let finalTotal = subtotal;
-
-            if (qty >= 55) {
-                discount = subtotal * 0.10;
-                finalTotal = subtotal - discount;
-                document.getElementById('discountLabel').innerText = `10% (-${discount.toLocaleString()}p)`;
-            } else {
-                document.getElementById('discountLabel').innerText = `0% (-0p)`;
-            }
-
-            document.getElementById('rateLabel').innerText = `${rate}p`;
-            document.getElementById('subtotalLabel').innerText = `${subtotal.toLocaleString()}p`;
-            document.getElementById('finalLabel').innerText = `${finalTotal.toLocaleString()}p`;
-        }
-    </script>
 </body>
 </html>
