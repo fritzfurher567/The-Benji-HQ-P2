@@ -152,3 +152,44 @@ async function handleCustomerOrderNotification(clientUsername, benjiQuantity) {
 
     return await sendDiscordAlert(SELLER_WEBHOOK_URL, embedPayload);
 }
+
+/ticket saver/
+const fs = require('fs');
+const path = require('path');
+const fetch = require('node-fetch'); // or whatever you use for requests
+
+const BACKUP_FILE = path.join(__dirname, 'ticket_backup.txt');
+
+async function handleTicketSubmission(ticketData) {
+    const webhookUrl = "YOUR_DISCORD_WEBHOOK_URL";
+
+    try {
+        // Try sending it to Discord
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ticketData)
+        });
+
+        // If Discord responds with an error status
+        if (!response.ok) {
+            console.log(`Discord error ${response.status}. Saving to backup.`);
+            saveToBackup(ticketData);
+            return false;
+        }
+
+        console.log("Ticket sent to Discord successfully.");
+        return true;
+
+    } catch (error) {
+        // If the internet drops or the webhook is completely offline
+        console.log("Server/Network offline. Saving to backup.");
+        saveToBackup(ticketData);
+        return false;
+    }
+}
+
+function saveToBackup(data) {
+    // Appends the ticket details onto a new line in ticket_backup.txt on your PC
+    fs.appendFileSync(BACKUP_FILE, JSON.stringify(data) + "\n", 'utf8');
+}
