@@ -2,51 +2,257 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Farmer Terminal - Benji HQ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benji HQ | Farmer Terminal</title>
     <style>
-        body { background: #121214; color: #e1e1e6; font-family: sans-serif; padding: 40px; }
-        .container { max-width: 500px; background: #202024; padding: 30px; border-radius: 8px; margin: 0 auto; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0 20px 0; border-radius: 4px; border: 1px solid #4d4d57; background: #121214; color: #fff; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 4px; background: #2a9d8f; color: #fff; font-size: 16px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #264653; }
-        .calc-view { background: #121214; padding: 15px; border-radius: 4px; text-align: center; margin-bottom: 20px; font-weight: bold; border-left: 4px solid #2a9d8f; }
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background: #0b0c0e; /* Deep black */
+            color: #e5e7eb;
+            padding: 40px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 500px;
+            background: #141619;
+            border: 1px solid #1a202c;
+            border-top: 4px solid #10b981; /* Sleek Emerald Green */
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .header {
+            border-bottom: 1px solid #2c3036;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #10b981;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            background: #0b0c0e;
+            border: 1px solid #374151;
+            color: #fff;
+            padding: 14px;
+            border-radius: 4px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            appearance: none;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 1px #10b981;
+        }
+        .calc-view {
+            background: rgba(16, 185, 129, 0.05);
+            padding: 16px;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 24px;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #d1d5db;
+        }
+        .payout-amount {
+            color: #10b981;
+            font-size: 20px;
+            display: block;
+            margin-top: 4px;
+        }
+        .dispatch-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            background: #10b981;
+            color: #000000;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .dispatch-btn:hover {
+            background: #059669;
+            color: #ffffff;
+        }
+        .dispatch-btn:disabled {
+            background: #4b5563;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        #statusMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            padding: 16px;
+            border-radius: 4px;
+            display: none;
+            font-weight: 600;
+        }
+        .success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .transfer-code {
+            font-family: monospace;
+            background: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #fff;
+            letter-spacing: 2px;
+            font-size: 16px;
+            display: inline-block;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🧑‍🌾 Farmer Terminal</h2>
-        <p style="color: #8d8d99;">Select your crop layout and log delivery batches below.</p>
-
-        <label>Crop Type:</label>
-        <select id="vegType">
-            <option value="Beans">🫘 Beans</option>
-            <option value="Peppers">🫑 Peppers</option>
-        </select>
-
-        <label>Crop Amount:</label>
-        <input type="number" id="cropCount" min="1" placeholder="Enter amount..." oninput="calculatePayout()">
-
-        <div class="calc-view">
-            Estimated Payout: <span id="payoutDisplay" style="color: #00b37e;">0</span>p
+    <div class="wrapper">
+        <div class="header">
+            <h2>Farmer Terminal</h2>
+            <div class="subtitle">Log agricultural harvests for warehouse transfer.</div>
         </div>
 
-        <button onclick="submitFarmerTicket()">Generate Management Ticket</button>
+        <div class="form-group">
+            <label for="farmerName">Farmer Identification</label>
+            <input type="text" id="farmerName" placeholder="Enter your username..." required>
+        </div>
+
+        <div class="form-group">
+            <label>Crop Selection</label>
+            <select id="vegType">
+                <option value="Beans">🫘 Beans</option>
+                <option value="Peppers">🫑 Peppers</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Batch Quantity</label>
+            <input type="number" id="cropCount" min="1" placeholder="Enter amount..." oninput="calculatePayout()">
+        </div>
+
+        <div class="calc-view">
+            Estimated Bulk Payout
+            <span class="payout-amount" id="payoutDisplay">0p</span>
+        </div>
+
+        <button class="dispatch-btn" id="dispatchBtn" onclick="submitFarmerTicket()">Generate Transfer Ticket</button>
+        <div id="statusMessage"></div>
     </div>
 
-    <script src="../api.js"></script>
     <script>
         function calculatePayout() {
             const count = parseInt(document.getElementById('cropCount').value) || 0;
-            // 5,000 per 200 items breaks down perfectly to 25p per item
-            document.getElementById('payoutDisplay').innerText = (count * 25).toLocaleString();
+            // Calculates payout at 25p per unit
+            document.getElementById('payoutDisplay').innerText = (count * 25).toLocaleString() + 'p';
+        }
+
+        // Generates a random 6-character alphanumeric code for tracking
+        function generateTransferCode() {
+            return 'FRM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
         async function submitFarmerTicket() {
-            const type = document.getElementById('vegType').value;
-            const count = parseInt(document.getElementById('cropCount').value);
-            if (!count || count <= 0) return alert("Please enter a valid crop amount!");
+            const btn = document.getElementById('dispatchBtn');
+            const statusBox = document.getElementById('statusMessage');
 
-            alert(`Ticket generated successfully for ${count} ${type}! Total bulk payout request value: ${count * 25}p.`);
+            const farmerName = document.getElementById('farmerName').value.trim();
+            const vegType = document.getElementById('vegType').value;
+            const count = parseInt(document.getElementById('cropCount').value);
+
+            if (!farmerName) return alert("Please enter your Farmer Identification.");
+            if (!count || count <= 0) return alert("Please enter a valid crop batch quantity.");
+
+            // Generate the unique code
+            const uniqueCode = generateTransferCode();
+            const totalPayout = (count * 25).toLocaleString() + 'p';
+
+            btn.disabled = true;
+            btn.innerText = "TRANSMITTING...";
+            statusBox.style.display = "none";
+
+            // Standardized payload matching the system you built
+            const payloadData = {
+                actionType: "Agriculture Transfer",
+                submittedBy: farmerName,
+                cropHarvested: vegType,
+                batchQuantity: count + " Units",
+                estimatedPayout: totalPayout,
+                transferCode: uniqueCode, // This code will show in the Discord channel
+                managerNotes: "Awaiting manager intake confirmation."
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/notify-discord', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payloadData)
+                });
+
+                if (response.ok) {
+                    statusBox.className = "success";
+                    // Display the code to the farmer so they can give it to the manager
+                    statusBox.innerHTML = `
+                        ✓ Transfer Ticket Sent.<br>
+                        Give this code to the manager:<br>
+                        <span class="transfer-code">${uniqueCode}</span>
+                    `;
+                    statusBox.style.display = "block";
+
+                    // Clear inputs
+                    document.getElementById('farmerName').value = '';
+                    document.getElementById('cropCount').value = '';
+                    calculatePayout(); // Reset payout display
+                } else {
+                    throw new Error("Server response failed.");
+                }
+
+            } catch (error) {
+                console.error("Transmission Error:", error);
+                statusBox.className = "error";
+                statusBox.innerText = "✗ Transmission Failed. Please try again.";
+                statusBox.style.display = "block";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "GENERATE TRANSFER TICKET";
+            }
         }
     </script>
 </body>

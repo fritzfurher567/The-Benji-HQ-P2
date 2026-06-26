@@ -2,46 +2,326 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fisher Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benji HQ | Fisher Terminal</title>
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0b0c0e; color: #f0f2f5; padding: 40px; margin: 0; }
-        .wrapper { max-width: 500px; margin: 0 auto; background: #141619; border: 1px solid #22252a; border-radius: 6px; padding: 32px; }
-        h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px 0; color: #ffffff; }
-        .subtitle { font-size: 13px; color: #707782; margin-bottom: 24px; }
-        label { display: block; font-size: 12px; font-weight: 600; color: #b1b8c4; text-transform: uppercase; margin-bottom: 8px; }
-        input { width: 100%; padding: 12px; background: #0b0c0e; border: 1px solid #2c3036; border-radius: 4px; color: #ffffff; font-size: 14px; margin-bottom: 20px; }
-        .calc-panel { background: #0b0c0e; border: 1px solid #2c3036; border-radius: 4px; padding: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; font-size: 14px; }
-        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 4px; background: #ff6a00; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; text-transform: uppercase; }
-        .submit-btn:hover { background: #e05d00; }
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background: #080a0f; /* Deep oceanic black */
+            color: #e5e7eb;
+            padding: 40px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 500px;
+            background: #11141a;
+            border: 1px solid #1e293b;
+            border-top: 4px solid #0ea5e9; /* Neon Sky Blue */
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+        .header {
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        /* Dual-Action Toggle Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .action-option { display: none; }
+        .action-label {
+            display: block;
+            background: #080a0f;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            text-align: center;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .action-label:hover {
+            border-color: #64748b;
+            color: #fff;
+        }
+        .action-option:checked + .action-label {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: #0ea5e9;
+            color: #0ea5e9;
+            box-shadow: inset 0 0 0 1px #0ea5e9;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0ea5e9;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            background: #080a0f;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 14px;
+            border-radius: 4px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            appearance: none;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 1px #0ea5e9;
+        }
+
+        .calc-view {
+            background: rgba(14, 165, 233, 0.05);
+            padding: 16px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            font-weight: 600;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            color: #cbd5e1;
+        }
+        .payout-amount {
+            color: #0ea5e9;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .dispatch-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            background: #0ea5e9;
+            color: #000000;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .dispatch-btn:hover { background: #0284c7; color: #ffffff; }
+        .dispatch-btn:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
+
+        #statusMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            padding: 16px;
+            border-radius: 4px;
+            display: none;
+            font-weight: 600;
+        }
+        .success {
+            background: rgba(14, 165, 233, 0.1);
+            color: #0ea5e9;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .transfer-code {
+            font-family: monospace;
+            background: #000;
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: #0ea5e9;
+            letter-spacing: 2px;
+            font-size: 18px;
+            display: inline-block;
+            margin-top: 12px;
+            border: 1px solid #0ea5e9;
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <h2>Fisher Terminal</h2>
-        <div class="subtitle">Log caught Tuna totals to generate verification data tickets.</div>
-
-        <label>Tuna Quantity</label>
-        <input type="number" id="tunaCount" min="1" placeholder="0" oninput="updatePayoutCalc()">
-
-        <div class="calc-panel">
-            <span>Estimated Compensation (200p / unit)</span>
-            <span id="payoutDisplay" style="color: #ff6a00; font-weight: 600;">0p</span>
+        <div class="header">
+            <h2>Fisher Terminal</h2>
+            <div class="subtitle">Log daily catches or issue warehouse transfers.</div>
         </div>
 
-        <button class="submit-btn" onclick="submitTicket()">Generate Ticket</button>
+        <!-- Action Toggle -->
+        <div class="action-grid">
+            <input type="radio" name="actionType" id="modeStock" value="Fisher Stock Update" checked onchange="updateUIText()">
+            <label for="modeStock" class="action-label">Log Catch (Stock)</label>
+
+            <input type="radio" name="actionType" id="modeTransfer" value="Fisher Transfer Request" onchange="updateUIText()">
+            <label for="modeTransfer" class="action-label">Transfer to Manager</label>
+        </div>
+
+        <div class="form-group">
+            <label for="fisherName">Fisher Identification</label>
+            <input type="text" id="fisherName" placeholder="Enter your username..." required>
+        </div>
+
+        <div class="form-group">
+            <label>Catch Selection</label>
+            <select id="fishType">
+                <option value="Tuna">🐟 Premium Tuna</option>
+                <option value="Salmon">🐡 Wild Salmon</option>
+                <option value="Mixed">🦐 Mixed Catch</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="fishCount" min="1" placeholder="Enter amount..." oninput="calculateValue()">
+        </div>
+
+        <div class="calc-view">
+            <span id="calcLabel">Total Stock Value</span>
+            <span class="payout-amount" id="payoutDisplay">0p</span>
+        </div>
+
+        <div class="form-group">
+            <label for="fisherNotes">Location / Log Notes (Optional)</label>
+            <textarea id="fisherNotes" placeholder="Enter grid coordinates or manager notes..."></textarea>
+        </div>
+
+        <button class="dispatch-btn" id="dispatchBtn" onclick="submitFisherTicket()">Update Stock Log</button>
+        <div id="statusMessage"></div>
     </div>
 
-    <script src="../api.js"></script>
     <script>
-        function updatePayoutCalc() {
-            const count = parseInt(document.getElementById('tunaCount').value) || 0;
-            document.getElementById('payoutDisplay').innerText = `${(count * 200).toLocaleString()}p`;
+        // Changes UI text dynamically based on what action they select
+        function updateUIText() {
+            const isTransfer = document.getElementById('modeTransfer').checked;
+            const btn = document.getElementById('dispatchBtn');
+            const calcLabel = document.getElementById('calcLabel');
+
+            if (isTransfer) {
+                btn.innerText = "GENERATE TRANSFER TICKET";
+                calcLabel.innerText = "Estimated Transfer Payout";
+            } else {
+                btn.innerText = "UPDATE STOCK LOG";
+                calcLabel.innerText = "Total Stock Value";
+            }
         }
-        function submitTicket() {
-            const count = parseInt(document.getElementById('tunaCount').value);
-            if (!count || count <= 0) return alert("Enter a valid tuna quantity.");
-            alert("Fishing log entry successfully sent to verification queue.");
+
+        // Calculates value at 200p per unit based on your original code
+        function calculateValue() {
+            const count = parseInt(document.getElementById('fishCount').value) || 0;
+            document.getElementById('payoutDisplay').innerText = (count * 200).toLocaleString() + 'p';
+        }
+
+        // Generates a random 6-character code
+        function generateTrackingCode() {
+            return 'FSH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        async function submitFisherTicket() {
+            const btn = document.getElementById('dispatchBtn');
+            const statusBox = document.getElementById('statusMessage');
+
+            const actionType = document.querySelector('input[name="actionType"]:checked').value;
+            const fisherName = document.getElementById('fisherName').value.trim();
+            const fishType = document.getElementById('fishType').value;
+            const count = parseInt(document.getElementById('fishCount').value);
+            const notes = document.getElementById('fisherNotes').value.trim();
+            const isTransfer = actionType.includes("Transfer");
+
+            if (!fisherName) return alert("Please enter your Fisher Identification.");
+            if (!count || count <= 0) return alert("Please enter a valid catch quantity.");
+
+            const uniqueCode = generateTrackingCode();
+            const totalValue = (count * 200).toLocaleString() + 'p';
+
+            btn.disabled = true;
+            btn.innerText = "TRANSMITTING...";
+            statusBox.style.display = "none";
+
+            // Structured perfectly for your notify-discord.js file
+            const payloadData = {
+                actionType: actionType,
+                submittedBy: fisherName,
+                catchType: fishType,
+                batchQuantity: count + " Units",
+                calculatedValue: totalValue,
+                managerNotes: notes || "No additional notes logged.",
+                trackingCode: uniqueCode
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/notify-discord', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payloadData)
+                });
+
+                if (response.ok) {
+                    statusBox.className = "success";
+
+                    let successMsg = isTransfer
+                        ? `✓ Transfer Request Sent.<br>Give this code to the manager:`
+                        : `✓ Personal Stock Log Updated.<br>Log verification code:`;
+
+                    statusBox.innerHTML = `
+                        ${successMsg}<br>
+                        <span class="transfer-code">${uniqueCode}</span>
+                    `;
+                    statusBox.style.display = "block";
+
+                    // Clear inputs for the next log
+                    document.getElementById('fishCount').value = '';
+                    document.getElementById('fisherNotes').value = '';
+                    calculateValue();
+                } else {
+                    throw new Error("Server response failed.");
+                }
+
+            } catch (error) {
+                console.error("Transmission Error:", error);
+                statusBox.className = "error";
+                statusBox.innerText = "✗ Transmission Failed. Please try again.";
+                statusBox.style.display = "block";
+            } finally {
+                btn.disabled = false;
+                updateUIText(); // Resets button text to correct state
+            }
         }
     </script>
 </body>

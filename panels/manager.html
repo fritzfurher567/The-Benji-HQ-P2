@@ -2,64 +2,380 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Management Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benji HQ | Staff Terminal</title>
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0b0c0e; color: #f0f2f5; padding: 40px; margin: 0; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1100px; margin: 0 auto; }
-        .card { background: #141619; border: 1px solid #22252a; border-radius: 6px; padding: 28px; }
-        h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px 0; color: #ffffff; }
-        .subtitle { font-size: 13px; color: #707782; margin-bottom: 20px; }
-        .stock-row { display: flex; justify-content: space-between; padding: 12px; background: #0b0c0e; border: 1px solid #2c3036; border-radius: 4px; margin-bottom: 8px; font-size: 14px; }
-        .stock-val { color: #ffffff; font-weight: 600; }
-        .ticket-box { background: #0b0c0e; border: 1px solid #2c3036; border-radius: 4px; padding: 16px; font-size: 13px; line-height: 1.6; }
-        .ticket-title { font-weight: 600; color: #ff6a00; margin-bottom: 8px; }
-        .btn-group { display: flex; gap: 8px; margin-top: 16px; }
-        .btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; text-transform: uppercase; }
-        .btn-approve { background: #ff6a00; color: #ffffff; }
-        .btn-approve:hover { background: #e05d00; }
-        .btn-reject { background: rgba(248, 81, 73, 0.1); color: #f85149; border: 1px solid #f85149; }
-        .btn-reject:hover { background: #f85149; color: #ffffff; }
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background: #09090b;
+            color: #e5e7eb;
+            padding: 40px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 500px;
+            background: #141619;
+            border: 1px solid #27272a;
+            border-top: 4px solid #f97316;
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .header {
+            border-bottom: 1px solid #27272a;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #a1a1aa;
+        }
+        .back-btn {
+            background: #27272a;
+            color: #a1a1aa;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background: #3f3f46;
+            color: #fff;
+        }
+
+        /* 3-Way Action Toggle Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .action-option { display: none; }
+        .action-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0b0c0e;
+            border: 1px solid #3f3f46;
+            color: #a1a1aa;
+            text-align: center;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 11px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            height: 100%;
+        }
+        .action-label:hover {
+            border-color: #71717a;
+            color: #fff;
+        }
+        .action-option:checked + .action-label {
+            background: rgba(249, 115, 22, 0.1);
+            border-color: #f97316;
+            color: #f97316;
+            box-shadow: inset 0 0 0 1px #f97316;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #f97316;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            background: #0b0c0e;
+            border: 1px solid #3f3f46;
+            color: #fff;
+            padding: 14px;
+            border-radius: 4px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            appearance: none;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 1px #f97316;
+        }
+
+        .calc-view {
+            background: rgba(249, 115, 22, 0.05);
+            padding: 16px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            font-weight: 600;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            color: #d4d4d8;
+        }
+        .payout-amount {
+            color: #f97316;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .dispatch-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            background: #f97316;
+            color: #000000;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .dispatch-btn:hover { background: #ea580c; color: #ffffff; }
+        .dispatch-btn:disabled { background: #3f3f46; color: #a1a1aa; cursor: not-allowed; }
+
+        #statusMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            padding: 16px;
+            border-radius: 4px;
+            display: none;
+            font-weight: 600;
+        }
+        .success {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .transfer-code {
+            font-family: monospace;
+            background: #000;
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: #f97316;
+            letter-spacing: 2px;
+            font-size: 18px;
+            display: inline-block;
+            margin-top: 12px;
+            border: 1px solid #f97316;
+        }
     </style>
 </head>
 <body>
-    <div class="grid">
-        <div class="card">
-            <h2>Warehouse Stock</h2>
-            <div class="subtitle">Current materials registered inside storage blocks.</div>
-            <div class="stock-row"><span>Tuna</span><span id="st-tuna" class="stock-val">0</span></div>
-            <div class="stock-row"><span>Salt</span><span id="st-salt" class="stock-val">0</span></div>
-            <div class="stock-row"><span>Beans</span><span id="st-beans" class="stock-val">0</span></div>
-            <div class="stock-row"><span>Peppers</span><span id="st-peppers" class="stock-val">0</span></div>
+    <div class="wrapper">
+        <div class="header">
+            <div>
+                <h2 id="terminalTitle">Staff Terminal</h2>
+                <div class="subtitle">Log inventory, issue transfers, or access the Butter Market.</div>
+            </div>
+            <a href="index.html" class="back-btn">Log Out</a>
         </div>
 
-        <div class="card">
-            <h2>Pending Forms</h2>
-            <div class="subtitle">Review active resource drop submissions.</div>
-            <div class="ticket-box" id="activeTicket">
-                <div class="ticket-title">Ticket #8849</div>
-                <div>Origin: <strong>W_FISH_04 (Fisher)</strong></div>
-                <div>Quantity: <strong>50 Tuna</strong></div>
-                <div class="btn-group">
-                    <button class="btn btn-approve" onclick="actionTicket(true)">Approve</button>
-                    <button class="btn btn-reject" onclick="actionTicket(false)">Reject</button>
-                </div>
-            </div>
-            <p id="emptyMsg" style="color: #707782; font-size: 13px; text-align: center; margin: 20px 0; display: none;">No incoming tickets present.</p>
+        <div class="action-grid">
+            <input type="radio" name="actionType" id="modeStock" value="Stock" checked onchange="updateUIText()">
+            <label for="modeStock" class="action-label">Update Stock<br>(No Ticket)</label>
+
+            <input type="radio" name="actionType" id="modeTransfer" value="Transfer" onchange="updateUIText()">
+            <label for="modeTransfer" class="action-label">Transfer To<br>Manager</label>
+
+            <input type="radio" name="actionType" id="modeMarket" value="Market" onchange="updateUIText()">
+            <label for="modeMarket" class="action-label">Buy Butter<br>(Market)</label>
         </div>
+
+        <div class="form-group">
+            <label for="gathererName">Staff Identification</label>
+            <input type="text" id="gathererName" placeholder="Enter your username..." required>
+        </div>
+
+        <div class="form-group">
+            <label>Item Selection</label>
+            <select id="itemType" onchange="calculateValue()">
+                <option value="Salt">🧂 Salt (15p/unit)</option>
+                <option value="Pastry Dough">🥐 Pastry Dough (15p/unit)</option>
+                <option value="Butter" id="butterOption" style="display:none;">🧈 Butter (50p/unit)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="itemCount" min="1" placeholder="Enter amount..." oninput="calculateValue()">
+        </div>
+
+        <div class="calc-view">
+            <span id="calcLabel">Estimated Compensation</span>
+            <span class="payout-amount" id="payoutDisplay">0p</span>
+        </div>
+
+        <button class="dispatch-btn" id="dispatchBtn" onclick="submitGathererTicket()">Update Personal Stock</button>
+        <div id="statusMessage"></div>
     </div>
 
-    <script src="../api.js"></script>
     <script>
-        function actionTicket(approved) {
-            if (approved) {
-                document.getElementById('st-tuna').innerText = "50";
-                alert("Supplies routed to warehouse reserves.");
-            } else {
-                alert("Log request rejected.");
+        // Check URL parameters to see who logged in and update the title
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const role = urlParams.get('role');
+            if (role === 'gatherer') {
+                document.getElementById('terminalTitle').innerText = "Gatherer Terminal";
+                document.title = "Benji HQ | Gatherer Terminal";
+            } else if (role === 'manager') {
+                document.getElementById('terminalTitle').innerText = "Manager Terminal";
+                document.title = "Benji HQ | Manager Terminal";
             }
-            document.getElementById('activeTicket').style.display = 'none';
-            document.getElementById('emptyMsg').style.display = 'block';
+        };
+
+        function updateUIText() {
+            const mode = document.querySelector('input[name="actionType"]:checked').value;
+            const btn = document.getElementById('dispatchBtn');
+            const calcLabel = document.getElementById('calcLabel');
+            const itemSelect = document.getElementById('itemType');
+            const butterOption = document.getElementById('butterOption');
+
+            if (mode === "Market") {
+                btn.innerText = "SUBMIT MARKET ORDER";
+                calcLabel.innerText = "Total Order Cost";
+                butterOption.style.display = "block";
+                itemSelect.value = "Butter";
+                itemSelect.disabled = true;
+            } else if (mode === "Transfer") {
+                btn.innerText = "GENERATE TRANSFER TICKET";
+                calcLabel.innerText = "Estimated Compensation";
+                butterOption.style.display = "none";
+                itemSelect.disabled = false;
+                if (itemSelect.value === "Butter") itemSelect.value = "Salt";
+            } else {
+                btn.innerText = "UPDATE PERSONAL STOCK";
+                calcLabel.innerText = "Total Stock Value";
+                butterOption.style.display = "none";
+                itemSelect.disabled = false;
+                if (itemSelect.value === "Butter") itemSelect.value = "Salt";
+            }
+            calculateValue();
+        }
+
+        function calculateValue() {
+            const count = parseInt(document.getElementById('itemCount').value) || 0;
+            const item = document.getElementById('itemType').value;
+            let price = (item === "Butter") ? 50 : 15;
+
+            document.getElementById('payoutDisplay').innerText = (count * price).toLocaleString() + 'p';
+        }
+
+        function generateTrackingCode() {
+            return 'GTH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        async function submitGathererTicket() {
+            const btn = document.getElementById('dispatchBtn');
+            const statusBox = document.getElementById('statusMessage');
+
+            const mode = document.querySelector('input[name="actionType"]:checked').value;
+            const gathererName = document.getElementById('gathererName').value.trim();
+            const itemType = document.getElementById('itemType').value;
+            const count = parseInt(document.getElementById('itemCount').value);
+
+            if (!gathererName) return alert("Please enter your Staff Identification.");
+            if (!count || count <= 0) return alert("Please enter a valid quantity.");
+
+            if (mode === "Stock") {
+                statusBox.className = "success";
+                statusBox.innerHTML = `✓ Personal Stock Updated Internally.<br>(No manager ticket generated)`;
+                statusBox.style.display = "block";
+                document.getElementById('itemCount').value = '';
+                calculateValue();
+                return;
+            }
+
+            const uniqueCode = generateTrackingCode();
+            const totalValue = document.getElementById('payoutDisplay').innerText;
+
+            btn.disabled = true;
+            btn.innerText = "TRANSMITTING...";
+            statusBox.style.display = "none";
+
+            const payloadData = {
+                actionType: mode === "Market" ? "Market Order (Butter)" : "Staff Transfer",
+                submittedBy: gathererName,
+                item: itemType,
+                batchQuantity: count + " Units",
+                transactionValue: totalValue,
+                trackingCode: uniqueCode
+            };
+
+            if (mode === "Market") {
+                payloadData.webhookUrl = "YOUR_BUTTER_WEBHOOK_URL_GOES_HERE";
+            }
+
+            try {
+                // Sends the ticket perfectly to your Netlify routing system
+                const response = await fetch('/.netlify/functions/notify-discord', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payloadData)
+                });
+
+                if (response.ok) {
+                    statusBox.className = "success";
+                    let successMsg = mode === "Market"
+                        ? `✓ Market Order Placed.<br>Your order receipt code:`
+                        : `✓ Transfer Request Sent.<br>Give this code to the manager:`;
+
+                    statusBox.innerHTML = `
+                        ${successMsg}<br>
+                        <span class="transfer-code">${uniqueCode}</span>
+                    `;
+                    statusBox.style.display = "block";
+
+                    document.getElementById('itemCount').value = '';
+                    calculateValue();
+                } else {
+                    throw new Error("Server response failed.");
+                }
+
+            } catch (error) {
+                console.error("Transmission Error:", error);
+                statusBox.className = "error";
+                statusBox.innerText = "✗ Transmission Failed. Please try again.";
+                statusBox.style.display = "block";
+            } finally {
+                btn.disabled = false;
+                updateUIText();
+            }
         }
     </script>
 </body>

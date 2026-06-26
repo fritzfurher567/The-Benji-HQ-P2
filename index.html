@@ -1,58 +1,502 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+   
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benji HQ Portal</title>
+    <title>Benji HQ | Central Hub</title>
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0b0c0e; color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: #141619; padding: 40px; border-radius: 6px; width: 360px; border: 1px solid #22252a; }
-        h2 { font-size: 20px; font-weight: 600; margin: 0 0 8px 0; color: #ffffff; text-align: center; }
-        p { font-size: 13px; color: #707782; text-align: center; margin: 0 0 24px 0; }
-        input { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #2c3036; background: #0b0c0e; color: #ffffff; font-size: 14px; text-align: center; transition: border-color 0.2s; }
-        input:focus { outline: none; border-color: #474d57; }
-        .access-btn { width: 100%; padding: 12px; border: none; border-radius: 4px; background: #ff6a00; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .access-btn:hover { background: #e05d00; }
-        .error { color: #f85149; font-size: 13px; text-align: center; margin-top: 12px; display: none; }
+        /* --- GLOBAL STYLES --- */
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: #09090b; color: #f4f4f5; display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR STYLES --- */
+        .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; display: flex; flex-direction: column; padding: 24px 0; z-index: 10; overflow-y: auto;}
+        .logo { padding: 0 24px; margin-bottom: 32px; display: flex; flex-direction: column; line-height: 0.85; user-select: none; }
+        .logo-the { font-size: 18px; color: #f4f4f5; font-weight: 800; margin-left: 2px; }
+        .logo-benji { font-size: 46px; color: #d8c29d; font-weight: 900; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .logo-hq { font-size: 34px; color: #f4f4f5; font-weight: 900; letter-spacing: -1px; margin-left: 24px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+
+        .nav-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex-grow: 1; }
+        .nav-btn { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+        .nav-btn:hover { background: #27272a; color: #fff; }
+        .nav-btn.active { background: #27272a; color: #f97316; }
+
+        .employee-section { padding: 20px 16px; border-top: 1px solid #27272a; }
+        .login-box { display: flex; gap: 8px; flex-direction: column;}
+        .login-label {font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
+        .login-inputs { display: flex; gap: 8px; }
+        .login-box input { flex-grow: 1; background: #09090b; border: 1px solid #3f3f46; color: #fff; padding: 10px; border-radius: 4px; font-size: 14px; outline: none; width: 100%;}
+        .login-box button { background: #3f3f46; color: #fff; border: none; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .login-box button:hover { background: #f97316; color: #000; }
+
+        /* --- MAIN CONTENT & VIEWS --- */
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .view-section { display: none; width: 100%; max-width: 900px; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- THE BENJI HQ HUB DESIGN --- */
+        .hub-header { text-align: center; margin-top: 20px; margin-bottom: 30px; }
+        .welcome-badge { display: inline-block; border: 1px solid #f97316; color: #f97316; padding: 4px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase;}
+        .hq-title { font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px; margin-bottom: 16px; text-shadow: 0 0 30px rgba(249, 115, 22, 0.4); text-transform: uppercase; }
+        .hq-subtext { color: #a1a1aa; font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+
+        /* --- SELLER / SHOP STYLES --- */
+        .shop-container { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
+        .shop-container h2 { font-size: 20px; color: #ffffff; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #2c3036; padding-bottom: 10px;}
+        .shop-container label { font-size: 12px; color: #a0a5b0; margin-bottom: 8px; display: block; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
+        .shop-container input, .shop-container select { width: 100%; padding: 12px; background: #0b0c0e; border: 1px solid #2c3036; color: #ffffff; border-radius: 4px; box-sizing: border-box; margin-bottom: 20px; outline: none; transition: 0.2s;}
+        .shop-container input:focus, .shop-container select:focus { border-color: #f97316; box-shadow: 0 0 0 1px #f97316;}
+        .quick-buy-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .quick-btn { flex: 1; background: #0b0c0e; color: #ffffff; border: 1px solid #2c3036; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;}
+        .quick-btn:hover, .quick-btn.active { background: #f97316; border-color: #f97316; color: #000; }
+        .pricing-box { background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.2); padding: 12px; margin-bottom: 20px; border-radius: 6px; }
+        .tip-text { font-size: 11px; color: #a0a5b0; margin-top: -15px; margin-bottom: 20px; display: block; }
+        .total-display { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #0b0c0e; padding: 15px; border-radius: 6px; border: 1px solid #2c3036;}
+        .total-amount { color: #f97316; font-size: 24px; font-weight: 900; }
+        .buy-btn { width: 100%; padding: 16px; background: #f97316; border: none; color: #000; font-weight: 900; font-size: 16px; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: 0.2s; letter-spacing: 1px;}
+        .buy-btn:hover { background: #ea580c; color: #fff;}
+
+        /* --- RECEIPT CSS --- */
+        #receipt-box { display: none; margin-top: 25px; padding: 20px; background: #0b0c0e; border: 1px dashed #2c3036; border-radius: 6px; }
+        .receipt-title { color: #f97316; font-weight: bold; margin-bottom: 15px; text-align: center; letter-spacing: 1px; }
+        .receipt-line { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #a0a5b0; }
+        .receipt-code { font-family: monospace; color: #ffffff; font-size: 18px; text-align: center; margin-top: 15px; display: flex; justify-content: center; align-items: center; background: #141619; padding: 10px; border-radius: 4px; border: 1px solid #3f3f46;}
+        #copy-btn { background-color: #2c3036; color: #a0a5b0; border: 1px solid #a0a5b0; padding: 4px 10px; margin-left: 10px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s; font-weight: bold;}
+        #copy-btn:hover { background-color: #f97316; color: #000; border-color: #f97316; }
+
+        /* --- PROFILE TABLE STYLES --- */
+        .profile-card { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; margin-bottom: 20px;}
+        table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 6px; overflow: hidden; margin-top: 10px;}
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 14px;}
+        th { color: #f97316; font-size: 12px; text-transform: uppercase; font-weight: 800;}
+
+        .credit-balance { display: flex; justify-content: space-between; align-items: center; background: rgba(249, 115, 22, 0.1); border: 1px solid #f97316; padding: 20px; border-radius: 6px; margin-bottom: 20px;}
+        .credit-balance h3 { color: #fff; font-size: 16px; margin: 0;}
+        .credit-amount { color: #f97316; font-size: 28px; font-weight: 900;}
+
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <h2>Benji HQ Portal</h2>
-        <p>Enter worker access credentials</p>
-        <input type="text" id="workerCode" placeholder="W_XXXX_00" autocomplete="off">
-        <button class="access-btn" onclick="handleLogin()">Access Terminal</button>
-        <div id="errorMsg" class="error">Access Denied: Invalid Code</div>
+
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-the">The</div>
+            <div class="logo-benji">Benji</div>
+            <div class="logo-hq">HQ</div>
+        </div>
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="switchNav('view-hub', this)">🛒 Buy Benjis</button>
+            <button class="nav-btn" onclick="switchNav('view-banking', this)">💰 Load Pounds (Bank)</button>
+            <button class="nav-btn" onclick="switchNav('view-profile', this)">👤 My Orders</button>
+        </div>
+
+
+
+        <div class="employee-section" id="customer-profile-section" style="display: none; background: rgba(249, 115, 22, 0.05); border-top: 1px solid #f97316;">
+            <div class="login-box">
+                <span class="login-label" style="color: #f97316;">Logged In As</span>
+                <span id="logged-in-username" style="color: #fff; font-weight: bold; font-size: 14px;">User</span>
+                <span style="color: #a1a1aa; font-size: 12px; margin-top: 4px;">Balance: <span id="logged-in-balance" style="color: #f97316; font-weight: bold;">0</span>p</span>
+                <button onclick="logoutCustomer()" style="margin-top: 8px; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa;">LOG OUT</button>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="login-box">
+                <span class="login-label">Staff / Manager Portal</span>
+                <div class="login-inputs">
+                    <input type="password" id="empCode" placeholder="Enter Role Code...">
+                    <button onclick="attemptLogin()">GO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <div id="view-hub" class="view-section active">
+            <div class="hub-header">
+                <div class="welcome-badge">Welcome to the Hub</div>
+                <h1 class="hq-title">THE BENJI HQ</h1>
+                <p class="hq-subtext">This is the Benji HQ. Benjis are used for treasure chests, make sure to buy one at our affordable prices.</p>
+            </div>
+
+            <div class="shop-container">
+                <h2>Process Order</h2>
+
+                <label>Payment Method</label>
+                <select id="paymentMethod">
+                    <option value="Cash/Pounds">Cash / Pounds (Direct Exchange)</option>
+                    <option value="Account Credits">Benji Credits (Pre-Loaded)</option>
+                </select>
+
+                <label>Quantity</label>
+                <div class="quick-buy-row">
+                    <button type="button" class="quick-btn" onclick="setQuantity(10)">10x</button>
+                    <button type="button" class="quick-btn" onclick="setQuantity(25)">25x</button>
+                    <button type="button" class="quick-btn" onclick="setQuantity(55)">55x</button>
+                </div>
+                <input type="number" id="qty" placeholder="Enter amount..." oninput="calculateTotal()" min="1">
+
+                <div class="pricing-box">
+                    <div style="font-size: 13px; color: #a0a5b0;">Base Price: 350p / item</div>
+                    <div style="font-size: 13px; color: #f97316; font-weight: bold; margin-top: 4px;">Bulk (55+): 300p / item</div>
+                </div>
+
+                <label>Tip Amount</label>
+                <input type="number" id="tip" placeholder="Optional tip in points..." oninput="calculateTotal()" min="0">
+                <span class="tip-text">Fixed point amount, no math required.</span>
+
+                <label>Client Username</label>
+                <input type="text" id="username" placeholder="Your Discord Username...">
+
+                <div class="total-display">
+                    <span style="font-weight:bold; color:#a1a1aa;">Total Due:</span>
+                    <span class="total-amount" id="display-total">0p</span>
+                </div>
+
+                <button class="buy-btn" id="submitOrderBtn" onclick="processOrder()">Purchase Order</button>
+
+                <div id="receipt-box">
+                    <div class="receipt-title">ORDER SUMMARY</div>
+                    <div class="receipt-line"><span>Method:</span> <span id="rec-method" style="color:#fff;">Cash</span></div>
+                    <div class="receipt-line"><span>Items:</span> <span id="rec-qty">0</span></div>
+                    <div class="receipt-line"><span>Unit Price:</span> <span id="rec-price">0p</span></div>
+                    <div class="receipt-line"><span>Tip:</span> <span id="rec-tip">0p</span></div>
+                    <hr style="border-color: #2c3036; margin: 10px 0;">
+                    <div class="receipt-line"><span style="color:#fff; font-weight:bold;">Final Total:</span> <span id="rec-total" style="color:#f97316; font-weight:bold;">0p</span></div>
+
+                    <div class="receipt-code">
+                        <span id="receipt-order-code">ORD-XXXXX</span>
+                        <button type="button" id="copy-btn" onclick="copyOrderCode()">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-banking" class="view-section">
+            <div class="shop-container" style="max-width: 600px;">
+                <h2>Load Pounds (Credits)</h2>
+                <p style="color: #a1a1aa; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
+                    Submit a request to load pounds into your account. The owner will review your ticket and assign a meeting location to collect the physical cash. Once verified, credits will be added to your profile.
+                </p>
+
+                <label>Your Username</label>
+                <input type="text" id="bankUsername" placeholder="Enter your Discord Username...">
+
+                <label>Amount to Load (Pounds)</label>
+                <input type="number" id="loadAmount" placeholder="e.g. 5000" min="100">
+
+                <button class="buy-btn" id="loadBtn" onclick="submitPoundRequest()">Request Deposit</button>
+
+                <div id="bank-status" style="display:none; margin-top: 20px; padding: 15px; background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; color: #22c55e; border-radius: 6px; text-align: center; font-weight: bold;">
+                    ✓ Deposit Ticket Sent! Please wait for the owner to contact you with a meeting place.
+                </div>
+            </div>
+        </div>
+
+        <div id="view-profile" class="view-section">
+            <div class="profile-card">
+                <div class="credit-balance">
+                    <div>
+                        <h3>My Account Balance</h3>
+                        <span style="font-size:12px; color:#a1a1aa;">Pre-loaded Credits</span>
+                    </div>
+                    <div class="credit-amount">0p</div>
+                </div>
+
+                <h2 style="color: #fff; margin-bottom: 5px;">My Order History</h2>
+                <p style="color: #a1a1aa; margin-bottom: 20px;">Track your recent Benji purchases.</p>
+                <table id="ordersTable">
+                    <thead><tr><th>Order ID</th><th>Package</th><th>Method</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td colspan="4" style="text-align:center;">No recent orders. Head to the shop!</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        async function handleLogin() {
-            const code = document.getElementById('workerCode').value.trim();
-            const errorElement = document.getElementById('errorMsg');
-            errorElement.style.display = 'none';
-            if (!code) return;
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
 
-            try {
-                const response = await fetch(`/api/login?code=${code}`);
-                const data = await response.json();
-                if (data.success) {
-                    window.location.href = `/panels/${data.role.toLowerCase()}.html`;
-                } else {
-                    errorElement.style.display = 'block';
-                }
-            } catch (err) {
-                if (code === 'W_DIST-1_nicho') window.location.href = '/panels/owner.html';
-                else if (code.startsWith('W_MGMT_')) window.location.href = '/panels/manager.html';
-                else if (code.startsWith('W_CHEF_')) window.location.href = '/panels/chef.html';
-                else if (code.startsWith('W_FISH_')) window.location.href = '/panels/fisher.html';
-                else if (code.startsWith('W_GATH_')) window.location.href = '/panels/gatherer.html';
-                else if (code.startsWith('W_FARM_')) window.location.href = '/panels/farmer.html';
-                else if (code.startsWith('W_SELL_')) window.location.href = '/panels/seller.html';
-                else errorElement.style.display = 'block';
+        // Our database of user balances
+        const userBalances = {
+            "TestUser": 1000,
+            "test": 20000 // Added some funds for testing based on your screenshot!
+        };
+
+        // NEW GLOBAL VARIABLE FOR LOGIN
+        let currentUser = null;
+
+        // --- CUSTOMER LOGIN LOGIC ---
+        function loginCustomer() {
+            const user = document.getElementById('customerUsername').value.trim();
+            if (!user) {
+                alert("Please enter your Discord username to log in.");
+                return;
+            }
+
+            currentUser = user;
+
+            // If new user, give them 0 balance to start
+            if (userBalances[currentUser] === undefined) {
+                userBalances[currentUser] = 0;
+            }
+
+            // Swap UI in sidebar
+            document.getElementById('customer-login-section').style.display = 'none';
+            document.getElementById('customer-profile-section').style.display = 'block';
+            document.getElementById('logged-in-username').innerText = currentUser;
+
+            // Auto-fill and lock the checkout username box
+            const checkoutUser = document.getElementById('username');
+            checkoutUser.value = currentUser;
+            checkoutUser.disabled = true;
+            checkoutUser.style.opacity = "0.5";
+
+            // Auto-fill and lock the banking username box
+            const bankUser = document.getElementById('bankUsername');
+            bankUser.value = currentUser;
+            bankUser.disabled = true;
+            bankUser.style.opacity = "0.5";
+
+            updateBalanceDisplay();
+        }
+
+        function logoutCustomer() {
+            currentUser = null;
+
+            // Swap UI in sidebar
+            document.getElementById('customer-login-section').style.display = 'block';
+            document.getElementById('customer-profile-section').style.display = 'none';
+            document.getElementById('customerUsername').value = '';
+
+            // Unlock and clear checkout box
+            const checkoutUser = document.getElementById('username');
+            checkoutUser.value = '';
+            checkoutUser.disabled = false;
+            checkoutUser.style.opacity = "1";
+
+            // Unlock and clear banking box
+            const bankUser = document.getElementById('bankUsername');
+            bankUser.value = '';
+            bankUser.disabled = false;
+            bankUser.style.opacity = "1";
+
+            // Reset Profile page display
+            document.querySelector('.credit-amount').innerText = "0p";
+        }
+
+        function updateBalanceDisplay() {
+            if (currentUser) {
+                const bal = userBalances[currentUser];
+                document.getElementById('logged-in-balance').innerText = bal.toLocaleString();
+                document.querySelector('.credit-amount').innerText = bal.toLocaleString() + "p";
             }
         }
+
+
+        // --- NAVIGATION LOGIC ---
+        function switchNav(targetId, btn) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function attemptLogin() {
+            const code = document.getElementById('empCode').value.trim();
+            if (code.startsWith('W_GATH_')) {
+                window.location.href = "manager.html?role=gatherer";
+            } else if (code.startsWith('W_MGMT_') || code === "W_DIST-1_nicho") {
+                window.location.href = "manager.html?role=manager";
+            } else {
+                alert("Invalid Access Code.");
+            }
+        }
+
+        function calculateTotal() {
+            let qty = parseInt(document.getElementById('qty').value) || 0;
+            let tip = parseInt(document.getElementById('tip').value) || 0;
+
+            let unitPrice = 350;
+            if (qty >= 55) unitPrice = 300;
+            else if (qty >= 40) unitPrice = 310;
+            else if (qty >= 30) unitPrice = 320;
+            else if (qty >= 20) unitPrice = 330;
+            else if (qty >= 10) unitPrice = 340;
+
+            let total = (qty * unitPrice) + tip;
+
+            document.getElementById('display-total').innerText = total.toLocaleString() + "p";
+
+            return { qty: qty, tip: tip, unitPrice: unitPrice, total: total };
+        }
+
+        function setQuantity(amount) {
+            document.getElementById('qty').value = amount;
+            calculateTotal();
+        }
+
+        async function processOrder() {
+            const orderData = calculateTotal();
+            const username = document.getElementById('username').value.trim();
+            const method = document.getElementById('paymentMethod').value;
+            const orderCode = "ORD-" + Math.floor(10000 + Math.random() * 90000);
+            const btn = document.getElementById('submitOrderBtn');
+
+            if (orderData.qty <= 0 || !username) {
+                alert("Please fill all fields including your username!");
+                return;
+            }
+
+            // --- ENFORCEMENT: MUST BE LOGGED IN TO USE CREDITS ---
+            if (method === "Account Credits") {
+                if (!currentUser) {
+                    alert("❌ You must log in using the Customer Portal on the left to pay with Account Credits.");
+                    return;
+                }
+
+                const currentBalance = userBalances[currentUser] || 0;
+
+                if (orderData.total > currentBalance) {
+                    alert("❌ Order Declined: Insufficient funds! You have " + currentBalance.toLocaleString() + "p, but need " + orderData.total.toLocaleString() + "p.");
+                    return;
+                }
+
+                // Deduct from balance
+                userBalances[currentUser] -= orderData.total;
+                updateBalanceDisplay(); // Update the visual numbers immediately
+            }
+
+            btn.disabled = true;
+            btn.innerText = "PROCESSING...";
+
+            const payload = {
+                embeds: [{
+                    title: "🛒 New Storefront Sale",
+                    color: 0xfacc15,
+                    fields: [
+                        {name: "Customer", value: username, inline: true},
+                        {name: "Order Code", value: orderCode, inline: true},
+                        {name: "Payment Method", value: method, inline: true},
+                        {name: "Quantity", value: `**${orderData.qty}x Benjis**`, inline: true},
+                        {name: "Tip Amount", value: orderData.tip + "p", inline: true},
+                        {name: "Final Total", value: orderData.total.toLocaleString() + "p", inline: true}
+                    ]
+                }]
+            };
+
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                alert("✅ Order Placed! It is now waiting for the seller.");
+
+                document.getElementById('receipt-box').style.display = 'block';
+                document.getElementById('receipt-order-code').innerText = orderCode;
+                document.getElementById('rec-method').innerText = method;
+                document.getElementById('rec-qty').innerText = orderData.qty;
+                document.getElementById('rec-price').innerText = orderData.unitPrice + "p";
+                document.getElementById('rec-tip').innerText = orderData.tip + "p";
+                document.getElementById('rec-total').innerText = orderData.total.toLocaleString() + "p";
+
+            } catch (err) {
+                alert("Order failed to send.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Purchase Order";
+            }
+        }
+
+        async function submitPoundRequest() {
+            const username = document.getElementById('bankUsername').value.trim();
+            const amount = parseInt(document.getElementById('loadAmount').value);
+            const btn = document.getElementById('loadBtn');
+            const statusBox = document.getElementById('bank-status');
+
+            if (!username || !amount || amount <= 0) {
+                alert("Please enter a valid username and amount to load.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "SENDING TICKET...";
+            statusBox.style.display = "none";
+
+            const payload = {
+                embeds: [{
+                    title: "💰 Bank Deposit Request (Load Pounds)",
+                    color: 0x22c55e,
+                    description: "A user is requesting to meet and load pounds into their account.",
+                    fields: [
+                        {name: "Customer", value: username, inline: true},
+                        {name: "Amount to Load", value: amount.toLocaleString() + "p", inline: true},
+                        {
+                            name: "Action Required",
+                            value: "DM user with meeting location. Collect cash, then manually update database.",
+                            inline: false
+                        }
+                    ]
+                }]
+            };
+
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                statusBox.style.display = "block";
+                document.getElementById('loadAmount').value = '';
+
+            } catch (err) {
+                console.error("Webhook failed:", err);
+                alert("Failed to send deposit ticket. Try again.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Request Deposit";
+            }
+        }
+
+        function copyOrderCode() {
+            const codeText = document.getElementById('receipt-order-code').innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const copyBtn = document.getElementById('copy-btn');
+                copyBtn.innerText = "Copied!";
+                setTimeout(() => {
+                    copyBtn.innerText = "Copy";
+                }, 2000);
+            });
+        }
+
+        window.onload = () => {
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
+
+    if (!accessToken) return;
+
+    fetch('https://discord.com/api/users/@me', {
+        headers: { authorization: `${tokenType} ${accessToken}` }
+    })
+    .then(result => result.json())
+    .then(response => {
+        const { username } = response;
+        // Now automatically log them in
+        document.getElementById('customerUsername').value = username;
+        loginCustomer(); // Triggers your existing login logic
+        window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
+    });
+};
     </script>
 </body>
 </html>
-

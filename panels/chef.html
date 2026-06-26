@@ -2,49 +2,284 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chef Kitchen Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benji HQ | Chef Terminal</title>
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0b0c0e; color: #f0f2f5; padding: 40px; margin: 0; }
-        .wrapper { max-width: 500px; margin: 0 auto; background: #141619; border: 1px solid #22252a; border-radius: 6px; padding: 32px; }
-        h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px 0; color: #ffffff; }
-        .subtitle { font-size: 13px; color: #707782; margin-bottom: 24px; }
-        .status-box { background: #0b0c0e; border: 1px solid #2c3036; border-radius: 4px; padding: 16px; margin-bottom: 24px; }
-        .status-line { display: flex; justify-content: space-between; font-size: 13px; color: #b1b8c4; padding: 4px 0; }
-        .slider-container { margin: 24px 0; }
-        label { display: block; font-size: 12px; font-weight: 600; color: #b1b8c4; text-transform: uppercase; margin-bottom: 8px; }
-        input[type="range"] { width: 100%; margin: 10px 0; accent-color: #ff6a00; }
-        .dispatch-btn { width: 100%; padding: 14px; border: none; border-radius: 4px; background: #ff6a00; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; text-transform: uppercase; }
-        .dispatch-btn:hover { background: #e05d00; }
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background: #0b0c0e;
+            color: #e5e7eb;
+            padding: 40px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 500px;
+            background: #141619;
+            border: 1px solid #2c251d;
+            border-top: 4px solid #d97706;
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .header {
+            border-bottom: 1px solid #2c3036;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #d97706;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            background: #0b0c0e;
+            border: 1px solid #374151;
+            color: #fff;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #d97706;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .batch-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .batch-option {
+            display: none;
+        }
+        .batch-label {
+            display: block;
+            background: #0b0c0e;
+            border: 1px solid #374151;
+            color: #9ca3af;
+            text-align: center;
+            padding: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .batch-label:hover {
+            border-color: #6b7280;
+            color: #fff;
+        }
+        .batch-option:checked + .batch-label {
+            background: rgba(217, 119, 6, 0.1);
+            border-color: #d97706;
+            color: #d97706;
+            box-shadow: inset 0 0 0 1px #d97706;
+        }
+
+        .dispatch-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            background: #d97706;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        .dispatch-btn:hover {
+            background: #b45309;
+        }
+        .dispatch-btn:active {
+            transform: scale(0.98);
+        }
+        .dispatch-btn:disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #statusMessage {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 16px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background: rgba(217, 119, 6, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(217, 119, 6, 0.2);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .transfer-code {
+            font-family: monospace;
+            background: #000;
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: #d97706;
+            letter-spacing: 2px;
+            font-size: 18px;
+            display: inline-block;
+            margin-top: 12px;
+            border: 1px solid #d97706;
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <h2>Kitchen Production Terminal</h2>
-        <div class="subtitle">Verify warehouse ingredients and track active cooking batches.</div>
-
-        <div class="status-box">
-            <div class="status-line"><span>Required Tuna</span><span>50 Units</span></div>
-            <div class="status-line"><span>Required Salt</span><span>20 Units</span></div>
+        <div class="header">
+            <h2>Kitchen Production</h2>
+            <div class="subtitle">"A complex dish for the more refined palette."</div>
         </div>
 
-        <div class="slider-container">
-            <label>Batch Progress (<span id="progressVal">0</span>%)</label>
-            <input type="range" id="productionSlider" min="0" max="100" value="0" oninput="updateProgress(this.value)">
+        <div class="form-group">
+            <label for="chefName">Chef Identification</label>
+            <input type="text" id="chefName" placeholder="Enter your username..." required>
         </div>
 
-        <button class="dispatch-btn" onclick="dispatchOrder()">Dispatch Location Alert</button>
+        <div class="form-group">
+            <label>Select Batch Quantity</label>
+            <div class="batch-grid">
+                <input type="radio" name="batch" id="batch50" value="50" class="batch-option" checked>
+                <label for="batch50" class="batch-label">50 Benjis</label>
+
+                <input type="radio" name="batch" id="batch100" value="100" class="batch-option">
+                <label for="batch100" class="batch-label">100 Benjis</label>
+
+                <input type="radio" name="batch" id="batch200" value="200" class="batch-option">
+                <label for="batch200" class="batch-label">200 Benjis</label>
+
+                <input type="radio" name="batch" id="batch300" value="300" class="batch-option">
+                <label for="batch300" class="batch-label">300 Benjis</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="chefNotes">Manager Notes / Status Update</label>
+            <textarea id="chefNotes" placeholder="Example: Making a ticket now, need more salt soon..."></textarea>
+        </div>
+
+        <button class="dispatch-btn" id="dispatchBtn" onclick="dispatchOrder()">Dispatch to Manager</button>
+        <div id="statusMessage"></div>
     </div>
 
-    <script src="../api.js"></script>
     <script>
-        function updateProgress(val) {
-            document.getElementById('progressVal').innerText = val;
+        // Generates a random 6-character alphanumeric code for tracking
+        function generateTransferCode() {
+            return 'CHF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
         }
-        function dispatchOrder() {
-            const progress = document.getElementById('productionSlider').value;
-            if (progress < 100) return alert("Batch must reach 100% before dispatch.");
-            alert("Location verification coordinates pushed to communication channels.");
+
+        async function dispatchOrder() {
+            const btn = document.getElementById('dispatchBtn');
+            const statusBox = document.getElementById('statusMessage');
+
+            // Gather inputs
+            const chefName = document.getElementById('chefName').value.trim();
+            const notes = document.getElementById('chefNotes').value.trim();
+            const batchSize = document.querySelector('input[name="batch"]:checked').value;
+
+            if (!chefName) {
+                alert("Please enter your Chef Identification before dispatching.");
+                return;
+            }
+
+            // Generate unique code
+            const uniqueCode = generateTransferCode();
+
+            // Lock the button
+            btn.disabled = true;
+            btn.innerText = "TRANSMITTING...";
+            statusBox.style.display = "none";
+
+            // Standardized payload formatting
+            const payloadData = {
+                actionType: "Chef Production",
+                submittedBy: chefName,
+                batchQuantity: batchSize + " Units",
+                managerNotes: notes || "No additional notes provided.",
+                transferCode: uniqueCode // Sends the code to Discord
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/notify-discord', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payloadData)
+                });
+
+                if (response.ok) {
+                    statusBox.className = "success";
+                    // Display code to the chef
+                    statusBox.innerHTML = `
+                        ✓ Dispatch Successful. Manager notified.<br>
+                        Give this code to the manager:<br>
+                        <span class="transfer-code">${uniqueCode}</span>
+                    `;
+                    statusBox.style.display = "block";
+
+                    // Clear inputs so they can start a new ticket if needed
+                    document.getElementById('chefName').value = '';
+                    document.getElementById('chefNotes').value = '';
+                    document.getElementById('batch50').checked = true;
+                } else {
+                    throw new Error("Server rejected the ticket.");
+                }
+
+            } catch (error) {
+                console.error("Webhook Error:", error);
+                statusBox.className = "error";
+                statusBox.innerText = "✗ Transmission Failed. Check console.";
+                statusBox.style.display = "block";
+            } finally {
+                // Unlock button
+                btn.disabled = false;
+                btn.innerText = "DISPATCH TO MANAGER";
+            }
         }
     </script>
 </body>

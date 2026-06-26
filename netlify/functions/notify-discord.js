@@ -1,41 +1,92 @@
 /**
  * Netlify Serverless Function Handler
  * Destination Path: netlify/functions/notify-discord.js
- * Strictly captures incoming client application context and maps payloads into secure BotGhost APIs.
+ *
+ * AUTOMATED MULTI-TOOL:
+ * Automatically formats incoming POST requests into Discord Webhook Embeds.
+ * Fully supports Orders, Transfer Tickets, and Logistics without code changes.
  */
 
 const https = require('https');
 const url = require('url');
 
 exports.handler = async (event, context) => {
-  // Reject alternative non-POST configuration verbs
+  // 1. Reject anything that isn't a POST request
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Method Configuration Profile Invalid. Use POST requests." })
+      body: JSON.stringify({ error: "Method Invalid. Use POST requests." })
     };
   }
 
   try {
+    // 2. Parse the data sent from your frontend
     const requestData = JSON.parse(event.body || "{}");
-    const quantityValue = requestData.quantity !== undefined ? requestData.quantity : 1;
 
-    // Build the payload mapping configuration required by BotGhost
+    // 3. Determine the type of ticket to customize the Embed Title and Color
+    // It looks for a "type" or "actionType" from your fetch request
+    const actionType = requestData.actionType || requestData.type || "Ticket";
+    const isTransfer = actionType.toLowerCase().includes("transfer");
+    const isLogistics = actionType.toLowerCase().includes("logistics");
+
+    let embedTitle = "💼 New " + actionType;
+    let embedColor = 0xff6a00; // Baseline Orange
+
+    if (isTransfer) {
+        embedTitle = "🔄 Transfer Ticket Processed";
+        embedColor = 0x3498db; // Blue for Transfers
+    } else if (isLogistics) {
+        embedTitle = "📦 Logistics Submission";
+        embedColor = 0x9b59b6; // Purple for Logistics
+    } else if (requestData.orderCode || requestData.quantity) {
+        embedTitle = "🛒 New Order Receipt";
+        embedColor = 0x2ecc71; // Green for Orders
+    }
+
+    // 4. Dynamically build the Discord fields based on exactly what the frontend sends
+    // This guarantees your Transfer features and Logistics inputs work immediately.
+    const embedFields = [];
+    const ignoreKeys = ['actionType', 'type'];
+
+    for (const [key, value] of Object.entries(requestData)) {
+      if (!ignoreKeys.includes(key) && value !== "" && value !== null) {
+        // Turn camelCase keys into Clean Titles (e.g., "orderCode" -> "Order Code")
+        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        embedFields.push({
+          name: formattedKey,
+          value: String(value),
+          inline: true
+        });
+      }
+    }
+
+    // Fallback if an empty ticket is sent
+    if (embedFields.length === 0) {
+      embedFields.push({ name: "System Message", value: "Ticket triggered with no readable data.", inline: false });
+    }
+
+    // 5. Construct the final Discord Native Payload
     const webhookPayload = JSON.stringify({
-      variables: [
-        {
-          name: "quantity",
-          variable: "{quantity}",
-          value: quantityValue.toString()
-        }
-      ]
+      embeds: [{
+        title: embedTitle,
+        color: embedColor,
+        fields: embedFields,
+        timestamp: new Date().toISOString(),
+        footer: { text: "Benji HQ Automated System" }
+      }]
     });
 
-    const destinationTarget = process.env.BOTGHOST_WEBHOOK_URL || 'https://api.botghost.com/webhook/placeholder';
+    // 6. Securely pull the Webhook URL from Netlify Environment Variables
+    const destinationTarget = process.env.DISCORD_WEBHOOK_URL;
+
+    if (!destinationTarget) {
+        throw new Error("DISCORD_WEBHOOK_URL environment variable is missing in Netlify.");
+    }
+
     const parsingUrl = url.parse(destinationTarget);
 
-    // Promise wrapper pipeline to handle standard HTTP payloads without adding unnecessary third-party overhead
+    // 7. Deliver the Webhook to Discord directly
     const deliverWebhookNotification = () => {
       return new Promise((resolve, reject) => {
         const structuralOptions = {
@@ -44,7 +95,6 @@ exports.handler = async (event, context) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': process.env.BOTGHOST_API_KEY || 'MISSING_AUTHORIZATION_KEY_TOKEN',
             'Content-Length': Buffer.byteLength(webhookPayload)
           },
           timeout: 8000
@@ -57,13 +107,16 @@ exports.handler = async (event, context) => {
             if (res.statusCode >= 200 && res.statusCode < 300) {
               resolve({ success: true, code: res.statusCode });
             } else {
-              reject(new Error(`Server communication returned abnormal response code status: ${res.statusCode}`));
+              reject(new Error(`Discord API returned abnormal response code: ${res.statusCode} - ${systemBufferResult}`));
             }
           });
         });
 
         req.on('error', (err) => { reject(err); });
-        req.on('timeout', () => { req.destroy(); reject(new Error('Gateway interface reached network timeout restrictions.')); });
+        req.on('timeout', () => {
+          req.destroy();
+          reject(new Error('Gateway interface reached network timeout restrictions.'));
+        });
 
         req.write(webhookPayload);
         req.end();
@@ -72,19 +125,26 @@ exports.handler = async (event, context) => {
 
     await deliverWebhookNotification();
 
+    // 8. Return success to the frontend
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      },
       body: JSON.stringify({ success: true, status: 'sent' })
     };
 
   } catch (error) {
-    console.error("Internal processing log signature error caught:", error.message);
+    console.error("Internal processing error caught:", error.message);
 
-    // Status handles the required database logic: leaves state as 'pending' if the webhook pipeline fails
+    // 9. Fail safely and leave the database state 'pending'
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      },
       body: JSON.stringify({
         success: false,
         status: 'pending',
@@ -94,3 +154,20 @@ exports.handler = async (event, context) => {
     };
   }
 };
+
+async function sendToDiscord(data) {
+    try {
+        const response = await fetch('/.netlify/functions/notify-discord', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            console.log("Ticket successfully dispatched to Discord.");
+        }
+    } catch (error) {
+        console.error("Transmission failed:", error);
+    }
+}

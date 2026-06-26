@@ -2,198 +2,344 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Administration Panel</title>
+    <title>Benji HQ | Owner Administration</title>
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0b0c0e; color: #f0f2f5; padding: 40px; margin: 0; }
-        .wrapper { max-width: 950px; margin: 0 auto; background: #141619; border: 1px solid #22252a; border-radius: 6px; padding: 32px; }
-        h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px 0; color: #ffffff; }
-        .subtitle { font-size: 13px; color: #707782; margin-bottom: 24px; }
+        /* --- GLOBAL STYLES --- */
+        body { background: #09090b; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; margin: 0; display: flex; justify-content: center; }
+        .wrapper { width: 100%; max-width: 900px; }
 
-        .add-worker-form { display: flex; gap: 12px; background: #0b0c0e; padding: 16px; border: 1px solid #2c3036; border-radius: 4px; margin-bottom: 24px; align-items: flex-end; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-        label { font-size: 11px; font-weight: 600; color: #b1b8c4; text-transform: uppercase; }
-        .add-worker-form input, .add-worker-form select { background: #141619; color: #ffffff; padding: 10px; border: 1px solid #2c3036; border-radius: 4px; font-size: 13px; }
+        /* --- HEADER FORMATTING --- */
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #27272a; padding-bottom: 20px; margin-bottom: 30px; }
+        .header-title h1 { font-size: 32px; color: #ffffff; margin: 0 0 5px 0; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        .header-title p { font-size: 14px; color: #f97316; margin: 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .logout-btn { background: #18181b; color: #a1a1aa; border: 1px solid #3f3f46; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; text-decoration: none; transition: 0.2s; }
+        .logout-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-        th, td { padding: 12px; text-align: left; font-size: 14px; border-bottom: 1px solid #2c3036; }
-        th { background: #0b0c0e; color: #b1b8c4; font-weight: 600; text-transform: uppercase; font-size: 12px; }
+        /* --- BOX CONTAINERS --- */
+        .admin-section { margin-bottom: 40px; }
+        .admin-section h2 { font-size: 18px; color: #ffffff; margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .subtext { font-size: 13px; color: #a1a1aa; margin-top: 0; margin-bottom: 20px; }
+        .admin-box { background: #141619; border: 1px solid #27272a; border-top: 3px solid #3f3f46; border-radius: 6px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .box-orange { border-top-color: #f97316; }
+        .box-green { border-top-color: #22c55e; }
+        .box-blue { border-top-color: #3b82f6; }
 
-        .table-input { background: transparent; color: #ffffff; border: 1px solid transparent; padding: 6px; border-radius: 4px; font-size: 13px; width: 100%; font-family: monospace; transition: all 0.2s; }
-        .table-input:focus { background: #0b0c0e; border-color: #474d57; outline: none; }
-        select { background: #0b0c0e; color: #ffffff; padding: 6px 10px; border: 1px solid #2c3036; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        /* --- INPUTS & GRIDS --- */
+        .input-row { display: flex; gap: 20px; align-items: flex-end; }
+        .input-group { flex: 1; display: flex; flex-direction: column; }
+        label { font-size: 11px; font-weight: bold; color: #71717a; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { padding: 14px; background: #0b0c0e; border: 1px solid #3f3f46; color: #ffffff; border-radius: 4px; outline: none; font-size: 14px; transition: border-color 0.2s; }
+        input:focus, select:focus { border-color: #f97316; box-shadow: 0 0 0 1px #f97316; }
 
-        .add-btn { background: #ff6a00; color: #ffffff; border: none; padding: 10px 20px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; text-transform: uppercase; }
-        .add-btn:hover { background: #e05d00; }
+        /* --- BUTTONS --- */
+        .btn { padding: 14px 24px; font-weight: 800; border-radius: 4px; cursor: pointer; transition: 0.2s; height: 48px; border: none; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; }
+        .btn-orange { background: #f97316; color: #000; }
+        .btn-orange:hover { background: #ea580c; color: #fff; }
+        .btn-green { background: #22c55e; color: #000; }
+        .btn-green:hover { background: #16a34a; color: #fff; }
+        .btn-blue { background: #3b82f6; color: #000; }
+        .btn-blue:hover { background: #2563eb; color: #fff; }
 
-        .btn-group { display: flex; gap: 6px; }
-        .cycle-btn { background: rgba(255, 106, 0, 0.1); color: #ff6a00; border: 1px solid #ff6a00; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
-        .cycle-btn:hover { background: #ff6a00; color: #ffffff; }
-        .kick-btn { background: rgba(248, 81, 73, 0.1); color: #f85149; border: 1px solid #f85149; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
-        .kick-btn:hover { background: #f85149; color: #ffffff; }
+        /* Table Action Buttons */
+        .action-btns { display: flex; gap: 8px; }
+        .btn-sm { padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; border: 1px solid transparent; background: transparent; transition: 0.2s;}
+        .btn-edit { color: #3b82f6; border-color: #3b82f6; }
+        .btn-edit:hover { background: #3b82f6; color: #fff; }
+        .btn-revoke { color: #ef4444; border-color: #ef4444; }
+        .btn-revoke:hover { background: #ef4444; color: #fff; }
+
+        /* --- TABLES --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #0b0c0e; border-radius: 6px; overflow: hidden; }
+        th { text-align: left; font-size: 11px; color: #f97316; text-transform: uppercase; padding: 15px; background: #18181b; border-bottom: 1px solid #27272a; }
+        td { padding: 15px; color: #e5e7eb; font-size: 14px; border-bottom: 1px solid #27272a; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #141619; }
+        .code-cell { font-family: monospace; color: #a1a1aa; font-size: 15px; letter-spacing: 1px; }
+
+        /* --- STATUS NOTIFICATIONS --- */
+        .status-box { display: none; margin-top: 15px; padding: 15px; border-radius: 4px; font-size: 13px; font-weight: bold; text-align: center; }
+        .status-success { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <h2>Administration Control</h2>
-        <div class="subtitle">System Authorization Level: Owner Bypass Ledger</div>
 
-        <div class="add-worker-form">
-            <div class="form-group">
-                <label>Worker Code</label>
-                <input type="text" id="newWorkerCode" placeholder="W_FISH_02">
-            </div>
-            <div class="form-group">
-                <label>Assign Panel Node</label>
-                <select id="newWorkerRole">
-                    <option value="Fisher">Fisher</option>
-                    <option value="Farmer">Farmer</option>
-                    <option value="Gatherer">Gatherer</option>
-                    <option value="Chef">Chef</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Seller">Seller</option>
-                </select>
-            </div>
-            <button class="add-btn" onclick="addNewWorkerRow()">Add Worker</button>
+<div class="wrapper">
+
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Administration Control</h1>
+            <p>System Authorization Level: Owner Bypass Ledger</p>
         </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Worker Code</th>
-                    <th>Current Assignment</th>
-                    <th>Security Actions</th>
-                </tr>
-            </thead>
-            <tbody id="rosterTemplateBody">
-                <tr id="row-worker1">
-                    <td>
-                        <input type="text" class="table-input" id="code-worker1" value="W_FISH_02">
-                    </td>
-                    <td>
-                        <select id="role-worker1">
-                            <option value="Fisher" selected>Fisher</option>
-                            <option value="Farmer">Farmer</option>
-                            <option value="Gatherer">Gatherer</option>
-                            <option value="Chef">Chef</option>
-                            <option value="Manager">Manager</option>
-                            <option value="Seller">Seller</option>
-                        </select>
-                    </td>
-                    <td>
-                        <div class="btn-group">
-                            <button class="cycle-btn" onclick="cycleWorkerCode('worker1')">Cycle Code</button>
-                            <button class="kick-btn" onclick="evictStaff('row-worker1')">Kick</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr id="row-worker2">
-                    <td>
-                        <input type="text" class="table-input" id="code-worker2" value="W_SELL_14">
-                    </td>
-                    <td>
-                        <select id="role-worker2">
-                            <option value="Fisher">Fisher</option>
-                            <option value="Farmer">Farmer</option>
-                            <option value="Gatherer">Gatherer</option>
-                            <option value="Chef">Chef</option>
-                            <option value="Manager">Manager</option>
-                            <option value="Seller" selected>Seller</option>
-                        </select>
-                    </td>
-                    <td>
-                        <div class="btn-group">
-                            <button class="cycle-btn" onclick="cycleWorkerCode('worker2')">Cycle Code</button>
-                            <button class="kick-btn" onclick="evictStaff('row-worker2')">Kick</button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <a href="index.html" class="logout-btn">CLOSE PANEL</a>
     </div>
 
-    <script src="../api.js"></script>
-    <script>
-        let workerCounter = 3;
+    <!-- SECTION 1: WORKER ASSIGNMENT & SPREADSHEET -->
+    <div class="admin-section">
+        <h2>Worker Directory Ledger</h2>
+        <p class="subtext">Assign, edit, or revoke access codes and panel nodes for all staff members.</p>
 
-        // Automatically randomizes a fresh four-digit code string matching the job prefix
-        function generateRandomCode(role) {
-            const prefixMap = {
-                'Fisher': 'W_FISH',
-                'Farmer': 'W_FARM',
-                'Gatherer': 'W_GATH',
-                'Chef': 'W_CHEF',
-                'Manager': 'W_MGMT',
-                'Seller': 'W_SELL'
-            };
-            const prefix = prefixMap[role] || 'W_WORK';
-            const randomNum = Math.floor(1000 + Math.random() * 9000); // Guarantees a clean 4-digit number
-            return `${prefix}_${randomNum}`;
+        <div class="admin-box box-orange">
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Staff Access Code</label>
+                    <input type="text" id="worker-code" placeholder="e.g. W_FARM_01">
+                </div>
+                <div class="input-group">
+                    <label>Assign Panel Node (Role)</label>
+                    <select id="worker-role">
+                        <option value="Fisher">Fisher</option>
+                        <option value="Farmer">Farmer</option>
+                        <option value="Gatherer">Gatherer</option>
+                        <option value="Manager">Manager</option>
+                    </select>
+                </div>
+                <button class="btn btn-orange" onclick="addWorker()">Save Worker</button>
+            </div>
+        </div>
+
+        <div class="admin-box" style="padding: 0; border-top: none;">
+            <table id="worker-table">
+                <thead>
+                    <tr>
+                        <th>Access Code</th>
+                        <th>Assigned Role</th>
+                        <th style="width: 180px;">Security Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="worker-list">
+                    <!-- Default example row -->
+                    <tr>
+                        <td class="code-cell">W_DIST-1_nicho</td>
+                        <td>Manager (Owner)</td>
+                        <td><span style="color:#71717a; font-size:11px; font-weight:bold;">SYSTEM LOCKED</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SECTION 2: MANUAL CREDIT LOADER (BANKING) -->
+    <div class="admin-section">
+        <h2>Central Bank Processing</h2>
+        <p class="subtext">Fulfill user "Load Pounds" requests. Manually add credits to an account after collecting physical cash.</p>
+
+        <div class="admin-box box-blue">
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Target Username</label>
+                    <input type="text" id="targetUser" placeholder="e.g. PlayerName123">
+                </div>
+                <div class="input-group">
+                    <label>Amount to Load (Pounds)</label>
+                    <input type="number" id="loadAmount" placeholder="e.g. 5000">
+                </div>
+                <button class="btn btn-blue" onclick="manualLoadCredits()">Execute Deposit</button>
+            </div>
+            <div id="bankStatus" class="status-box status-success"></div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: MULTI-ISLAND LOGISTICS TERMINAL -->
+    <div class="admin-section">
+        <h2>Multi-Island Logistics Terminal</h2>
+        <p class="subtext">Fulfill and verify pending manager warehouse transfers or tickets.</p>
+
+        <div class="admin-box box-green">
+            <div class="input-row">
+                <div class="input-group" style="flex: 0.5;">
+                    <label>Transfer Ticket ID</label>
+                    <input type="text" id="ticket-id" placeholder="e.g. TRN-492B">
+                </div>
+                <div class="input-group">
+                    <label>Owner Completion Notes</label>
+                    <input type="text" id="owner-notes" placeholder="e.g. Loaded 500 Tuna into Main HQ">
+                </div>
+                <button class="btn btn-green" onclick="completeTransfer()">Mark Complete</button>
+            </div>
+            <div id="logisticsStatus" class="status-box status-success"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // DISCORD WEBHOOK URLS (PASTE YOURS HERE)
+    // ==========================================
+    const OWNER_LOG_WEBHOOK = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
+
+    // ==========================================
+    // 1. WORKER SPREADSHEET LOGIC (ADD, EDIT, REVOKE)
+    // ==========================================
+    function addWorker() {
+        const codeInput = document.getElementById("worker-code");
+        const roleInput = document.getElementById("worker-role");
+        const code = codeInput.value.trim();
+        const role = roleInput.value;
+
+        if (!code) {
+            alert("Please enter a worker code.");
+            return;
         }
 
-        // Overwrites the existing input value with a newly generated random code sequence
-        function cycleWorkerCode(suffixId) {
-            const roleSelect = document.getElementById(`role-${suffixId}`);
-            const codeInput = document.getElementById(`code-${suffixId}`);
+        const tableBody = document.getElementById("worker-list");
+        const newRow = document.createElement("tr");
 
-            const oldCode = codeInput.value;
-            const newCode = generateRandomCode(roleSelect.value);
+        newRow.innerHTML = `
+            <td class="code-cell">${code}</td>
+            <td class="role-cell">${role}</td>
+            <td>
+                <div class="action-btns">
+                    <button class="btn-sm btn-edit" onclick="editWorker(this)">EDIT</button>
+                    <button class="btn-sm btn-revoke" onclick="revokeWorker(this)">REVOKE</button>
+                </div>
+            </td>
+        `;
 
-            if (confirm(`Cycle authentication codes? This will immediately replace ${oldCode} with ${newCode}.`)) {
-                codeInput.value = newCode;
-                console.log(`Database sync: Code rotated from ${oldCode} -> ${newCode}`);
-            }
+        tableBody.appendChild(newRow);
+
+        // Clear input after saving
+        codeInput.value = "";
+    }
+
+    function editWorker(button) {
+        // Find the row we clicked
+        const row = button.closest("tr");
+
+        // Grab the existing code and role from the row
+        const existingCode = row.querySelector(".code-cell").innerText;
+        const existingRole = row.querySelector(".role-cell").innerText;
+
+        // Push them back up into the input fields so the owner can change them
+        document.getElementById("worker-code").value = existingCode;
+        document.getElementById("worker-role").value = existingRole;
+
+        // Remove the row (When they hit "Save", it will create a new updated row)
+        row.remove();
+
+        // Scroll back up to the inputs slightly
+        document.getElementById("worker-code").focus();
+    }
+
+    function revokeWorker(button) {
+        if (confirm("Are you sure you want to revoke this access code?")) {
+            button.closest("tr").remove();
+        }
+    }
+
+    // ==========================================
+    // 2. CENTRAL BANK PROCESSING (LOAD POUNDS)
+    // ==========================================
+    async function manualLoadCredits() {
+        const user = document.getElementById('targetUser').value.trim();
+        const amount = document.getElementById('loadAmount').value;
+        const statusBox = document.getElementById('bankStatus');
+
+        if (!user || !amount) {
+            return alert("You must enter both a Username and an Amount.");
         }
 
-        function addNewWorkerRow() {
-            const codeInput = document.getElementById('newWorkerCode');
-            const roleSelect = document.getElementById('newWorkerRole');
-            const code = codeInput.value.trim();
-            const role = roleSelect.value;
+        const payload = {
+            embeds: [{
+                title: "⚖️ Manual Bank Deposit Executed",
+                color: 0x3b82f6, // Blue
+                fields: [
+                    {name: "Authorized By", value: "System Owner", inline: true},
+                    {name: "User Credited", value: user, inline: true},
+                    {name: "Amount Added", value: amount + "p", inline: true},
+                    {name: "Status", value: "Funds Successfully Verified & Loaded", inline: false}
+                ],
+                footer: {text: "Benji HQ Owner Terminal"},
+                timestamp: new Date().toISOString()
+            }]
+        };
 
-            if (!code) return alert("Please type a valid worker code layout first.");
+        try {
+            await fetch(OWNER_LOG_WEBHOOK, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
 
-            const tableBody = document.getElementById('rosterTemplateBody');
-            const suffixId = `worker${workerCounter}`;
-            const uniqueRowId = `row-${suffixId}`;
+            statusBox.innerHTML = `✓ Successfully credited <b>${amount}p</b> to <b>${user}</b>. Audit log sent.`;
+            statusBox.style.display = "block";
 
-            const newRowHtml = `
-                <tr id="${uniqueRowId}">
-                    <td>
-                        <input type="text" class="table-input" id="code-${suffixId}" value="${code}">
-                    </td>
-                    <td>
-                        <select id="role-${suffixId}">
-                            <option value="Fisher" ${role === 'Fisher' ? 'selected' : ''}>Fisher</option>
-                            <option value="Farmer" ${role === 'Farmer' ? 'selected' : ''}>Farmer</option>
-                            <option value="Gatherer" ${role === 'Gatherer' ? 'selected' : ''}>Gatherer</option>
-                            <option value="Chef" ${role === 'Chef' ? 'selected' : ''}>Chef</option>
-                            <option value="Manager" ${role === 'Manager' ? 'selected' : ''}>Manager</option>
-                            <option value="Seller" ${role === 'Seller' ? 'selected' : ''}>Seller</option>
-                        </select>
-                    </td>
-                    <td>
-                        <div class="btn-group">
-                            <button class="cycle-btn" onclick="cycleWorkerCode('${suffixId}')">Cycle Code</button>
-                            <button class="kick-btn" onclick="evictStaff('${uniqueRowId}')">Kick</button>
-                        </div>
-                    </td>
-                </tr>
-            `;
+            // Clear inputs
+            document.getElementById('targetUser').value = '';
+            document.getElementById('loadAmount').value = '';
 
-            tableBody.insertAdjacentHTML('beforeend', newRowHtml);
-            codeInput.value = '';
-            workerCounter++;
+            // Hide message after 4 seconds
+            setTimeout(() => {
+                statusBox.style.display = "none";
+            }, 4000);
+
+        } catch (error) {
+            alert("Failed to log to Discord. Check your Webhook URL.");
+            console.error(error);
+        }
+    }
+
+    // ==========================================
+    // 3. LOGISTICS TRANSFER COMPLETION
+    // ==========================================
+    async function completeTransfer() {
+        const ticketId = document.getElementById("ticket-id").value.trim();
+        const notes = document.getElementById("owner-notes").value.trim();
+        const statusBox = document.getElementById('logisticsStatus');
+
+        if (!ticketId) {
+            return alert("You must enter a Ticket ID to complete a transfer!");
         }
 
-        function evictStaff(rowId) {
-            const targetRow = document.getElementById(rowId);
-            const currentCode = targetRow.querySelector('.table-input').value;
+        const completionPayload = {
+            embeds: [{
+                title: `✅ Ticket Resolved: ${ticketId}`,
+                color: 0x22c55e, // Green
+                description: `The owner has successfully cleared this ticket and completed the logistics transfer.\n\n**Owner Notes:**\n${notes || "No additional notes provided."}`,
+                fields: [
+                    {name: "Status", value: "Fully Loaded & Completed", inline: true},
+                    {name: "Ticket ID", value: `**${ticketId}**`, inline: true}
+                ],
+                footer: {text: "Benji HQ Owner Terminal"},
+                timestamp: new Date().toISOString()
+            }]
+        };
 
-            if (confirm(`Are you sure you want to completely kick worker ${currentCode}?`)) {
-                targetRow.remove();
-            }
+        try {
+            await fetch(OWNER_LOG_WEBHOOK, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(completionPayload)
+            });
+
+            statusBox.innerHTML = `✓ Transfer Ticket <b>${ticketId}</b> Marked Complete. Discord updated.`;
+            statusBox.style.display = "block";
+
+            // Clear inputs
+            document.getElementById("ticket-id").value = "";
+            document.getElementById("owner-notes").value = "";
+
+            // Hide message after 4 seconds
+            setTimeout(() => {
+                statusBox.style.display = "none";
+            }, 4000);
+
+        } catch (error) {
+            alert("Failed to send to Discord. Check your Webhook URL.");
+            console.error(error);
         }
-    </script>
+    }
+
+    <div className="shop-container" style="margin-top: 20px;">
+        <h3>Admin: Deduct Credits</h3>
+        <input type="text" id="deductUser" placeholder="Username to deduct from..."/>
+        <input type="number" id="deductAmount" placeholder="Amount to deduct..."/>
+        <button className="buy-btn" style="background: #ef4444;" onClick="deductCredits()">Deduct Credits</button>
+        <div id="deduct-status" style="display:none; margin-top:10px; color:#ef4444; font-weight:bold;">✓ Deduction
+            logged.
+        </div>
+    </div>
+
+</script>
 </body>
 </html>

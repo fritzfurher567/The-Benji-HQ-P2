@@ -1,31 +1,15 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const cors = require('cors');
-
-// If you are using an older version of Node.js that doesn't have fetch built-in,
-// you will need to uncomment the line below and run 'npm install node-fetch'
-// const fetch = require('node-fetch');
-
-const app = express();
-const port = 3000;
-
-app.use(cors());
-app.use(express.json());
-
 // =====================================================================
-// BENJI HQ BACKEND WEB COMPONENT CONNECTIONS & WEBHOOK ROUTING LOGIC
+// BENJI HQ FRONTEND WEBHOOK ROUTING & LOGIC (NO NODE.JS REQUIRED)
 // =====================================================================
 
-const MANAGEMENT_WEBHOOK_URL = "https://discord.com/api/webhooks/1518750569509158976/qrPxgKYr4Cw95rrAgVKnICrbVo6CcTop5UJhKT6el1FWCoBGXsUTibPsXJyKkYn3npn7";
-const SELLER_WEBHOOK_URL     = "https://discord.com/api/webhooks/1518747199293358170/98WSV1uVc6ePnPL60r3KQjLLObEV6hxHR0YMiNiX3sDCfbhuc02tgLtSDtFeYWHH0qU6";
-
-const BACKUP_FILE = path.join(__dirname, 'ticket_backup.txt');
-const SALES_LOG_FILE = path.join(__dirname, 'sales_log.txt');
+// Your Webhooks
+const MANAGEMENT_WEBHOOK_URL = "https://discord.com/api/webhooks/1519404043364073513/h8TVIzirZaZ2CEwBYin-SZJ5LhfWgiG7wXdkgTABkwrAu29IF-U_e6pa7OOsfFEDtgsY";
+const SELLER_WEBHOOK_URL     = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
+// Add your private Owner channel webhook here for completed transfers
+const OWNER_WEBHOOK_URL      = "https://discord.com/api/webhooks/1519403176930054329/t0hT6O936JluOaD476NiwyEzseafVFEPH8rUgxVE0wfPKAZAGLCM2aCDzin2TkOrRSpo";
 
 /**
- * Common dispatch handler to pass data streams to Discord instantly,
- * bypassing any offline bot dependencies.
+ * Universal dispatcher using the browser's native fetch API.
  */
 async function sendDiscordAlert(webhookUrl, messagePayload) {
     try {
@@ -34,7 +18,13 @@ async function sendDiscordAlert(webhookUrl, messagePayload) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(messagePayload)
         });
-        return response.ok;
+        if (response.ok) {
+            console.log("Successfully sent to Discord!");
+            return true;
+        } else {
+            console.error("Discord rejected the webhook.");
+            return false;
+        }
     } catch (error) {
         console.error("Critical Webhook Dispatch Failure:", error);
         return false;
@@ -42,8 +32,16 @@ async function sendDiscordAlert(webhookUrl, messagePayload) {
 }
 
 /**
- * 🐟 CODES: W_FISH_01 to W_FISH_20
+ * Helper function to generate a random Ticket ID (e.g. TRN-8A2F)
  */
+function generateTicketId() {
+    return 'TRN-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+}
+
+// =====================================================================
+// RESOURCE TICKETS (FARMERS, FISHERS, GATHERERS)
+// =====================================================================
+
 async function handleFisherSubmission(workerCode, fishCount) {
     const totalPayout = fishCount * 200;
     const embedPayload = {
@@ -62,9 +60,6 @@ async function handleFisherSubmission(workerCode, fishCount) {
     return await sendDiscordAlert(MANAGEMENT_WEBHOOK_URL, embedPayload);
 }
 
-/**
- * 🧂 CODES: W_GATH_01 to W_GATH_20
- */
 async function handleGathererSubmission(workerCode, saltCount) {
     const totalPayout = saltCount * 15;
     const embedPayload = {
@@ -83,9 +78,6 @@ async function handleGathererSubmission(workerCode, saltCount) {
     return await sendDiscordAlert(MANAGEMENT_WEBHOOK_URL, embedPayload);
 }
 
-/**
- * 🧑‍🌾 CODES: W_FARM_01 to W_FARM_20
- */
 async function handleFarmerSubmission(workerCode, cropType, cropCount) {
     const totalPayout = cropCount * 25;
     const embedPayload = {
@@ -104,9 +96,10 @@ async function handleFarmerSubmission(workerCode, cropType, cropCount) {
     return await sendDiscordAlert(MANAGEMENT_WEBHOOK_URL, embedPayload);
 }
 
-/**
- * 💼 BUYER ENGINE INVOICE CALCULATOR
- */
+// =====================================================================
+// SELLER / BUYER ENGINE LOGIC
+// =====================================================================
+
 function processClientInvoiceCalculation(benjiQuantity) {
     let pricePerBenji = 350;
 
@@ -131,34 +124,86 @@ function processClientInvoiceCalculation(benjiQuantity) {
     };
 }
 
-/**
- * 🚨 SELLER ALERT ROUTER
- */
-const embedPayload = {
+async function handleSellerSubmission(clientUsername, benjiQuantity, orderCode) {
+    const calculation = processClientInvoiceCalculation(benjiQuantity);
+
+    const embedPayload = {
         content: "🚨 **NEW ACTIVE BUYER INCOMING** 🚨",
         embeds: [{
             title: "💼 Active Storefront Ticket Dispatched",
-            color: 15167313,
+            color: 0x00ff00,
             fields: [
                 { name: "Customer Username", value: `${clientUsername}`, inline: true },
                 { name: "Quantity Demanded", value: `${benjiQuantity} Benjis`, inline: true },
+                { name: "Order Code", value: `${orderCode}`, inline: true },
                 { name: "Calculated Unit Value Rate", value: `£${calculation.unitRate} each`, inline: true },
-                { name: "Final Invoice Ledger Total", value: `£${calculation.netTotalInvoiceValue.toLocaleString()}`, inline: false },
-                { name: "Bulk Special Status", value: calculation.hasBulkDiscountApplied ? "✅ 10% Total Discount Checked & Deducted" : "No discount" }
-            ]
+                { name: "Final Invoice Ledger Total", value: `£${calculation.netTotalInvoiceValue.toLocaleString()}`, inline: true },
+                { name: "Bulk Special Status", value: calculation.hasBulkDiscountApplied ? "✅ 10% Discount Applied" : "No discount", inline: false }
+            ],
+            footer: { text: "Benji HQ Sales Engine" },
+            timestamp: new Date().toISOString()
         }]
     };
 
-// This is the part of your code that builds the Discord message
-const embedPayload = {
-    embeds: [{
-        title: "New Active Buyer Incoming",
-        color: 0x00ff00, // Green color for a successful order
-        fields: [
-            { name: "Customer Name", value: clientUsername, inline: true },
-            { name: "Order Amount", value: calculation.toString(), inline: true },
-            { name: "Order Code", value: orderCode, inline: true } // This sends your code
-        ],
-        timestamp: new Date()
-    }]
-};
+    return await sendDiscordAlert(SELLER_WEBHOOK_URL, embedPayload);
+}
+
+// =====================================================================
+// LOGISTICS & TRANSFER MANAGER (STEP 1: MANAGER REQUESTS)
+// =====================================================================
+
+async function handleTransferTicket(managerName, origin, destination, itemsTransferred, customMessage, selectedWebhookUrl) {
+    const ticketId = generateTicketId(); // Generates the code you will use in the Owner Panel
+
+    const transferPayload = {
+        content: "🔔 **PENDING OWNER ACTION: WAREHOUSE TRANSFER** 🔔",
+        embeds: [{
+            title: `📦 Transfer Request: ${ticketId}`,
+            color: 16753920, // Orange/Yellow to indicate "Pending"
+            description: `**Manager Note:**\n${customMessage}\n\n*Awaiting Owner approval and in-game loading.*`,
+            fields: [
+                { name: "Authorized By", value: managerName, inline: true },
+                { name: "Item(s) in Transit", value: itemsTransferred, inline: true },
+                { name: "Ticket ID", value: `**${ticketId}**`, inline: true },
+                { name: "From (Origin)", value: origin, inline: true },
+                { name: "To (Destination)", value: destination, inline: true }
+            ],
+            footer: { text: "Benji HQ Multi-Island Logistics System" },
+            timestamp: new Date().toISOString()
+        }]
+    };
+
+    return await sendDiscordAlert(selectedWebhookUrl, transferPayload);
+}
+
+// =====================================================================
+// LOGISTICS & TRANSFER MANAGER (STEP 2: OWNER COMPLETION)
+// =====================================================================
+
+// You will link this to a button on your Owner Panel HTML
+async function handleOwnerTransferComplete(ticketId, ownerNotes) {
+    const completionPayload = {
+        embeds: [{
+            title: `✅ Transfer Complete: ${ticketId}`,
+            color: 0x00ff00, // Green to indicate it's done
+            description: `The owner has successfully loaded the warehouse and completed the deal in-game.\n\n**Owner Notes:**\n${ownerNotes || "No additional notes."}`,
+            fields: [
+                { name: "Status", value: "Fully Loaded & Completed", inline: true },
+                { name: "Ticket ID", value: `**${ticketId}**`, inline: true }
+            ],
+            footer: { text: "Benji HQ Owner Terminal" },
+            timestamp: new Date().toISOString()
+        }]
+    };
+
+    // Sends the completion receipt to your private Owner channel
+    return await sendDiscordAlert(OWNER_WEBHOOK_URL, completionPayload);
+}
+
+// Inside api.js
+app.post('/purchase', async (req, res) => {
+    const { userId, item, price } = req.body;
+    // Here you would run your SQL to update the user's balance
+    // Example: db.run("UPDATE platform_user_profiles SET pounds_balance = ...")
+    res.json({ status: 'success', message: 'Item purchased!' });
+});
