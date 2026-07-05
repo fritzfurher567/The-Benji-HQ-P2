@@ -336,7 +336,7 @@ async function processCredit(action) {
 
     try {
         // 4. Send the data to your Netlify backend
-        const response = await fetch('/.netlify/functions/updateCredits', {
+        const response = await fetch('/.netlify/functions/update-creds', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: username, amount: amount, action: action })
@@ -513,7 +513,7 @@ async function processCredit(action) {
 async function loadTickets() {
     const container = document.getElementById('tickets-container');
     try {
-        const response = await fetch('/.netlify/functions/getTickets');
+        const response = await fetch('/.netlify/functions/get-tickets');
         const tickets = await response.json();
 
         container.innerHTML = tickets.map(t => `
