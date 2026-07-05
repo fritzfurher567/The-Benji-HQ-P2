@@ -1,9 +1,21 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Benji HQ | Owner Administration</title>
-    <style>
+
+
+
+</body>
+
+
+
+<meta charset="UTF-8">
+
+<title>Benji HQ | Owner Administration</title>
+
+<style>
+
         /* --- GLOBAL STYLES --- */
         body { background: #09090b; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; margin: 0; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 900px; }
@@ -119,10 +131,11 @@
     </div>
 
     <!-- SECTION 2: MANUAL CREDIT LOADER (BANKING) -->
+
+    <div id="tab-banking" class="tab-content">
+
     <div class="admin-section">
         <h2>Central Bank Processing</h2>
-        <p class="subtext">Fulfill user "Load Pounds" requests. Manually add credits to an account after collecting physical cash.</p>
-
         <div class="admin-box box-blue">
             <div class="input-row">
                 <div class="input-group">
@@ -130,14 +143,36 @@
                     <input type="text" id="targetUser" placeholder="e.g. PlayerName123">
                 </div>
                 <div class="input-group">
-                    <label>Amount to Load (Pounds)</label>
-                    <input type="number" id="loadAmount" placeholder="e.g. 5000">
+                    <label>Amount</label>
+                    <input type="number" id="loadAmount" placeholder="Amount">
                 </div>
-                <button class="btn btn-blue" onclick="manualLoadCredits()">Execute Deposit</button>
+                <button class="btn btn-blue" onclick="processCredit('add')">Add Pounds</button>
             </div>
-            <div id="bankStatus" class="status-box status-success"></div>
+            <div id="bank-status" class="status-box status-success" style="display:none;"></div>
         </div>
     </div>
+
+    <div class="admin-section">
+        <div class="admin-box box-orange">
+            <h3>Admin: Deduct Credits</h3>
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="deductUser" placeholder="Username...">
+                </div>
+                <div class="input-group">
+                    <label>Amount</label>
+                    <input type="number" id="deductAmount" placeholder="Amount...">
+                </div>
+                <button class="btn" style="background: #ef4444;" onclick="processCredit('deduct')">Deduct Credits</button>
+            </div>
+            <div id="deduct-status" class="status-box" style="display:none; color: #ef4444;">✓ Deduction logged.</div>
+        </div>
+    </div>
+</div>
+
+
+
 
     <!-- SECTION 3: MULTI-ISLAND LOGISTICS TERMINAL -->
     <div class="admin-section">
@@ -161,6 +196,11 @@
     </div>
 
 </div>
+
+<div id="ticket-list" class="admin-box">
+        <h3>Pending Manager Tickets</h3>
+        <div id="tickets-container">Loading tickets...</div>
+    </div>
 
 <script>
     // ==========================================
@@ -279,6 +319,54 @@
         }
     }
 
+    // Function to handle Add or Deduct Pounds
+async function processCredit(action) {
+    // 1. Grab the correct input boxes depending on which button you clicked
+    const username = document.getElementById(action === 'add' ? "targetUser" : "deductUser").value;
+    const amount = parseInt(document.getElementById(action === 'add' ? "loadAmount" : "deductAmount").value);
+
+    // 2. Grab the correct success message box
+    const statusDiv = document.getElementById(action === 'add' ? "bank-status" : "deduct-status");
+
+    // 3. Stop if the boxes are empty
+    if (!username || !amount) {
+        alert("Please enter both a username and an amount.");
+        return;
+    }
+
+    try {
+        // 4. Send the data to your Netlify backend
+        const response = await fetch('/.netlify/functions/updateCredits', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username, amount: amount, action: action })
+        });
+
+        const data = await response.json();
+
+        // 5. Show the success message or an error
+        if (response.ok) {
+            statusDiv.style.display = "block";
+            statusDiv.style.color = action === 'add' ? "#22c55e" : "#ef4444"; // Green for add, red for deduct
+            statusDiv.innerText = `✓ Success: ${amount}p has been ${action === 'add' ? 'added to' : 'deducted from'} ${username}!`;
+
+            // Clear the input boxes
+            document.getElementById(action === 'add' ? "targetUser" : "deductUser").value = "";
+            document.getElementById(action === 'add' ? "loadAmount" : "deductAmount").value = "";
+
+            // Hide the message after 4 seconds
+            setTimeout(() => {
+                statusDiv.style.display = "none";
+            }, 4000);
+        } else {
+            alert("Database Error: " + (data.error || "Could not update user."));
+        }
+    } catch (error) {
+        console.error("Fetch error:", error);
+        alert("Failed to connect to the server.");
+    }
+}
+
     // ==========================================
     // 3. LOGISTICS TRANSFER COMPLETION
     // ==========================================
@@ -330,15 +418,144 @@
         }
     }
 
-    <div className="shop-container" style="margin-top: 20px;">
-        <h3>Admin: Deduct Credits</h3>
-        <input type="text" id="deductUser" placeholder="Username to deduct from..."/>
-        <input type="number" id="deductAmount" placeholder="Amount to deduct..."/>
-        <button className="buy-btn" style="background: #ef4444;" onClick="deductCredits()">Deduct Credits</button>
-        <div id="deduct-status" style="display:none; margin-top:10px; color:#ef4444; font-weight:bold;">✓ Deduction
-            logged.
-        </div>
-    </div>
+    async function deductCredits() {
+        const user = document.getElementById("deductUser").value;
+        const amount = document.getElementById("deductAmount").value;
+        const statusDiv = document.getElementById("deduct-status");
+
+        if (!user || !amount) {
+            alert("Please enter a username and amount.");
+            return;
+        }
+
+        try {
+            // This 'fetch' sends the data to your backend
+            const response = await fetch('/.netlify/functions/deductCredits', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: user, amount: amount})
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                statusDiv.style.display = "block"; // Shows the "Deduction logged" message
+                statusDiv.innerText = `✓ Success: ${amount} deducted from ${user}`;
+                setTimeout(() => {
+                    statusDiv.style.display = "none";
+                }, 3000);
+            } else {
+                throw new Error(result.message || "Failed to deduct");
+            }
+        } catch (error) {
+            alert("Error: " + error.message);
+        }
+    }
+
+    async function addCredits() {
+        const user = document.getElementById("loadUser").value;
+        const amount = document.getElementById("loadAmount").value;
+        const statusDiv = document.getElementById("load-status");
+
+        if (!user || !amount) return alert("Enter both username and amount.");
+
+        try {
+            const response = await fetch('/.netlify/functions/addCredits', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: user, amount: amount})
+            });
+
+            if (response.ok) {
+                statusDiv.style.display = "block";
+                statusDiv.innerText = `✓ Added ${amount}p to ${user}`;
+                setTimeout(() => {
+                    statusDiv.style.display = "none";
+                }, 3000);
+            } else {
+                alert("Database Error: Could not add credits.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Connection failed.");
+        }
+    }
+
+    async function processCredit(action) {
+        // Get values based on the button clicked
+        const user = document.getElementById(action === 'add' ? "targetUser" : "deductUser").value;
+        const amount = document.getElementById(action === 'add' ? "loadAmount" : "deductAmount").value;
+        const statusDiv = document.getElementById(action === 'add' ? "bank-status" : "deduct-status");
+
+        if (!user || !amount) return alert("Please enter both a username and an amount.");
+
+        try {
+            const response = await fetch('/.netlify/functions/updateCredits', {
+                method: 'POST',
+                body: JSON.stringify({username: user, amount: amount, action: action})
+            });
+
+            if (response.ok) {
+                statusDiv.style.display = "block";
+                statusDiv.innerText = `✓ Successfully updated ${user}'s balance!`;
+                setTimeout(() => {
+                    statusDiv.style.display = "none";
+                }, 3000);
+            } else {
+                alert("Database transaction failed.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Could not connect to server.");
+        }
+    }
+
+async function loadTickets() {
+    const container = document.getElementById('tickets-container');
+    try {
+        const response = await fetch('/.netlify/functions/getTickets');
+        const tickets = await response.json();
+
+        container.innerHTML = tickets.map(t => `
+            <div class="ticket-item" onclick="selectTicket('${t.ticket_id}')">
+                <strong>${t.ticket_id}</strong> - ${t.manager_name}
+            </div>
+        `).join('');
+    } catch (err) {
+        container.innerText = "Failed to load tickets.";
+    }
+}
+
+// Select a ticket and fill in the input box automatically
+function selectTicket(id) {
+    document.getElementById('ticket-id').value = id;
+    alert("Ticket " + id + " selected!");
+}
+
+// Run this when the page loads
+loadTickets();
+
+
+async function addPounds() {
+    const user = document.getElementById("targetUser").value;
+    const amount = document.getElementById("loadAmount").value;
+
+    try {
+        const response = await fetch('/.netlify/functions/updateCredits', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, amount: amount, action: 'add' })
+        });
+
+        if (response.ok) {
+            alert("Added!");
+        } else {
+            alert("Error: Function not found. Are you using 'netlify dev'?");
+        }
+    } catch (err) {
+        alert("Connection failed.");
+    }
+}
 
 </script>
 </body>

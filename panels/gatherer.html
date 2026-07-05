@@ -2,354 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Benji HQ | Gatherer Terminal</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        body {
-            background: #0b0c0e;
-            color: #e5e7eb;
-            padding: 40px;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-        .wrapper {
-            width: 100%;
-            max-width: 500px;
-            background: #141619;
-            border: 1px solid #27272a;
-            border-top: 4px solid #eab308; /* Harvest Gold */
-            border-radius: 8px;
-            padding: 32px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .header {
-            border-bottom: 1px solid #27272a;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-        }
-        h2 {
-            font-size: 22px;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: #a1a1aa;
-        }
+        /* --- GLOBAL STYLES --- */
+        body { background: #09090b; color: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; display: flex; }
 
-        /* 3-Way Action Toggle Grid */
-        .action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-        .action-option { display: none; }
-        .action-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #0b0c0e;
-            border: 1px solid #3f3f46;
-            color: #a1a1aa;
-            text-align: center;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 11px;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            height: 100%;
-        }
-        .action-label:hover {
-            border-color: #71717a;
-            color: #fff;
-        }
-        .action-option:checked + .action-label {
-            background: rgba(234, 179, 8, 0.1);
-            border-color: #eab308;
-            color: #eab308;
-            box-shadow: inset 0 0 0 1px #eab308;
-        }
+        /* --- TOP NAV (LOGO) --- */
+        .top-navbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: #0a0a0a; border-bottom: 2px solid #f97316; display: flex; align-items: center; padding: 0 30px; z-index: 1000; }
+        .logo-text { color: white; font-weight: 900; font-size: 1.4rem; letter-spacing: 1px; }
 
-        .form-group { margin-bottom: 20px; }
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            color: #eab308;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            letter-spacing: 0.5px;
-        }
-        input[type="text"], input[type="number"], select, textarea {
-            width: 100%;
-            background: #0b0c0e;
-            border: 1px solid #3f3f46;
-            color: #fff;
-            padding: 14px;
-            border-radius: 4px;
-            font-size: 15px;
-            transition: border-color 0.2s;
-            appearance: none;
-        }
-        textarea { resize: vertical; min-height: 80px; }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #eab308;
-            box-shadow: 0 0 0 1px #eab308;
-        }
+        /* --- LEFT SIDEBAR --- */
+        .sidebar { position: fixed; top: 70px; left: 0; width: 250px; height: calc(100vh - 70px); background: #141619; border-right: 1px solid #27272a; padding: 20px; }
+        .nav-item { display: block; padding: 15px; color: #a1a1aa; text-decoration: none; font-weight: bold; border-radius: 4px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .nav-item:hover { background: #18181b; color: #fff; border-color: #3f3f46; }
+        .nav-item.active { background: #f97316; color: #000; }
 
-        .calc-view {
-            background: rgba(234, 179, 8, 0.05);
-            padding: 16px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            font-weight: 600;
-            border: 1px solid rgba(234, 179, 8, 0.2);
-            color: #d4d4d8;
-        }
-        .payout-amount {
-            color: #eab308;
-            font-size: 20px;
-            font-weight: 700;
-        }
-        .dispatch-btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 4px;
-            background: #eab308;
-            color: #000000;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .dispatch-btn:hover { background: #ca8a04; color: #ffffff; }
-        .dispatch-btn:disabled { background: #3f3f46; color: #a1a1aa; cursor: not-allowed; }
+        /* --- MAIN CONTENT --- */
+        .main-content { margin-top: 70px; margin-left: 250px; padding: 40px; width: 100%; max-width: 800px; }
+        .admin-box { background: #141619; border: 1px solid #27272a; padding: 25px; border-radius: 8px; margin-bottom: 20px; }
 
-        #statusMessage {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 14px;
-            padding: 16px;
-            border-radius: 4px;
-            display: none;
-            font-weight: 600;
-        }
-        .success {
-            background: rgba(234, 179, 8, 0.1);
-            color: #eab308;
-            border: 1px solid rgba(234, 179, 8, 0.2);
-        }
-        .error {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-        .transfer-code {
-            font-family: monospace;
-            background: #000;
-            padding: 6px 12px;
-            border-radius: 4px;
-            color: #eab308;
-            letter-spacing: 2px;
-            font-size: 18px;
-            display: inline-block;
-            margin-top: 12px;
-            border: 1px solid #eab308;
-        }
+        /* --- INPUTS & BUTTONS --- */
+        label { display: block; font-size: 11px; font-weight: bold; color: #f97316; margin-bottom: 8px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; background: #0b0c0e; border: 1px solid #3f3f46; color: white; border-radius: 4px; margin-bottom: 15px; }
+        .btn { background: #f97316; color: #000; padding: 12px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn:hover { background: #ea580c; color: white; }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="header">
-            <h2>Gatherer Terminal</h2>
-            <div class="subtitle">Log inventory, issue transfers, or access the Butter Market.</div>
-        </div>
 
-        <div class="action-grid">
-            <input type="radio" name="actionType" id="modeStock" value="Stock" checked onchange="updateUIText()">
-            <label for="modeStock" class="action-label">Update Stock<br>(No Ticket)</label>
+    <header class="top-navbar">
+        <div class="logo-text">THE BENJI HQ</div>
+    </header>
 
-            <input type="radio" name="actionType" id="modeTransfer" value="Transfer" onchange="updateUIText()">
-            <label for="modeTransfer" class="action-label">Transfer To<br>Manager</label>
+    <nav class="sidebar">
+        <div class="nav-item active" onclick="showSection('transfer')">Transfer To Manager</div>
+        <div class="nav-item" onclick="showSection('stock')">Update Stock</div>
+        <div class="nav-item" onclick="showSection('market')">Buy Butter</div>
+        <a href="index.html" class="nav-item" style="color: #ef4444;">Logout</a>
+    </nav>
 
-            <input type="radio" name="actionType" id="modeMarket" value="Market" onchange="updateUIText()">
-            <label for="modeMarket" class="action-label">Buy Butter<br>(Market)</label>
-        </div>
-
-        <div class="form-group">
-            <label for="gathererName">Gatherer Identification</label>
-            <input type="text" id="gathererName" placeholder="Enter your username..." required>
-        </div>
-
-        <div class="form-group">
-            <label>Item Selection</label>
-            <select id="itemType" onchange="calculateValue()">
-                <option value="Salt">🧂 Salt (15p/unit)</option>
-                <option value="Pastry Dough">🥐 Pastry Dough (15p/unit)</option>
-                <option value="Butter" id="butterOption" style="display:none;">🧈 Butter (50p/unit)</option>
+    <main class="main-content">
+        <div id="section-transfer" class="admin-box">
+            <h2>Transfer To Manager</h2>
+            <label>Item</label>
+            <select id="transfer-item">
+                <option value="Salt">Salt (Sell at 15p)</option>
+                <option value="Pastry Dough">Pastry Dough (Sell at 50p)</option>
             </select>
-        </div>
-
-        <div class="form-group">
             <label>Quantity</label>
-            <input type="number" id="itemCount" min="1" placeholder="Enter amount..." oninput="calculateValue()">
+            <input type="number" id="transfer-qty" placeholder="0">
+            <button class="btn" onclick="processAction('transfer')">Submit Transfer</button>
         </div>
 
-        <div class="calc-view">
-            <span id="calcLabel">Estimated Compensation</span>
-            <span class="payout-amount" id="payoutDisplay">0p</span>
+        <div id="section-stock" class="admin-box" style="display:none;">
+            <h2>Update/View Stock</h2>
+            <p>Current Inventory:</p>
+            <ul>
+                <li>Salt: <span id="stock-salt">0</span></li>
+                <li>Butter: <span id="stock-butter">0</span></li>
+                <li>Pastry Dough: <span id="stock-dough">0</span></li>
+            </ul>
         </div>
 
-        <button class="dispatch-btn" id="dispatchBtn" onclick="submitGathererTicket()">Update Personal Stock</button>
-        <div id="statusMessage"></div>
-    </div>
+        <div id="section-market" class="admin-box" style="display:none;">
+            <h2>Buy Butter (20p/unit)</h2>
+            <label>Quantity</label>
+            <input type="number" id="market-qty" placeholder="0">
+            <button class="btn" onclick="processAction('market')">Purchase</button>
+        </div>
+    </main>
 
     <script>
-        // Changes UI depending on Stock, Transfer, or Market mode
-        function updateUIText() {
-            const mode = document.querySelector('input[name="actionType"]:checked').value;
-            const btn = document.getElementById('dispatchBtn');
-            const calcLabel = document.getElementById('calcLabel');
-            const itemSelect = document.getElementById('itemType');
-            const butterOption = document.getElementById('butterOption');
+    // 1. ADD YOUR SHARED WEBHOOK HERE
+    const SHARED_WEBHOOK_URL = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
 
-            if (mode === "Market") {
-                btn.innerText = "SUBMIT MARKET ORDER";
-                calcLabel.innerText = "Total Order Cost";
-                // Lock selection to Butter
-                butterOption.style.display = "block";
-                itemSelect.value = "Butter";
-                itemSelect.disabled = true;
-            } else if (mode === "Transfer") {
-                btn.innerText = "GENERATE TRANSFER TICKET";
-                calcLabel.innerText = "Estimated Compensation";
-                // Restore normal items
-                butterOption.style.display = "none";
-                itemSelect.disabled = false;
-                if (itemSelect.value === "Butter") itemSelect.value = "Salt";
-            } else { // Stock mode
-                btn.innerText = "UPDATE PERSONAL STOCK";
-                calcLabel.innerText = "Total Stock Value";
-                butterOption.style.display = "none";
-                itemSelect.disabled = false;
-                if (itemSelect.value === "Butter") itemSelect.value = "Salt";
-            }
-            calculateValue();
+    // Navigation Toggle
+    function showSection(id) {
+        document.querySelectorAll('.admin-box').forEach(b => b.style.display = 'none');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('section-' + id).style.display = 'block';
+        event.currentTarget.classList.add('active');
+    }
+
+    // Shared Function to send to Discord
+    async function sendToDiscord(title, fields) {
+        const payload = {
+            embeds: [{
+                title: title,
+                color: 16345622, // Orange color
+                fields: fields,
+                footer: { text: "Benji HQ | Staff Terminal" },
+                timestamp: new Date().toISOString()
+            }]
+        };
+
+        try {
+            await fetch(SHARED_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            alert("Action logged successfully!");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to send to Discord.");
         }
+    }
 
-        // Calculates pricing (15p for gathered goods, 50p cost for butter)
-        function calculateValue() {
-            const count = parseInt(document.getElementById('itemCount').value) || 0;
-            const item = document.getElementById('itemType').value;
-            let price = (item === "Butter") ? 50 : 15;
-
-            document.getElementById('payoutDisplay').innerText = (count * price).toLocaleString() + 'p';
+    // Processing Actions
+    async function processAction(type) {
+        if (type === 'transfer') {
+            const item = document.getElementById('transfer-item').value;
+            const qty = document.getElementById('transfer-qty').value;
+            sendToDiscord("📦 New Transfer Request", [
+                { name: "Item", value: item, inline: true },
+                { name: "Quantity", value: qty, inline: true }
+            ]);
         }
-
-        function generateTrackingCode() {
-            return 'GTH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        else if (type === 'market') {
+            const qty = document.getElementById('market-qty').value;
+            sendToDiscord("🧈 New Market Order", [
+                { name: "Item", value: "Butter", inline: true },
+                { name: "Quantity", value: qty, inline: true },
+                { name: "Total Cost", value: (qty * 20) + "p", inline: true }
+            ]);
         }
-
-        async function submitGathererTicket() {
-            const btn = document.getElementById('dispatchBtn');
-            const statusBox = document.getElementById('statusMessage');
-
-            const mode = document.querySelector('input[name="actionType"]:checked').value;
-            const gathererName = document.getElementById('gathererName').value.trim();
-            const itemType = document.getElementById('itemType').value;
-            const count = parseInt(document.getElementById('itemCount').value);
-
-            if (!gathererName) return alert("Please enter your Gatherer Identification.");
-            if (!count || count <= 0) return alert("Please enter a valid quantity.");
-
-            // 1. If it's just a stock update, no ticket/Discord message is needed.
-            if (mode === "Stock") {
-                statusBox.className = "success";
-                statusBox.innerHTML = `✓ Personal Stock Updated Internally.<br>(No manager ticket generated)`;
-                statusBox.style.display = "block";
-                document.getElementById('itemCount').value = '';
-                calculateValue();
-                return; // Stop here, don't hit the Discord webhook
-            }
-
-            // 2. If it is a Transfer or Market order, generate a ticket and send to Discord
-            const uniqueCode = generateTrackingCode();
-            const totalValue = document.getElementById('payoutDisplay').innerText;
-
-            btn.disabled = true;
-            btn.innerText = "TRANSMITTING...";
-            statusBox.style.display = "none";
-
-            // Base Payload
-            const payloadData = {
-                actionType: mode === "Market" ? "Market Order (Butter)" : "Gatherer Transfer",
-                submittedBy: gathererName,
-                item: itemType,
-                batchQuantity: count + " Units",
-                transactionValue: totalValue,
-                trackingCode: uniqueCode
-            };
-
-            // ADD THE BUTTER WEBHOOK URL HERE
-            if (mode === "Market") {
-                // REPLACE THE STRING BELOW WITH YOUR UNIQUE MARKET WEBHOOK
-                payloadData.webhookUrl = "YOUR_BUTTER_WEBHOOK_URL_GOES_HERE";
-            }
-
-            try {
-                const response = await fetch('/.netlify/functions/notify-discord', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payloadData)
-                });
-
-                if (response.ok) {
-                    statusBox.className = "success";
-                    let successMsg = mode === "Market"
-                        ? `✓ Market Order Placed.<br>Your order receipt code:`
-                        : `✓ Transfer Request Sent.<br>Give this code to the manager:`;
-
-                    statusBox.innerHTML = `
-                        ${successMsg}<br>
-                        <span class="transfer-code">${uniqueCode}</span>
-                    `;
-                    statusBox.style.display = "block";
-
-                    document.getElementById('itemCount').value = '';
-                    calculateValue();
-                } else {
-                    throw new Error("Server response failed.");
-                }
-
-            } catch (error) {
-                console.error("Transmission Error:", error);
-                statusBox.className = "error";
-                statusBox.innerText = "✗ Transmission Failed. Please try again.";
-                statusBox.style.display = "block";
-            } finally {
-                btn.disabled = false;
-                updateUIText();
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
