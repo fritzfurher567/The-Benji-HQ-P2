@@ -45,3 +45,7 @@ body {
   z-index: 20;
   box-shadow: 0 0 15px rgba(220, 38, 38, 0.3);
 }
+
+html {
+  font-size: 110%; /* Increase this number to make the whole site scale up */
+}
