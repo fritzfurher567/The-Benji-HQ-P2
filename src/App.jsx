@@ -132,7 +132,7 @@ export default function App() {
     let updatedOrders = [...orders, newOrder];
 
     try {
-      const res = await fetch('/.netlify/functions/notify-discord', {
+      const res = await fetch('http://localhost:3000/api/notify-discord', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: 1 })
@@ -156,7 +156,7 @@ export default function App() {
     const workingQueue = orders.map(async (order) => {
       if (order.status === 'pending') {
         try {
-          const res = await fetch('/.netlify/functions/notify-discord', {
+          const res = await fetch('http://localhost:3000/api/notify-discord', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ quantity: 1 })
@@ -188,7 +188,7 @@ export default function App() {
     setGeneratedTicket(tkn);
 
     try {
-      await fetch('/.netlify/functions/notify-discord', {
+      await fetch('http://localhost:3000/api/notify-discord', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: tkn })
@@ -728,7 +728,7 @@ export default function App() {
                         setTransferTickets(prev => [...prev, newTransfer]);
 
                         try {
-                          await fetch('/.netlify/functions/notify-discord', {
+                          await ('http://localhost:3000/api/notify-discord', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ quantity: tkt })

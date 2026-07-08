@@ -430,7 +430,7 @@ async function processCredit(action) {
 
         try {
             // This 'fetch' sends the data to your backend
-            const response = await fetch('/.netlify/functions/deductCredits', {
+            const response = await ('http://localhost:3000/api/deduct-creds', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({username: user, amount: amount})
@@ -460,7 +460,7 @@ async function processCredit(action) {
         if (!user || !amount) return alert("Enter both username and amount.");
 
         try {
-            const response = await fetch('/.netlify/functions/addCredits', {
+            const response = await ('http://localhost:3000/api/addpounds', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({username: user, amount: amount})
@@ -490,7 +490,7 @@ async function processCredit(action) {
         if (!user || !amount) return alert("Please enter both a username and an amount.");
 
         try {
-            const response = await fetch('/.netlify/functions/updateCredits', {
+            const response = await ('http://localhost:3000/api/updateCredits', {
                 method: 'POST',
                 body: JSON.stringify({username: user, amount: amount, action: action})
             });
@@ -513,7 +513,7 @@ async function processCredit(action) {
 async function loadTickets() {
     const container = document.getElementById('tickets-container');
     try {
-        const response = await fetch('/.netlify/functions/get-tickets');
+        const response = await fetch('http://localhost:3000/api/get-tickets');
         const tickets = await response.json();
 
         container.innerHTML = tickets.map(t => `
@@ -541,7 +541,7 @@ async function addPounds() {
     const amount = document.getElementById("loadAmount").value;
 
     try {
-        const response = await fetch('/.netlify/functions/updateCredits', {
+        const response = await fetch('http://localhost:3000/api/updateCredits', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: user, amount: amount, action: 'add' })

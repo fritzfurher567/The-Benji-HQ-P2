@@ -2,10 +2,10 @@ const { createClient } = require("@libsql/client");
 
 exports.handler = async (event) => {
     // We are now receiving 'targetUsername' instead of 'targetId'
-    const { targetUsername, amount, adminPassword } = JSON.parse(event.body);
+    const {targetUsername, amount, adminPassword} = JSON.parse(event.body);
 
     if (adminPassword !== process.env.ADMIN_PASSWORD) {
-        return { statusCode: 403, body: JSON.stringify({ message: "Access denied. Owner only!" }) };
+        return {statusCode: 403, body: JSON.stringify({message: "Access denied. Owner only!"})};
     }
 
     const db = createClient({
@@ -24,18 +24,18 @@ exports.handler = async (event) => {
         if (result.rowsAffected === 0) {
             return {
                 statusCode: 404,
-                body: JSON.stringify({ message: `User '${targetUsername}' not found in database.` })
+                body: JSON.stringify({message: `User '${targetUsername}' not found in database.`})
             };
         }
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: `Successfully added ${amount} pounds!` })
+            body: JSON.stringify({message: `Successfully added ${amount} pounds!`})
         };
     } catch (error) {
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: "Database connection error." })
+            body: JSON.stringify({message: "Database connection error."})
         };
     }
-};
+}

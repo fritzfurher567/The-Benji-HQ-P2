@@ -220,7 +220,7 @@
             };
 
             try {
-                const response = await fetch('/.netlify/functions/notify-discord', {
+                const response = await ('http://localhost:3000/api/notify-discord', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadData)

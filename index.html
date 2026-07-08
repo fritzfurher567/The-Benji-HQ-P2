@@ -85,18 +85,20 @@
 </head>
 <body>
 
-    <div class="sidebar">
+
+
+  <div class="sidebar">
         <div class="logo">
             <div class="logo-the">The</div>
             <div class="logo-benji">Benji</div>
             <div class="logo-hq">HQ</div>
         </div>
+
         <div class="nav-menu">
             <button class="nav-btn active" onclick="switchNav('view-hub', this)">🛒 Buy Benjis</button>
             <button class="nav-btn" onclick="switchNav('view-banking', this)">💰 Load Pounds (Bank)</button>
             <button class="nav-btn" onclick="switchNav('view-profile', this)">👤 My Orders</button>
         </div>
-
 
 
         <div class="employee-section" id="customer-profile-section" style="display: none; background: rgba(249, 115, 22, 0.05); border-top: 1px solid #f97316;">
@@ -117,9 +119,7 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="main-content">
+    </div> <div class="main-content">
 
         <div id="view-hub" class="view-section active">
             <div class="hub-header">
@@ -155,7 +155,7 @@
                 <span class="tip-text">Fixed point amount, no math required.</span>
 
                 <label>Client Username</label>
-                <input type="text" id="username" placeholder="Your Discord Username...">
+                <input type="text" id="username" placeholder="Your Roblox Username And Northwind Username...">
 
                 <div class="total-display">
                     <span style="font-weight:bold; color:#a1a1aa;">Total Due:</span>
@@ -181,58 +181,73 @@
             </div>
         </div>
 
+
         <div id="view-banking" class="view-section">
-            <div class="shop-container" style="max-width: 600px;">
-                <h2>Load Pounds (Credits)</h2>
-                <p style="color: #a1a1aa; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
-                    Submit a request to load pounds into your account. The owner will review your ticket and assign a meeting location to collect the physical cash. Once verified, credits will be added to your profile.
-                </p>
-
-                <label>Your Username</label>
-                <input type="text" id="bankUsername" placeholder="Enter your Discord Username...">
-
-                <label>Amount to Load (Pounds)</label>
-                <input type="number" id="loadAmount" placeholder="e.g. 5000" min="100">
-
-                <button class="buy-btn" id="loadBtn" onclick="submitPoundRequest()">Request Deposit</button>
-
-                <div id="bank-status" style="display:none; margin-top: 20px; padding: 15px; background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; color: #22c55e; border-radius: 6px; text-align: center; font-weight: bold;">
-                    ✓ Deposit Ticket Sent! Please wait for the owner to contact you with a meeting place.
-                </div>
+            <div style="display: flex; align-items: center; justify-content: center; height: 70vh; flex-direction: column; text-align: center;">
+                <div style="font-size: 5rem; font-weight: 900; color: #ffffff; margin-bottom: 20px; text-shadow: 0 0 10px #ff6b00, 0 0 20px #ff6b00, 0 0 40px #ff6b00, 0 0 80px #ff6b00;">BENJI HQ</div>
+                <div style="font-size: 2rem; font-weight: bold; color: #ff6b00; background-color: rgba(255, 107, 0, 0.1); border: 3px dashed #ff6b00; padding: 20px 40px; border-radius: 12px; animation: pulse 2s infinite;">⚠️ THIS TAB IS STILL BEING CODED ⚠️</div>
+                <p style="margin-top: 20px; font-size: 1.2rem; color: #9ca3af;">The Load Pounds feature is currently under construction. Check back later!</p>
+                <style>
+                    @keyframes pulse {
+                        0% { opacity: 1; box-shadow: 0 0 10px rgba(255,107,0,0.2); }
+                        50% { opacity: 0.6; box-shadow: 0 0 0px rgba(255,107,0,0); }
+                        100% { opacity: 1; box-shadow: 0 0 10px rgba(255,107,0,0.2); }
+                    }
+                </style>
             </div>
         </div>
+    </div>
 
+<!-- 3. MY ORDERS / PROFILE TAB -->
         <div id="view-profile" class="view-section">
+            <div class="hub-header">
+                <div class="welcome-badge">Client Portal</div>
+                <h1 class="hq-title">MY DASHBOARD</h1>
+            </div>
+
             <div class="profile-card">
                 <div class="credit-balance">
                     <div>
-                        <h3>My Account Balance</h3>
-                        <span style="font-size:12px; color:#a1a1aa;">Pre-loaded Credits</span>
+                        <h3>Available Benji Credits</h3>
+                        <p style="color: #a1a1aa; font-size: 12px; margin-top: 4px;">Used for quick checkout</p>
                     </div>
-                    <div class="credit-amount">0p</div>
+                    <div class="credit-amount" id="profile-balance">0p</div>
                 </div>
 
-                <h2 style="color: #fff; margin-bottom: 5px;">My Order History</h2>
-                <p style="color: #a1a1aa; margin-bottom: 20px;">Track your recent Benji purchases.</p>
-                <table id="ordersTable">
-                    <thead><tr><th>Order ID</th><th>Package</th><th>Method</th><th>Status</th></tr></thead>
-                    <tbody>
-                        <tr><td colspan="4" style="text-align:center;">No recent orders. Head to the shop!</td></tr>
+                <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;">Recent Orders</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order Code</th>
+                            <th>Items</th>
+                            <th>Total Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-history-table">
+                        <!-- Javascript will inject the remembered orders right here! -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-    </div>
 
     <script>
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
 
-        // Our database of user balances
-        const userBalances = {
+// Load balances and orders from LocalStorage so the browser remembers!
+        let userBalances = JSON.parse(localStorage.getItem('benji_balances')) || {
             "TestUser": 1000,
-            "test": 20000 // Added some funds for testing based on your screenshot!
+            "test": 20000
         };
+
+        let userOrders = JSON.parse(localStorage.getItem('benji_orders')) || {};
+
+        // Helper function to save updates to the memory
+        function saveToDatabase() {
+            localStorage.setItem('benji_balances', JSON.stringify(userBalances));
+            localStorage.setItem('benji_orders', JSON.stringify(userOrders));
+        }
 
         // NEW GLOBAL VARIABLE FOR LOGIN
         let currentUser = null;
@@ -271,37 +286,72 @@
 
             updateBalanceDisplay();
         }
+window.onload = () => {
+            const fragment = new URLSearchParams(window.location.hash.slice(1));
+            const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
 
-        function logoutCustomer() {
-            currentUser = null;
+            // If there's no token, stop here (the login gate stays visible)
+            if (!accessToken) return;
 
-            // Swap UI in sidebar
-            document.getElementById('customer-login-section').style.display = 'block';
-            document.getElementById('customer-profile-section').style.display = 'none';
-            document.getElementById('customerUsername').value = '';
+            // Hide the login gate since we have a token!
+            document.getElementById('login-gate').style.display = 'none';
 
-            // Unlock and clear checkout box
-            const checkoutUser = document.getElementById('username');
-            checkoutUser.value = '';
-            checkoutUser.disabled = false;
-            checkoutUser.style.opacity = "1";
+            // Fetch the user's info from Discord
+            fetch('https://discord.com/api/users/@me', {
+                headers: { authorization: `${tokenType} ${accessToken}` }
+            })
+            .then(result => result.json())
+            .then(response => {
+                const { username } = response;
 
-            // Unlock and clear banking box
-            const bankUser = document.getElementById('bankUsername');
-            bankUser.value = '';
-            bankUser.disabled = false;
-            bankUser.style.opacity = "1";
+                // Set our global user variable
+                currentUser = username;
 
-            // Reset Profile page display
-            document.querySelector('.credit-amount').innerText = "0p";
-        }
+                // Give them a starting balance if they are new
+                if (userBalances[currentUser] === undefined) {
+                    userBalances[currentUser] = 0;
+                }
 
-        function updateBalanceDisplay() {
-            if (currentUser) {
-                const bal = userBalances[currentUser];
-                document.getElementById('logged-in-balance').innerText = bal.toLocaleString();
-                document.querySelector('.credit-amount').innerText = bal.toLocaleString() + "p";
+                // Show their profile in the sidebar
+                document.getElementById('customer-profile-section').style.display = 'block';
+                document.getElementById('logged-in-username').innerText = currentUser;
+                updateBalanceDisplay();
+
+                // Auto-fill and lock the checkout username box
+                const checkoutUser = document.getElementById('username');
+                checkoutUser.value = currentUser;
+                checkoutUser.disabled = true;
+                checkoutUser.style.opacity = "0.5";
+
+                // Clean the URL so the messy token disappears
+                window.history.replaceState({}, document.title, window.location.pathname);
+            })
+            .catch(console.error);
+        };
+                //Table Builder Function//
+        function renderOrderHistory() {
+            const tbody = document.getElementById('order-history-table');
+            if (!tbody) return;
+
+            tbody.innerHTML = ""; // Clear out the old table
+
+            // If no orders exist, tell them
+            if (!currentUser || !userOrders[currentUser] || userOrders[currentUser].length === 0) {
+                tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No orders found.</td></tr>";
+                return;
             }
+
+            // Loop through remembered orders and build the table
+            userOrders[currentUser].forEach(order => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="color: #f4f4f5;">${order.code}</td>
+                    <td>${order.qty}x Benjis</td>
+                    <td style="color: #f97316; font-weight: bold;">${order.total.toLocaleString()}p</td>
+                    <td><span style="background: rgba(249,115,22,0.1); color: #f97316; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${order.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
 
@@ -373,10 +423,17 @@
                     return;
                 }
 
-                // Deduct from balance
-                userBalances[currentUser] -= orderData.total;
-                updateBalanceDisplay(); // Update the visual numbers immediately
+               function updateBalanceDisplay() {
+            if (currentUser) {
+                const bal = userBalances[currentUser];
+                // Update sidebar
+                document.getElementById('logged-in-balance').innerText = bal.toLocaleString();
+
+                // Update dashboard
+                const profileBal = document.getElementById('profile-balance');
+                if (profileBal) profileBal.innerText = bal.toLocaleString() + "p";
             }
+        }
 
             btn.disabled = true;
             btn.innerText = "PROCESSING...";
@@ -384,7 +441,7 @@
             const payload = {
                 embeds: [{
                     title: "🛒 New Storefront Sale",
-                    color: 0xfacc15,
+                    color:  0xFFA500,
                     fields: [
                         {name: "Customer", value: username, inline: true},
                         {name: "Order Code", value: orderCode, inline: true},
@@ -500,6 +557,43 @@
         window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
     });
 };
+
+  function attemptLogin() {
+    // 1. Grab the code from the 'empCode' input box
+    let enteredCode = document.getElementById("empCode").value;
+
+    // 2. Route the Owner exactly
+    if (enteredCode === "W_DIST-1_nicho") {
+      window.location.href = "panels/owner.html";
+
+    }
+    // 3. Route staff using .startsWith() to catch all 20 codes per role
+    else if (enteredCode.startsWith("W_MGMT_")) {
+      window.location.href = "panels/manager.html";
+
+    } else if (enteredCode.startsWith("W_SELL_")) {
+      window.location.href = "panels/seller.html";
+
+    } else if (enteredCode.startsWith("W_CHEF_")) {
+      window.location.href = "panels/chef.html";
+
+    } else if (enteredCode.startsWith("W_FISH_")) {
+      window.location.href = "panels/fisher.html";
+
+    } else if (enteredCode.startsWith("W_GATH_")) {
+      window.location.href = "panels/gatherer.html";
+
+    } else if (enteredCode.startsWith("W_FARM_")) {
+      window.location.href = "panels/farmer.html";
+
+    }
+    // 4. Reject invalid codes
+    else {
+      alert("Invalid code! Please check your roster code and try again.");
+    }
+  }}
+
+    
 
 
 
