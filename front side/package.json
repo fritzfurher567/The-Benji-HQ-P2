@@ -1,0 +1,12 @@
+{
+  "name": "the-benji-hq",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node ../netlify/functions/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "@libsql/client": "^0.6.0",
+    "dotenv": "^16.4.5"
+  }
+}

@@ -2,92 +2,282 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Seller Ticket Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benji HQ | Seller Panel</title>
     <style>
-        body { background: #0b0c0e; color: #f0f2f5; font-family: sans-serif; padding: 40px; }
-        .wrapper { max-width: 500px; margin: 0 auto; background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; }
-        h2 { font-size: 20px; color: #ffffff; margin-bottom: 20px; border-bottom: 1px solid #22252a; padding-bottom: 10px; }
-        label { font-size: 14px; color: #a0a5b0; margin-bottom: 5px; display: block; }
-        input, select { width: 100%; padding: 12px; background: #0b0c0e; border: 1px solid #2c3036; color: #ffffff; border-radius: 4px; margin-bottom: 15px; }
-        .action-btn { width: 100%; padding: 14px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; }
-        .btn-done { background: #28a745; color: white; }
-        .btn-done:hover { background: #218838; }
+        /* --- EXACT GLOBAL STYLES FROM INDEX.HTML --- */
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: #09090b; color: #f4f4f5; display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR STYLES --- */
+        .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; display: flex; flex-direction: column; padding: 24px 0; z-index: 10; overflow-y: auto;}
+
+        .logo { padding: 0 24px; margin-bottom: 32px; display: flex; justify-content: center; align-items: center; }
+        .logo img { max-width: 140px; height: auto; display: block; }
+
+        .nav-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex-grow: 1; }
+        .nav-btn { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+        .nav-btn:hover { background: #27272a; color: #fff; }
+        .nav-btn.active { background: #27272a; color: #f97316; }
+
+        .employee-section { padding: 20px 16px; border-top: 1px solid #27272a; }
+        .login-box { display: flex; gap: 8px; flex-direction: column;}
+        .login-label {font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
+
+        /* --- MAIN CONTENT & VIEWS --- */
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .view-section { display: none; width: 100%; max-width: 1100px; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- THE BENJI HQ HUB DESIGN --- */
+        .hub-header { text-align: center; margin-top: 20px; margin-bottom: 30px; }
+        .welcome-badge { display: inline-block; border: 1px solid #f97316; color: #f97316; padding: 4px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase;}
+        .hq-title { font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px; margin-bottom: 16px; text-shadow: 0 0 30px rgba(249, 115, 22, 0.4); text-transform: uppercase; }
+        .hq-subtext { color: #a1a1aa; font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+
+        /* --- PROFILE / TABLE STYLES --- */
+        .profile-card { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; margin-bottom: 20px; width: 100%; overflow-x: auto;}
+        table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 6px; overflow: hidden; margin-top: 10px;}
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; white-space: nowrap;}
+        th { color: #f97316; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;}
+
+        /* Meetup Input Box */
+        .meetup-input { width: 160px; padding: 8px 10px; background: #09090b; border: 1px solid #27272a; color: #ffffff; border-radius: 4px; outline: none; transition: 0.2s; font-size: 13px;}
+        .meetup-input:focus { border-color: #f97316;}
+
+        /* Status Dropdown */
+        .status-dropdown {
+            background: #09090b;
+            color: #f4f4f5;
+            border: 1px solid #27272a;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+            width: 100%;
+            max-width: 160px;
+        }
+        .status-dropdown:focus { border-color: #f97316; }
+        .status-dropdown option { background: #18181b; color: #f4f4f5; font-weight: normal; }
+
+        .stock-number { text-align: center; font-size: 100px; font-weight: 900; color: #f97316; text-shadow: 0 0 40px rgba(249, 115, 22, 0.4); margin: 30px 0; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <h2>Manage Ticket</h2>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="../image_58085d.png" alt="The Benji HQ">
+        </div>
 
-    <label>Ticket ID (from Discord)</label>
-    <input type="text" id="ticketId" placeholder="e.g. ORD-12345">
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="switchTab('view-sell', this)">📝 SELL BENJIS</button>
+            <button class="nav-btn" onclick="switchTab('view-stock', this)">📦 BENJI STOCK</button>
+        </div>
 
-    <label>Client Username</label>
-    <input type="text" id="clientName" placeholder="Username...">
+        <div class="employee-section">
+            <div class="login-box">
+                <span class="login-label" style="color: #f97316;">Logged In As</span>
+                <span id="seller-username-display" style="color: #fff; font-weight: bold; font-size: 14px;">Loading...</span>
+                <button onclick="window.location.href='../front side/index.html'" style="margin-top: 8px; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-weight: bold;">LOG OUT</button>
+            </div>
+        </div>
+    </div>
 
-    <label>Meeting Location / Instructions</label>
-    <input type="text" id="meetingPlace" placeholder="e.g. World 2, Spawn...">
+    <div class="main-content">
 
-    <label>Status</label>
-    <select id="ticketStatus">
-        <option value="Processing">Processing</option>
-        <option value="Completed">Completed / Exchanged</option>
-    </select>
+        <div id="view-sell" class="view-section active">
+            <div class="hub-header">
+                <div class="welcome-badge">Fulfillment Portal</div>
+                <h1 class="hq-title">ACTIVE ORDERS</h1>
+                <p class="hq-subtext">Manage active orders through processing, staging, and final customer handoff.</p>
+            </div>
 
-    <button class="action-btn btn-done" onclick="completeTicket()">Mark As Done</button>
-</div>
+            <div class="profile-card">
+                <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;">Order Execution Pipeline</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order Num</th>
+                            <th>Customer Discord</th>
+                            <th>Meetup Location</th>
+                            <th>Seller Discord</th>
+                            <th>Status Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="color: #f4f4f5; font-weight: bold;">ORD-84321</td>
+                            <td>ExampleUser#1234</td>
+                            <td>
+                                <input type="text" class="meetup-input" placeholder="Enter location...">
+                            </td>
+                            <td class="seller-table-display">Loading...</td>
+                            <td>
+                                <select class="status-dropdown">
+                                    <option value="pending">⏳ Pending</option>
+                                    <option value="processing">⚙️ Processing</option>
+                                    <option value="ready">📦 Ready to Pickup</option>
+                                    <option value="done">✅ Order Done</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-stock" class="view-section">
+            <div class="hub-header">
+                <div class="welcome-badge">Inventory Management</div>
+                <h1 class="hq-title">BENJI STOCK</h1>
+                <p class="hq-subtext">Current global stock of Benjis available for customers to purchase.</p>
+            </div>
+
+            <div class="profile-card">
+                <div class="stock-number">1,000</div>
+                <p style="text-align: center; color: #a1a1aa;">Stock levels are updated automatically by the Owner.</p>
+            </div>
+        </div>
+
+    </div>
+
+
+    <td style="color: #f4f4f5; font-weight: bold;">${order.id}</td>
+    <td>${order.customerDiscord}</td>
+    <td>${order.meetup}</td>
+    <td style="color: #f97316; font-weight: bold;">${order.seller}</td>
+    <td>
+        <button onclick="finishOrder('${order.id}', '${order.customerDiscord}', '${order.meetup}', '${order.seller}')"
+                style="background: #22c55e; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">
+            ✅ Finish
+        </button>
+    </td>
 
 <script>
-    // Your main webhook (Keep this here just in case)
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
+    // --- SET YOUR API FILENAME HERE ---
+const API_URL = '/.netlify/functions/api';
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
 
-    // 👉 PASTE YOUR NEW STATUS CHANNEL WEBHOOK HERE 👈
-    const STATUS_WEBHOOK_URL = "https://discord.com/api/webhooks/1520094625648480260/2ghP8XJXJsHemv5mMUpI7or2vT-w3GQQJIj4ftJCqLLpGEL0lAf_HMzPmFMOxyDTtpTW";
+// Tab switching controller
+function switchTab(targetViewId, activeBtn) {
+    document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(targetViewId).classList.add('active');
+    activeBtn.classList.add('active');
+}
 
-    async function completeTicket() {
-        const ticketId = document.getElementById('ticketId').value;
-        const clientName = document.getElementById('clientName').value;
-        const meetingPlace = document.getElementById('meetingPlace').value;
-        const status = document.getElementById('ticketStatus').value;
+// --- SYSTEM IDENTITY ---
+const currentSeller = localStorage.getItem('benji_active_seller_name') || "Duty Seller";
 
-        if (!ticketId || !meetingPlace) {
-            alert("Please fill in the Ticket ID and Meeting Place.");
+function loadSellerIdentity() {
+    const display = document.getElementById('seller-username-display');
+    if (display) display.innerText = currentSeller;
+}
+
+// --- FETCH FROM TURSO BACKEND ---
+async function loadActiveOrders() {
+    try {
+        const response = await fetch(API_URL);
+        const activeOrders = await response.json();
+
+        const tbody = document.querySelector('tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!activeOrders || activeOrders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">No active orders right now.</td></tr>`;
             return;
         }
 
-        // Payload for the Seller updating the ticket
-        const payload = {
-            embeds: [{
-                title: "✅ Ticket Updated",
-                color: status === "Completed" ? 0x28a745 : 0xfacc15, // Green if done, Yellow if processing
-                fields: [
-                    { name: "Ticket ID", value: ticketId, inline: true },
-                    { name: "Customer", value: clientName, inline: true },
-                    { name: "Meeting Place", value: meetingPlace, inline: false },
-                    { name: "Status", value: `**${status}**`, inline: true }
-                ]
-            }]
-        };
+        // Generate rows (filtering out finished ones just in case)
+        let orderCount = 0;
+        activeOrders.forEach(order => {
+            if (order.status === 'done') return;
 
-        try {
-            // This now sends exclusively to your STATUS_WEBHOOK_URL
-            await fetch(STATUS_WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            alert("Ticket updated and notification sent to the status channel!");
+            orderCount++;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="color: #f4f4f5; font-weight: bold;">${order.id}</td>
+                <td>${order.customerDiscord}</td>
+                <td>${order.meetup || 'Not Set'}</td>
+                <td style="color: ${order.seller === 'Pending' || order.seller === 'Unassigned' ? '#a1a1aa' : '#f97316'}; font-weight: bold;">
+                    ${order.seller}
+                </td>
+                <td>
+                    <button onclick="finishOrder('${order.id}', '${order.customerDiscord}', '${order.meetup}')"
+                            style="background: #22c55e; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold;">
+                        ✅ Finish
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
 
-            // Clear inputs
-            document.getElementById('ticketId').value = '';
-            document.getElementById('meetingPlace').value = '';
-        } catch (err) {
-            console.error("Webhook failed:", err);
-            alert("Failed to update ticket.");
+        if (orderCount === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">No active orders right now.</td></tr>`;
         }
+
+    } catch (error) {
+        console.error("Error fetching database:", error);
     }
-</script>
-</script>
+}
+
+// --- DISCORD WEBHOOK & FINISH LOGIC ---
+async function finishOrder(orderId, customer, meetup) {
+    try {
+        // 1. Send to Discord
+        await fetch(WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                embeds: [{
+                    title: "Order Completed! ✅",
+                    color: 5763719,
+                    fields: [
+                        { name: "Order ID", value: orderId, inline: true },
+                        { name: "Customer", value: customer, inline: true },
+                        { name: "Meetup", value: meetup || "Not provided", inline: true },
+                        { name: "Completed By", value: currentSeller, inline: true },
+                    ],
+                    timestamp: new Date()
+                }]
+            })
+        });
+
+        // 2. Update Database (Added missing Content-Type header!)
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'updateStatus',
+                orderId: orderId,
+                status: 'done',
+                seller: currentSeller
+            })
+        });
+
+        // 3. Refresh the list to remove the finished order
+        loadActiveOrders();
+
+    } catch (error) {
+        console.error("Error finishing order:", error);
+        alert("Failed to finish order. Check console.");
+    }
+}
+
+// --- BOOTUP SEQUENCE ---
+window.onload = () => {
+    loadSellerIdentity();
+    loadActiveOrders();
+
+    // Auto-refresh the orders every 5 seconds
+    setInterval(loadActiveOrders, 5000);
+};
 </script>
 </body>
 </html>

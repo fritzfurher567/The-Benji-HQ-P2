@@ -207,3 +207,50 @@ app.post('/purchase', async (req, res) => {
     // Example: db.run("UPDATE platform_user_profiles SET pounds_balance = ...")
     res.json({ status: 'success', message: 'Item purchased!' });
 });
+
+import { createClient } from "@libsql/client";
+
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
+
+export async function handler(event) {
+    const method = event.httpMethod;
+
+    // 1. GET Request (Used by your Seller Panel to load orders)
+    if (method === 'GET') {
+        try {
+            const result = await db.execute("SELECT * FROM orders WHERE status != 'done'");
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result.rows)
+            };
+        } catch (error) {
+            return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+        }
+    }
+
+    // 2. POST Request (Used by Storefront to add orders, or Panel to update status)
+    if (method === 'POST') {
+        const data = JSON.parse(event.body);
+
+        if (data.action === 'createOrder') {
+            await db.execute({
+                sql: "INSERT INTO orders (id, customerDiscord, meetup, seller, status) VALUES (?, ?, 'TBD', 'Pending', 'active')",
+                args: [data.orderId, data.customerDiscord, 'Pending']
+            });
+            return { statusCode: 200, body: "Order created" };
+        }
+
+        if (data.action === 'updateStatus') {
+            await db.execute({
+                sql: "UPDATE orders SET status = ? WHERE id = ?",
+                args: [data.status, data.orderId]
+            });
+            return { statusCode: 200, body: "Status updated" };
+        }
+    }
+
+    return { statusCode: 405, body: "Method Not Allowed" };
+}

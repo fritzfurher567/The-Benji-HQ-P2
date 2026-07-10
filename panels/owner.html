@@ -1,562 +1,273 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benji HQ | Seller Panel</title>
+    <style>
+        /* --- EXACT GLOBAL STYLES FROM INDEX.HTML --- */
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: #09090b; color: #f4f4f5; display: flex; height: 100vh; overflow: hidden; }
 
+        /* --- SIDEBAR STYLES --- */
+        .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; display: flex; flex-direction: column; padding: 24px 0; z-index: 10; overflow-y: auto;}
 
+        .logo { padding: 0 24px; margin-bottom: 32px; display: flex; justify-content: center; align-items: center; }
+        .logo img { max-width: 140px; height: auto; display: block; }
 
-</body>
+        .nav-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex-grow: 1; }
+        .nav-btn { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+        .nav-btn:hover { background: #27272a; color: #fff; }
+        .nav-btn.active { background: #27272a; color: #f97316; }
 
+        .employee-section { padding: 20px 16px; border-top: 1px solid #27272a; }
+        .login-box { display: flex; gap: 8px; flex-direction: column;}
+        .login-label {font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
 
+        /* --- MAIN CONTENT & VIEWS --- */
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .view-section { display: none; width: 100%; max-width: 1100px; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-<meta charset="UTF-8">
+        /* --- THE BENJI HQ HUB DESIGN --- */
+        .hub-header { text-align: center; margin-top: 20px; margin-bottom: 30px; }
+        .welcome-badge { display: inline-block; border: 1px solid #f97316; color: #f97316; padding: 4px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase;}
+        .hq-title { font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px; margin-bottom: 16px; text-shadow: 0 0 30px rgba(249, 115, 22, 0.4); text-transform: uppercase; }
+        .hq-subtext { color: #a1a1aa; font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
 
-<title>Benji HQ | Owner Administration</title>
+        /* --- PROFILE / TABLE STYLES --- */
+        .profile-card { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; margin-bottom: 20px; width: 100%; overflow-x: auto;}
+        table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 6px; overflow: hidden; margin-top: 10px;}
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; white-space: nowrap;}
+        th { color: #f97316; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;}
 
-<style>
+        /* Meetup Input Box */
+        .meetup-input { width: 160px; padding: 8px 10px; background: #09090b; border: 1px solid #27272a; color: #ffffff; border-radius: 4px; outline: none; transition: 0.2s; font-size: 13px;}
+        .meetup-input:focus { border-color: #f97316;}
 
-        /* --- GLOBAL STYLES --- */
-        body { background: #09090b; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; margin: 0; display: flex; justify-content: center; }
-        .wrapper { width: 100%; max-width: 900px; }
+        /* Status Dropdown */
+        .status-dropdown { background: #09090b; color: #f4f4f5; border: 1px solid #27272a; padding: 8px 12px; border-radius: 4px; font-size: 13px; outline: none; cursor: pointer; transition: 0.2s; font-weight: 600; width: 100%; max-width: 160px;}
+        .status-dropdown:focus { border-color: #f97316; }
+        .status-dropdown option { background: #18181b; color: #f4f4f5; font-weight: normal; }
 
-        /* --- HEADER FORMATTING --- */
-        .page-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #27272a; padding-bottom: 20px; margin-bottom: 30px; }
-        .header-title h1 { font-size: 32px; color: #ffffff; margin: 0 0 5px 0; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
-        .header-title p { font-size: 14px; color: #f97316; margin: 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .logout-btn { background: #18181b; color: #a1a1aa; border: 1px solid #3f3f46; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; text-decoration: none; transition: 0.2s; }
-        .logout-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
-
-        /* --- BOX CONTAINERS --- */
-        .admin-section { margin-bottom: 40px; }
-        .admin-section h2 { font-size: 18px; color: #ffffff; margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .subtext { font-size: 13px; color: #a1a1aa; margin-top: 0; margin-bottom: 20px; }
-        .admin-box { background: #141619; border: 1px solid #27272a; border-top: 3px solid #3f3f46; border-radius: 6px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .box-orange { border-top-color: #f97316; }
-        .box-green { border-top-color: #22c55e; }
-        .box-blue { border-top-color: #3b82f6; }
-
-        /* --- INPUTS & GRIDS --- */
-        .input-row { display: flex; gap: 20px; align-items: flex-end; }
-        .input-group { flex: 1; display: flex; flex-direction: column; }
-        label { font-size: 11px; font-weight: bold; color: #71717a; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select { padding: 14px; background: #0b0c0e; border: 1px solid #3f3f46; color: #ffffff; border-radius: 4px; outline: none; font-size: 14px; transition: border-color 0.2s; }
-        input:focus, select:focus { border-color: #f97316; box-shadow: 0 0 0 1px #f97316; }
-
-        /* --- BUTTONS --- */
-        .btn { padding: 14px 24px; font-weight: 800; border-radius: 4px; cursor: pointer; transition: 0.2s; height: 48px; border: none; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; }
-        .btn-orange { background: #f97316; color: #000; }
-        .btn-orange:hover { background: #ea580c; color: #fff; }
-        .btn-green { background: #22c55e; color: #000; }
-        .btn-green:hover { background: #16a34a; color: #fff; }
-        .btn-blue { background: #3b82f6; color: #000; }
-        .btn-blue:hover { background: #2563eb; color: #fff; }
-
-        /* Table Action Buttons */
-        .action-btns { display: flex; gap: 8px; }
-        .btn-sm { padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; border: 1px solid transparent; background: transparent; transition: 0.2s;}
-        .btn-edit { color: #3b82f6; border-color: #3b82f6; }
-        .btn-edit:hover { background: #3b82f6; color: #fff; }
-        .btn-revoke { color: #ef4444; border-color: #ef4444; }
-        .btn-revoke:hover { background: #ef4444; color: #fff; }
-
-        /* --- TABLES --- */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #0b0c0e; border-radius: 6px; overflow: hidden; }
-        th { text-align: left; font-size: 11px; color: #f97316; text-transform: uppercase; padding: 15px; background: #18181b; border-bottom: 1px solid #27272a; }
-        td { padding: 15px; color: #e5e7eb; font-size: 14px; border-bottom: 1px solid #27272a; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #141619; }
-        .code-cell { font-family: monospace; color: #a1a1aa; font-size: 15px; letter-spacing: 1px; }
-
-        /* --- STATUS NOTIFICATIONS --- */
-        .status-box { display: none; margin-top: 15px; padding: 15px; border-radius: 4px; font-size: 13px; font-weight: bold; text-align: center; }
-        .status-success { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+        .stock-number { text-align: center; font-size: 100px; font-weight: 900; color: #f97316; text-shadow: 0 0 40px rgba(249, 115, 22, 0.4); margin: 30px 0; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-
-    <div class="page-header">
-        <div class="header-title">
-            <h1>Administration Control</h1>
-            <p>System Authorization Level: Owner Bypass Ledger</p>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="../image_58085d.png" alt="The Benji HQ">
         </div>
-        <a href="index.html" class="logout-btn">CLOSE PANEL</a>
+
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="switchTab('view-sell', this)">📝 SELL BENJIS</button>
+            <button class="nav-btn" onclick="switchTab('view-stock', this)">📦 BENJI STOCK</button>
+        </div>
+
+        <div class="employee-section">
+            <div class="login-box">
+                <span class="login-label" style="color: #f97316;">Logged In As</span>
+                <span id="seller-username-display" style="color: #fff; font-weight: bold; font-size: 14px;">Loading...</span>
+                <button onclick="window.location.href='../front side/index.html'" style="margin-top: 8px; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-weight: bold;">LOG OUT</button>
+            </div>
+        </div>
     </div>
 
-    <!-- SECTION 1: WORKER ASSIGNMENT & SPREADSHEET -->
-    <div class="admin-section">
-        <h2>Worker Directory Ledger</h2>
-        <p class="subtext">Assign, edit, or revoke access codes and panel nodes for all staff members.</p>
+    <div class="main-content">
 
-        <div class="admin-box box-orange">
-            <div class="input-row">
-                <div class="input-group">
-                    <label>Staff Access Code</label>
-                    <input type="text" id="worker-code" placeholder="e.g. W_FARM_01">
-                </div>
-                <div class="input-group">
-                    <label>Assign Panel Node (Role)</label>
-                    <select id="worker-role">
-                        <option value="Fisher">Fisher</option>
-                        <option value="Farmer">Farmer</option>
-                        <option value="Gatherer">Gatherer</option>
-                        <option value="Manager">Manager</option>
-                    </select>
-                </div>
-                <button class="btn btn-orange" onclick="addWorker()">Save Worker</button>
+        <div id="view-sell" class="view-section active">
+            <div class="hub-header">
+                <div class="welcome-badge">Fulfillment Portal</div>
+                <h1 class="hq-title">ACTIVE ORDERS</h1>
+                <p class="hq-subtext">Manage active orders through processing, staging, and final customer handoff.</p>
+            </div>
+
+            <div class="profile-card">
+                <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;">Order Execution Pipeline</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order Num</th>
+                            <th>Customer Discord</th>
+                            <th>Meetup Location</th>
+                            <th>Seller Discord</th>
+                            <th>Status Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="admin-box" style="padding: 0; border-top: none;">
-            <table id="worker-table">
-                <thead>
-                    <tr>
-                        <th>Access Code</th>
-                        <th>Assigned Role</th>
-                        <th style="width: 180px;">Security Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="worker-list">
-                    <!-- Default example row -->
-                    <tr>
-                        <td class="code-cell">W_DIST-1_nicho</td>
-                        <td>Manager (Owner)</td>
-                        <td><span style="color:#71717a; font-size:11px; font-weight:bold;">SYSTEM LOCKED</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- SECTION 2: MANUAL CREDIT LOADER (BANKING) -->
-
-    <div id="tab-banking" class="tab-content">
-
-    <div class="admin-section">
-        <h2>Central Bank Processing</h2>
-        <div class="admin-box box-blue">
-            <div class="input-row">
-                <div class="input-group">
-                    <label>Target Username</label>
-                    <input type="text" id="targetUser" placeholder="e.g. PlayerName123">
-                </div>
-                <div class="input-group">
-                    <label>Amount</label>
-                    <input type="number" id="loadAmount" placeholder="Amount">
-                </div>
-                <button class="btn btn-blue" onclick="processCredit('add')">Add Pounds</button>
+        <div id="view-stock" class="view-section">
+            <div class="hub-header">
+                <div class="welcome-badge">Inventory Management</div>
+                <h1 class="hq-title">BENJI STOCK</h1>
+                <p class="hq-subtext">Current global stock of Benjis available for customers to purchase.</p>
             </div>
-            <div id="bank-status" class="status-box status-success" style="display:none;"></div>
-        </div>
-    </div>
 
-    <div class="admin-section">
-        <div class="admin-box box-orange">
-            <h3>Admin: Deduct Credits</h3>
-            <div class="input-row">
-                <div class="input-group">
-                    <label>Username</label>
-                    <input type="text" id="deductUser" placeholder="Username...">
-                </div>
-                <div class="input-group">
-                    <label>Amount</label>
-                    <input type="number" id="deductAmount" placeholder="Amount...">
-                </div>
-                <button class="btn" style="background: #ef4444;" onclick="processCredit('deduct')">Deduct Credits</button>
+            <div class="profile-card">
+                <div class="stock-number">1,000</div>
+                <p style="text-align: center; color: #a1a1aa;">Stock levels are updated automatically by the Owner.</p>
             </div>
-            <div id="deduct-status" class="status-box" style="display:none; color: #ef4444;">✓ Deduction logged.</div>
         </div>
-    </div>
-</div>
 
-
-
-
-    <!-- SECTION 3: MULTI-ISLAND LOGISTICS TERMINAL -->
-    <div class="admin-section">
-        <h2>Multi-Island Logistics Terminal</h2>
-        <p class="subtext">Fulfill and verify pending manager warehouse transfers or tickets.</p>
-
-        <div class="admin-box box-green">
-            <div class="input-row">
-                <div class="input-group" style="flex: 0.5;">
-                    <label>Transfer Ticket ID</label>
-                    <input type="text" id="ticket-id" placeholder="e.g. TRN-492B">
-                </div>
-                <div class="input-group">
-                    <label>Owner Completion Notes</label>
-                    <input type="text" id="owner-notes" placeholder="e.g. Loaded 500 Tuna into Main HQ">
-                </div>
-                <button class="btn btn-green" onclick="completeTransfer()">Mark Complete</button>
-            </div>
-            <div id="logisticsStatus" class="status-box status-success"></div>
-        </div>
     </div>
 
-</div>
+    <script>
+        // --- SET YOUR API FILENAME HERE ---
+        // Make sure this matches your netlify function filename (e.g. '/.netlify/functions/api' or '/.netlify/functions/orders')
+        const API_URL = '/.netlify/functions/api';
 
-<div id="ticket-list" class="admin-box">
-        <h3>Pending Manager Tickets</h3>
-        <div id="tickets-container">Loading tickets...</div>
-    </div>
-
-<script>
-    // ==========================================
-    // DISCORD WEBHOOK URLS (PASTE YOURS HERE)
-    // ==========================================
-    const OWNER_LOG_WEBHOOK = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
-
-    // ==========================================
-    // 1. WORKER SPREADSHEET LOGIC (ADD, EDIT, REVOKE)
-    // ==========================================
-    function addWorker() {
-        const codeInput = document.getElementById("worker-code");
-        const roleInput = document.getElementById("worker-role");
-        const code = codeInput.value.trim();
-        const role = roleInput.value;
-
-        if (!code) {
-            alert("Please enter a worker code.");
-            return;
+        // Tab switching controller
+        function switchTab(targetViewId, activeBtn) {
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(targetViewId).classList.add('active');
+            activeBtn.classList.add('active');
         }
 
-        const tableBody = document.getElementById("worker-list");
-        const newRow = document.createElement("tr");
+        // --- SYSTEM IDENTITY ---
+        const currentSeller = localStorage.getItem('benji_active_seller_name') || "Duty Seller";
 
-        newRow.innerHTML = `
-            <td class="code-cell">${code}</td>
-            <td class="role-cell">${role}</td>
-            <td>
-                <div class="action-btns">
-                    <button class="btn-sm btn-edit" onclick="editWorker(this)">EDIT</button>
-                    <button class="btn-sm btn-revoke" onclick="revokeWorker(this)">REVOKE</button>
-                </div>
-            </td>
-        `;
-
-        tableBody.appendChild(newRow);
-
-        // Clear input after saving
-        codeInput.value = "";
-    }
-
-    function editWorker(button) {
-        // Find the row we clicked
-        const row = button.closest("tr");
-
-        // Grab the existing code and role from the row
-        const existingCode = row.querySelector(".code-cell").innerText;
-        const existingRole = row.querySelector(".role-cell").innerText;
-
-        // Push them back up into the input fields so the owner can change them
-        document.getElementById("worker-code").value = existingCode;
-        document.getElementById("worker-role").value = existingRole;
-
-        // Remove the row (When they hit "Save", it will create a new updated row)
-        row.remove();
-
-        // Scroll back up to the inputs slightly
-        document.getElementById("worker-code").focus();
-    }
-
-    function revokeWorker(button) {
-        if (confirm("Are you sure you want to revoke this access code?")) {
-            button.closest("tr").remove();
-        }
-    }
-
-    // ==========================================
-    // 2. CENTRAL BANK PROCESSING (LOAD POUNDS)
-    // ==========================================
-    async function manualLoadCredits() {
-        const user = document.getElementById('targetUser').value.trim();
-        const amount = document.getElementById('loadAmount').value;
-        const statusBox = document.getElementById('bankStatus');
-
-        if (!user || !amount) {
-            return alert("You must enter both a Username and an Amount.");
+        function loadSellerIdentity() {
+            document.getElementById('seller-username-display').innerText = currentSeller;
         }
 
-        const payload = {
-            embeds: [{
-                title: "⚖️ Manual Bank Deposit Executed",
-                color: 0x3b82f6, // Blue
-                fields: [
-                    {name: "Authorized By", value: "System Owner", inline: true},
-                    {name: "User Credited", value: user, inline: true},
-                    {name: "Amount Added", value: amount + "p", inline: true},
-                    {name: "Status", value: "Funds Successfully Verified & Loaded", inline: false}
-                ],
-                footer: {text: "Benji HQ Owner Terminal"},
-                timestamp: new Date().toISOString()
-            }]
+        // --- FETCH FROM TURSO BACKEND ---
+        async function loadActiveOrders() {
+            try {
+                const response = await fetch(API_URL);
+                const activeOrders = await response.json();
+
+                const tbody = document.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                if (activeOrders.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">No active orders right now.</td></tr>`;
+                    return;
+                }
+
+                // Generate rows
+                activeOrders.forEach(order => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="color: #f4f4f5; font-weight: bold;">${order.id}</td>
+                        <td>${order.customerDiscord}</td>
+                        <td>
+                            <input type="text" class="meetup-input" value="${order.meetup || ''}"
+                                   onblur="updateOrderLocation('${order.id}', this.value)"
+                                   placeholder="Enter location...">
+                        </td>
+                        <td style="color: ${order.seller === 'Pending' ? '#a1a1aa' : '#f97316'}; font-weight: bold;">
+                            ${order.seller}
+                        </td>
+                        <td style="display: flex; gap: 8px;">
+                            <select class="status-dropdown" onchange="updateOrderStatus('${order.id}', this.value, '${order.seller}')">
+                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>⏳ Pending</option>
+                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>⚙️ Processing</option>
+                                <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>📦 Ready to Pickup</option>
+                            </select>
+                            <button onclick="finishOrder('${order.id}', '${order.customerDiscord}', '${order.meetup || ''}', '${order.seller}')"
+                                    style="background: #22c55e; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold;">
+                                ✅ Finish
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error fetching database:", error);
+            }
+        }
+
+        // --- SEND UPDATES TO BACKEND ---
+        async function updateOrderStatus(orderId, newStatus, currentAssignedSeller) {
+            let assignedSeller = currentAssignedSeller;
+            if (newStatus !== 'pending' && currentAssignedSeller === 'Pending') {
+                assignedSeller = currentSeller;
+            }
+
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'updateStatus',
+                    orderId: orderId,
+                    status: newStatus,
+                    seller: assignedSeller
+                })
+            });
+
+            loadActiveOrders();
+        }
+
+        async function updateOrderLocation(orderId, newLocation) {
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'updateLocation',
+                    orderId: orderId,
+                    meetup: newLocation
+                })
+            });
+        }
+
+        // --- DISCORD WEBHOOK & FINISH LOGIC ---
+        async function finishOrder(orderId, customer, meetup, seller) {
+            // 1. ADD YOUR WEBHOOK HERE
+            const WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_URL_HERE";
+
+            try {
+                // 2. Send to Discord
+                await fetch(WEBHOOK_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        embeds: [{
+                            title: "Order Completed! ✅",
+                            color: 5763719,
+                            fields: [
+                                { name: "Order ID", value: orderId, inline: true },
+                                { name: "Customer", value: customer, inline: true },
+                                { name: "Meetup", value: meetup || "Not provided", inline: true },
+                                { name: "Seller", value: seller, inline: true },
+                            ],
+                            timestamp: new Date()
+                        }]
+                    })
+                });
+
+                // 3. Update Database (Mark as 'done')
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'updateStatus',
+                        orderId: orderId,
+                        status: 'done',
+                        seller: seller
+                    })
+                });
+
+                // 4. Refresh the list to remove the finished order
+                loadActiveOrders();
+
+            } catch (error) {
+                console.error("Error finishing order:", error);
+                alert("Failed to finish order. Check console.");
+            }
+        }
+
+        // --- BOOTUP SEQUENCE ---
+        window.onload = () => {
+            loadSellerIdentity();
+            loadActiveOrders();
+
+            // Auto-refresh the orders every 5 seconds
+            setInterval(loadActiveOrders, 5000);
         };
-
-        try {
-            await fetch(OWNER_LOG_WEBHOOK, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-
-            statusBox.innerHTML = `✓ Successfully credited <b>${amount}p</b> to <b>${user}</b>. Audit log sent.`;
-            statusBox.style.display = "block";
-
-            // Clear inputs
-            document.getElementById('targetUser').value = '';
-            document.getElementById('loadAmount').value = '';
-
-            // Hide message after 4 seconds
-            setTimeout(() => {
-                statusBox.style.display = "none";
-            }, 4000);
-
-        } catch (error) {
-            alert("Failed to log to Discord. Check your Webhook URL.");
-            console.error(error);
-        }
-    }
-
-    // Function to handle Add or Deduct Pounds
-async function processCredit(action) {
-    // 1. Grab the correct input boxes depending on which button you clicked
-    const username = document.getElementById(action === 'add' ? "targetUser" : "deductUser").value;
-    const amount = parseInt(document.getElementById(action === 'add' ? "loadAmount" : "deductAmount").value);
-
-    // 2. Grab the correct success message box
-    const statusDiv = document.getElementById(action === 'add' ? "bank-status" : "deduct-status");
-
-    // 3. Stop if the boxes are empty
-    if (!username || !amount) {
-        alert("Please enter both a username and an amount.");
-        return;
-    }
-
-    try {
-        // 4. Send the data to your Netlify backend
-        const response = await fetch('/.netlify/functions/update-creds', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: username, amount: amount, action: action })
-        });
-
-        const data = await response.json();
-
-        // 5. Show the success message or an error
-        if (response.ok) {
-            statusDiv.style.display = "block";
-            statusDiv.style.color = action === 'add' ? "#22c55e" : "#ef4444"; // Green for add, red for deduct
-            statusDiv.innerText = `✓ Success: ${amount}p has been ${action === 'add' ? 'added to' : 'deducted from'} ${username}!`;
-
-            // Clear the input boxes
-            document.getElementById(action === 'add' ? "targetUser" : "deductUser").value = "";
-            document.getElementById(action === 'add' ? "loadAmount" : "deductAmount").value = "";
-
-            // Hide the message after 4 seconds
-            setTimeout(() => {
-                statusDiv.style.display = "none";
-            }, 4000);
-        } else {
-            alert("Database Error: " + (data.error || "Could not update user."));
-        }
-    } catch (error) {
-        console.error("Fetch error:", error);
-        alert("Failed to connect to the server.");
-    }
-}
-
-    // ==========================================
-    // 3. LOGISTICS TRANSFER COMPLETION
-    // ==========================================
-    async function completeTransfer() {
-        const ticketId = document.getElementById("ticket-id").value.trim();
-        const notes = document.getElementById("owner-notes").value.trim();
-        const statusBox = document.getElementById('logisticsStatus');
-
-        if (!ticketId) {
-            return alert("You must enter a Ticket ID to complete a transfer!");
-        }
-
-        const completionPayload = {
-            embeds: [{
-                title: `✅ Ticket Resolved: ${ticketId}`,
-                color: 0x22c55e, // Green
-                description: `The owner has successfully cleared this ticket and completed the logistics transfer.\n\n**Owner Notes:**\n${notes || "No additional notes provided."}`,
-                fields: [
-                    {name: "Status", value: "Fully Loaded & Completed", inline: true},
-                    {name: "Ticket ID", value: `**${ticketId}**`, inline: true}
-                ],
-                footer: {text: "Benji HQ Owner Terminal"},
-                timestamp: new Date().toISOString()
-            }]
-        };
-
-        try {
-            await fetch(OWNER_LOG_WEBHOOK, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(completionPayload)
-            });
-
-            statusBox.innerHTML = `✓ Transfer Ticket <b>${ticketId}</b> Marked Complete. Discord updated.`;
-            statusBox.style.display = "block";
-
-            // Clear inputs
-            document.getElementById("ticket-id").value = "";
-            document.getElementById("owner-notes").value = "";
-
-            // Hide message after 4 seconds
-            setTimeout(() => {
-                statusBox.style.display = "none";
-            }, 4000);
-
-        } catch (error) {
-            alert("Failed to send to Discord. Check your Webhook URL.");
-            console.error(error);
-        }
-    }
-
-    async function deductCredits() {
-        const user = document.getElementById("deductUser").value;
-        const amount = document.getElementById("deductAmount").value;
-        const statusDiv = document.getElementById("deduct-status");
-
-        if (!user || !amount) {
-            alert("Please enter a username and amount.");
-            return;
-        }
-
-        try {
-            // This 'fetch' sends the data to your backend
-            const response = await ('http://localhost:3000/api/deduct-creds', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: user, amount: amount})
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                statusDiv.style.display = "block"; // Shows the "Deduction logged" message
-                statusDiv.innerText = `✓ Success: ${amount} deducted from ${user}`;
-                setTimeout(() => {
-                    statusDiv.style.display = "none";
-                }, 3000);
-            } else {
-                throw new Error(result.message || "Failed to deduct");
-            }
-        } catch (error) {
-            alert("Error: " + error.message);
-        }
-    }
-
-    async function addCredits() {
-        const user = document.getElementById("loadUser").value;
-        const amount = document.getElementById("loadAmount").value;
-        const statusDiv = document.getElementById("load-status");
-
-        if (!user || !amount) return alert("Enter both username and amount.");
-
-        try {
-            const response = await ('http://localhost:3000/api/addpounds', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: user, amount: amount})
-            });
-
-            if (response.ok) {
-                statusDiv.style.display = "block";
-                statusDiv.innerText = `✓ Added ${amount}p to ${user}`;
-                setTimeout(() => {
-                    statusDiv.style.display = "none";
-                }, 3000);
-            } else {
-                alert("Database Error: Could not add credits.");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Connection failed.");
-        }
-    }
-
-    async function processCredit(action) {
-        // Get values based on the button clicked
-        const user = document.getElementById(action === 'add' ? "targetUser" : "deductUser").value;
-        const amount = document.getElementById(action === 'add' ? "loadAmount" : "deductAmount").value;
-        const statusDiv = document.getElementById(action === 'add' ? "bank-status" : "deduct-status");
-
-        if (!user || !amount) return alert("Please enter both a username and an amount.");
-
-        try {
-            const response = await ('http://localhost:3000/api/updateCredits', {
-                method: 'POST',
-                body: JSON.stringify({username: user, amount: amount, action: action})
-            });
-
-            if (response.ok) {
-                statusDiv.style.display = "block";
-                statusDiv.innerText = `✓ Successfully updated ${user}'s balance!`;
-                setTimeout(() => {
-                    statusDiv.style.display = "none";
-                }, 3000);
-            } else {
-                alert("Database transaction failed.");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Could not connect to server.");
-        }
-    }
-
-async function loadTickets() {
-    const container = document.getElementById('tickets-container');
-    try {
-        const response = await fetch('http://localhost:3000/api/get-tickets');
-        const tickets = await response.json();
-
-        container.innerHTML = tickets.map(t => `
-            <div class="ticket-item" onclick="selectTicket('${t.ticket_id}')">
-                <strong>${t.ticket_id}</strong> - ${t.manager_name}
-            </div>
-        `).join('');
-    } catch (err) {
-        container.innerText = "Failed to load tickets.";
-    }
-}
-
-// Select a ticket and fill in the input box automatically
-function selectTicket(id) {
-    document.getElementById('ticket-id').value = id;
-    alert("Ticket " + id + " selected!");
-}
-
-// Run this when the page loads
-loadTickets();
-
-
-async function addPounds() {
-    const user = document.getElementById("targetUser").value;
-    const amount = document.getElementById("loadAmount").value;
-
-    try {
-        const response = await fetch('http://localhost:3000/api/updateCredits', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: user, amount: amount, action: 'add' })
-        });
-
-        if (response.ok) {
-            alert("Added!");
-        } else {
-            alert("Error: Function not found. Are you using 'netlify dev'?");
-        }
-    } catch (err) {
-        alert("Connection failed.");
-    }
-}
-
-</script>
+    </script>
 </body>
 </html>
