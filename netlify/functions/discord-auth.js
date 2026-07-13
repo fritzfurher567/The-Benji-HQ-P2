@@ -1,16 +1,16 @@
-const fetch = require('node-fetch');
+// DELETE: const fetch = require('node-fetch');
+// DO NOT import anything. 'fetch' is now built-in.
 
 exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
     const { code } = JSON.parse(event.body);
-
-    // Ensure these exist in your Netlify Environment Variables
     const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
     const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
     const REDIRECT_URI = "https://thebenjihq.netlify.app";
 
     try {
+        // 'fetch' is now available globally
         const response = await fetch('https://discord.com/api/oauth2/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -24,10 +24,8 @@ exports.handler = async (event) => {
         });
 
         const data = await response.json();
-
         if (data.error) throw new Error(data.error_description || data.error);
 
-        // Fetch user info
         const userRes = await fetch('https://discord.com/api/users/@me', {
             headers: { Authorization: `Bearer ${data.access_token}` }
         });
