@@ -1,273 +1,805 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benji HQ | Seller Panel</title>
-    <style>
-        /* --- EXACT GLOBAL STYLES FROM INDEX.HTML --- */
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: #09090b; color: #f4f4f5; display: flex; height: 100vh; overflow: hidden; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benji HQ | Owner Panel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-        /* --- SIDEBAR STYLES --- */
-        .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; display: flex; flex-direction: column; padding: 24px 0; z-index: 10; overflow-y: auto;}
+    body {
+      background: #09090b;
+      color: #f4f4f5;
+      display: flex;
+      min-height: 100vh;
+    }
 
-        .logo { padding: 0 24px; margin-bottom: 32px; display: flex; justify-content: center; align-items: center; }
-        .logo img { max-width: 140px; height: auto; display: block; }
+    .sidebar {
+      width: 270px;
+      background: #18181b;
+      border-right: 1px solid #27272a;
+      padding: 22px 0;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .nav-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex-grow: 1; }
-        .nav-btn { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .nav-btn:hover { background: #27272a; color: #fff; }
-        .nav-btn.active { background: #27272a; color: #f97316; }
+.sidebar-logo-text{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  line-height:1;
+}
+.logo-benji{
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:3px;
+  color:#fff;
+  text-transform:uppercase;
+}
+.logo-hq{
+  font-size:36px;
+  font-weight:900;
+  letter-spacing:4px;
+  color:#f97316;
+  text-transform:uppercase;
+  text-shadow:0 0 20px rgba(249,115,22,0.4);
+}
 
-        .employee-section { padding: 20px 16px; border-top: 1px solid #27272a; }
-        .login-box { display: flex; gap: 8px; flex-direction: column;}
-        .login-label {font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
+    .sidebar-panel-name {
+      font-size: 12px;
+      color: #a1a1aa;
+    }
 
-        /* --- MAIN CONTENT & VIEWS --- */
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
-        .view-section { display: none; width: 100%; max-width: 1100px; }
-        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .nav {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-        /* --- THE BENJI HQ HUB DESIGN --- */
-        .hub-header { text-align: center; margin-top: 20px; margin-bottom: 30px; }
-        .welcome-badge { display: inline-block; border: 1px solid #f97316; color: #f97316; padding: 4px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase;}
-        .hq-title { font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px; margin-bottom: 16px; text-shadow: 0 0 30px rgba(249, 115, 22, 0.4); text-transform: uppercase; }
-        .hq-subtext { color: #a1a1aa; font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+    .nav button {
+      background: transparent;
+      border: none;
+      color: #a1a1aa;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+    }
 
-        /* --- PROFILE / TABLE STYLES --- */
-        .profile-card { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; margin-bottom: 20px; width: 100%; overflow-x: auto;}
-        table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 6px; overflow: hidden; margin-top: 10px;}
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; white-space: nowrap;}
-        th { color: #f97316; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;}
+    .nav button:hover {
+      background: #27272a;
+      color: #fff;
+    }
 
-        /* Meetup Input Box */
-        .meetup-input { width: 160px; padding: 8px 10px; background: #09090b; border: 1px solid #27272a; color: #ffffff; border-radius: 4px; outline: none; transition: 0.2s; font-size: 13px;}
-        .meetup-input:focus { border-color: #f97316;}
+    .nav button.active {
+      background: #27272a;
+      color: #f97316;
+    }
 
-        /* Status Dropdown */
-        .status-dropdown { background: #09090b; color: #f4f4f5; border: 1px solid #27272a; padding: 8px 12px; border-radius: 4px; font-size: 13px; outline: none; cursor: pointer; transition: 0.2s; font-weight: 600; width: 100%; max-width: 160px;}
-        .status-dropdown:focus { border-color: #f97316; }
-        .status-dropdown option { background: #18181b; color: #f4f4f5; font-weight: normal; }
+    .logout-box {
+      margin-top: auto;
+      padding: 14px;
+      border-top: 1px solid #27272a;
+    }
 
-        .stock-number { text-align: center; font-size: 100px; font-weight: 900; color: #f97316; text-shadow: 0 0 40px rgba(249, 115, 22, 0.4); margin: 30px 0; }
-    </style>
+    .logout-box button {
+      width: 100%;
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      color: #a1a1aa;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .logout-box button:hover {
+      border-color: #f97316;
+      color: #fff;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+      overflow: auto;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+      animation: fade 0.2s ease;
+    }
+
+    @keyframes fade {
+      from { opacity: 0.5; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: #a1a1aa;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: #141619;
+      border: 1px solid #22252a;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .card h3 {
+      color: #f97316;
+      margin-bottom: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .sidebar { width: 100%; max-width: 280px; }
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #a1a1aa;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      background: #0b0c0e;
+      border: 1px solid #2c3036;
+      color: #fff;
+      border-radius: 6px;
+      padding: 11px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #f97316;
+      box-shadow: 0 0 0 1px #f97316;
+    }
+
+    .btn {
+      border: none;
+      background: #f97316;
+      color: #000;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #ea580c;
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: #27272a;
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #0b0c0e;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #27272a;
+      text-align: left;
+      font-size: 13px;
+      color: #d4d4d8;
+      vertical-align: top;
+    }
+
+    th {
+      color: #f97316;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 800;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .status-active {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+    }
+
+    .status-revoked {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .status-pending {
+      background: rgba(234, 179, 8, 0.15);
+      color: #eab308;
+    }
+
+    .status-approved {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+    }
+
+    .status-declined {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .stock-big {
+      font-size: 54px;
+      font-weight: 900;
+      color: #f97316;
+      text-shadow: 0 0 30px rgba(249, 115, 22, 0.25);
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    .muted {
+      color: #a1a1aa;
+      font-size: 12px;
+    }
+
+    .webhook-note {
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      background: rgba(249, 115, 22, 0.08);
+      color: #fdba74;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    code {
+      color: #fdba74;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+  </style>
 </head>
 <body>
-
-    <div class="sidebar">
-        <div class="logo">
-            <img src="../image_58085d.png" alt="The Benji HQ">
-        </div>
-
-        <div class="nav-menu">
-            <button class="nav-btn active" onclick="switchTab('view-sell', this)">📝 SELL BENJIS</button>
-            <button class="nav-btn" onclick="switchTab('view-stock', this)">📦 BENJI STOCK</button>
-        </div>
-
-        <div class="employee-section">
-            <div class="login-box">
-                <span class="login-label" style="color: #f97316;">Logged In As</span>
-                <span id="seller-username-display" style="color: #fff; font-weight: bold; font-size: 14px;">Loading...</span>
-                <button onclick="window.location.href='../front side/index.html'" style="margin-top: 8px; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-weight: bold;">LOG OUT</button>
-            </div>
-        </div>
+  <aside class="sidebar">
+    <div class="sidebar-logo-wrap">
+      <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="The Benji HQ V2" />
+      <div class="sidebar-logo-ver">Community Hub v2.0</div>
+      <div class="sidebar-panel-name">Owner Command Center</div>
     </div>
 
-    <div class="main-content">
-
-        <div id="view-sell" class="view-section active">
-            <div class="hub-header">
-                <div class="welcome-badge">Fulfillment Portal</div>
-                <h1 class="hq-title">ACTIVE ORDERS</h1>
-                <p class="hq-subtext">Manage active orders through processing, staging, and final customer handoff.</p>
-            </div>
-
-            <div class="profile-card">
-                <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;">Order Execution Pipeline</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Order Num</th>
-                            <th>Customer Discord</th>
-                            <th>Meetup Location</th>
-                            <th>Seller Discord</th>
-                            <th>Status Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="view-stock" class="view-section">
-            <div class="hub-header">
-                <div class="welcome-badge">Inventory Management</div>
-                <h1 class="hq-title">BENJI STOCK</h1>
-                <p class="hq-subtext">Current global stock of Benjis available for customers to purchase.</p>
-            </div>
-
-            <div class="profile-card">
-                <div class="stock-number">1,000</div>
-                <p style="text-align: center; color: #a1a1aa;">Stock levels are updated automatically by the Owner.</p>
-            </div>
-        </div>
-
+    <div class="nav">
+      <button class="active" onclick="switchView('view-workers', this)">🔑 Worker Codes</button>
+      <button onclick="switchView('view-orders', this)">🛒 Benji Orders</button>
+      <button onclick="switchView('view-transfers', this)">🔁 Transfer Tickets</button>
+      <button onclick="switchView('view-stock', this)">📦 Benji Stock</button>
     </div>
 
-    <script>
-        // --- SET YOUR API FILENAME HERE ---
-        // Make sure this matches your netlify function filename (e.g. '/.netlify/functions/api' or '/.netlify/functions/orders')
-        const API_URL = '/.netlify/functions/api';
+    <div class="logout-box">
+      <button onclick="logoutOwner()">LOG OUT</button>
+    </div>
+  </aside>
 
-        // Tab switching controller
-        function switchTab(targetViewId, activeBtn) {
-            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(targetViewId).classList.add('active');
-            activeBtn.classList.add('active');
-        }
+  <main class="main">
+    <!-- WORKERS -->
+    <section id="view-workers" class="view active">
+      <div class="header">
+        <h2>Worker Codes</h2>
+        <p>Only active registered codes can log in. Fired workers auto-delete in 7 days.</p>
+      </div>
 
-        // --- SYSTEM IDENTITY ---
-        const currentSeller = localStorage.getItem('benji_active_seller_name') || "Duty Seller";
+      <div class="webhook-note">
+        Webhook is now code-locked in this file:
+        <code>https://discord.com/api/webhooks/1519403176930054329/t0hT6O936JluOaD476NiwyEzseafVFEPH8rUgxVE0wfPKAZAGLCM2aCDzin2TkOrRSpo</code>
+      </div>
 
-        function loadSellerIdentity() {
-            document.getElementById('seller-username-display').innerText = currentSeller;
-        }
+      <div class="grid">
+        <div class="card">
+          <h3>Register Worker</h3>
 
-        // --- FETCH FROM TURSO BACKEND ---
-        async function loadActiveOrders() {
-            try {
-                const response = await fetch(API_URL);
-                const activeOrders = await response.json();
+          <label>Discord Username</label>
+          <input id="w-username" placeholder="e.g. elliebear999" />
 
-                const tbody = document.querySelector('tbody');
-                tbody.innerHTML = '';
+          <label>Discord ID (optional)</label>
+          <input id="w-discord-id" placeholder="e.g. 123456789012345678" />
 
-                if (activeOrders.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">No active orders right now.</td></tr>`;
-                    return;
-                }
+          <label>Role</label>
+          <select id="w-role">
+            <option value="W_MGMT">Management</option>
+            <option value="W_SELL">Seller</option>
+            <option value="W_CHEF">Chef</option>
+            <option value="W_FISH">Fisher</option>
+            <option value="W_GATH">Gatherer</option>
+            <option value="W_FARM">Farmer</option>
+          </select>
 
-                // Generate rows
-                activeOrders.forEach(order => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td style="color: #f4f4f5; font-weight: bold;">${order.id}</td>
-                        <td>${order.customerDiscord}</td>
-                        <td>
-                            <input type="text" class="meetup-input" value="${order.meetup || ''}"
-                                   onblur="updateOrderLocation('${order.id}', this.value)"
-                                   placeholder="Enter location...">
-                        </td>
-                        <td style="color: ${order.seller === 'Pending' ? '#a1a1aa' : '#f97316'}; font-weight: bold;">
-                            ${order.seller}
-                        </td>
-                        <td style="display: flex; gap: 8px;">
-                            <select class="status-dropdown" onchange="updateOrderStatus('${order.id}', this.value, '${order.seller}')">
-                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>⏳ Pending</option>
-                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>⚙️ Processing</option>
-                                <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>📦 Ready to Pickup</option>
-                            </select>
-                            <button onclick="finishOrder('${order.id}', '${order.customerDiscord}', '${order.meetup || ''}', '${order.seller}')"
-                                    style="background: #22c55e; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold;">
-                                ✅ Finish
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                console.error("Error fetching database:", error);
-            }
-        }
+          <label>Code</label>
+          <input id="w-code" placeholder="e.g. W_SELL_01" />
 
-        // --- SEND UPDATES TO BACKEND ---
-        async function updateOrderStatus(orderId, newStatus, currentAssignedSeller) {
-            let assignedSeller = currentAssignedSeller;
-            if (newStatus !== 'pending' && currentAssignedSeller === 'Pending') {
-                assignedSeller = currentSeller;
-            }
+          <button class="btn" style="width:100%" onclick="registerWorker()">Save Worker</button>
+        </div>
 
-            await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'updateStatus',
-                    orderId: orderId,
-                    status: newStatus,
-                    seller: assignedSeller
-                })
-            });
+        <div class="card">
+          <h3>Roster (<span id="worker-count">0</span>)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Code</th>
+                <th>Status</th>
+                <th>Purge</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="worker-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-            loadActiveOrders();
-        }
+    <!-- ORDERS -->
+    <section id="view-orders" class="view">
+      <div class="header">
+        <h2>Benji Orders</h2>
+        <p>Same order format as seller panel.</p>
+      </div>
 
-        async function updateOrderLocation(orderId, newLocation) {
-            await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'updateLocation',
-                    orderId: orderId,
-                    meetup: newLocation
-                })
-            });
-        }
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Method</th>
+              <th>Qty</th>
+              <th>Tip</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Seller</th>
+              <th>Meetup</th>
+            </tr>
+          </thead>
+          <tbody id="orders-body"></tbody>
+        </table>
+      </div>
+    </section>
 
-        // --- DISCORD WEBHOOK & FINISH LOGIC ---
-        async function finishOrder(orderId, customer, meetup, seller) {
-            // 1. ADD YOUR WEBHOOK HERE
-            const WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_URL_HERE";
+    <!-- TRANSFERS -->
+    <section id="view-transfers" class="view">
+      <div class="header">
+        <h2>Transfer Tickets</h2>
+        <p>Approve or decline transfer requests.</p>
+      </div>
 
-            try {
-                // 2. Send to Discord
-                await fetch(WEBHOOK_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        embeds: [{
-                            title: "Order Completed! ✅",
-                            color: 5763719,
-                            fields: [
-                                { name: "Order ID", value: orderId, inline: true },
-                                { name: "Customer", value: customer, inline: true },
-                                { name: "Meetup", value: meetup || "Not provided", inline: true },
-                                { name: "Seller", value: seller, inline: true },
-                            ],
-                            timestamp: new Date()
-                        }]
-                    })
-                });
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Item</th>
+              <th>Amount</th>
+              <th>Pay</th>
+              <th>Route</th>
+              <th>Notes</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="transfer-body"></tbody>
+        </table>
+      </div>
+    </section>
 
-                // 3. Update Database (Mark as 'done')
-                await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'updateStatus',
-                        orderId: orderId,
-                        status: 'done',
-                        seller: seller
-                    })
-                });
+    <!-- STOCK -->
+    <section id="view-stock" class="view">
+      <div class="header">
+        <h2>Global Benji Stock</h2>
+        <p>Changes here reflect in seller panel stock display.</p>
+      </div>
 
-                // 4. Refresh the list to remove the finished order
-                loadActiveOrders();
+      <div class="grid">
+        <div class="card">
+          <h3>Current Stock</h3>
+          <div id="stock-display" class="stock-big">0</div>
+          <p class="muted">Broadcasted to seller panel via <code>benji_global_stock</code>.</p>
+        </div>
 
-            } catch (error) {
-                console.error("Error finishing order:", error);
-                alert("Failed to finish order. Check console.");
-            }
-        }
+        <div class="card">
+          <h3>Update Stock</h3>
+          <label>New Stock Value</label>
+          <input id="stock-input" type="number" min="0" placeholder="e.g. 1000" />
+          <button class="btn" onclick="saveStock()">Update Stock</button>
+        </div>
+      </div>
+    </section>
+  </main>
 
-        // --- BOOTUP SEQUENCE ---
-        window.onload = () => {
-            loadSellerIdentity();
-            loadActiveOrders();
+  <script>
+    const KEYS = {
+      workers: "benji_worker_codes",
+      orders: "benji_global_orders",
+      transfers: "benji_transfer_tickets",
+      stock: "benji_global_stock"
+    };
 
-            // Auto-refresh the orders every 5 seconds
-            setInterval(loadActiveOrders, 5000);
-        };
-    </script>
+    // Put your Discord webhook here (owner decisions use THIS directly)
+    const TRANSFER_WEBHOOK_URL = "PASTE_YOUR_DISCORD_WEBHOOK_HERE";
+
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const ownerName = localStorage.getItem("benji_active_seller_name") || "Owner";
+
+    function readJSON(key, fallback) {
+      try {
+        const v = JSON.parse(localStorage.getItem(key));
+        return v ?? fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function writeJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function esc(v) {
+      return String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function roleLabel(roleKey) {
+      return {
+        W_MGMT: "Management",
+        W_SELL: "Seller",
+        W_CHEF: "Chef",
+        W_FISH: "Fisher",
+        W_GATH: "Gatherer",
+        W_FARM: "Farmer"
+      }[roleKey] || roleKey;
+    }
+
+    function validateCodeForRole(roleKey, code) {
+      const m = String(code).toUpperCase().match(/^W_(MGMT|SELL|CHEF|FISH|GATH|FARM)_(\d{2})$/);
+      if (!m) return false;
+      const num = parseInt(m[2], 10);
+      if (num < 1 || num > 20) return false;
+      return `W_${m[1]}` === roleKey;
+    }
+
+    function purgeExpiredWorkers() {
+      let workers = readJSON(KEYS.workers, []);
+      const now = Date.now();
+
+      workers = workers.filter(w => !(w.status === "Revoked" && w.purgeAt && now >= w.purgeAt));
+      writeJSON(KEYS.workers, workers);
+    }
+
+    function registerWorker() {
+      const username = document.getElementById("w-username").value.trim();
+      const discordId = document.getElementById("w-discord-id").value.trim();
+      const roleKey = document.getElementById("w-role").value;
+      const code = document.getElementById("w-code").value.trim().toUpperCase();
+
+      if (!username || !code) {
+        alert("Username and code are required.");
+        return;
+      }
+
+      if (!validateCodeForRole(roleKey, code)) {
+        alert("Code format invalid for selected role. Example: W_SELL_01 to W_SELL_20");
+        return;
+      }
+
+      const workers = readJSON(KEYS.workers, []);
+      if (workers.some(w => String(w.code).toUpperCase() === code)) {
+        alert("That code already exists.");
+        return;
+      }
+
+      workers.push({
+        username,
+        discordId,
+        roleKey,
+        code,
+        status: "Active",
+        createdAt: new Date().toISOString()
+      });
+
+      writeJSON(KEYS.workers, workers);
+
+      document.getElementById("w-username").value = "";
+      document.getElementById("w-discord-id").value = "";
+      document.getElementById("w-code").value = "";
+
+      renderWorkers();
+    }
+
+    function setWorkerStatus(index, status) {
+      const workers = readJSON(KEYS.workers, []);
+      const w = workers[index];
+      if (!w) return;
+
+      if (status === "Revoked") {
+        if (!confirm(`Fire/revoke ${w.username}?`)) return;
+        w.status = "Revoked";
+        w.firedAt = Date.now();
+        w.purgeAt = Date.now() + (7 * DAY_MS);
+      } else {
+        w.status = "Active";
+        delete w.firedAt;
+        delete w.purgeAt;
+      }
+
+      workers[index] = w;
+      writeJSON(KEYS.workers, workers);
+      renderWorkers();
+    }
+
+    function renderWorkers() {
+      purgeExpiredWorkers();
+
+      const workers = readJSON(KEYS.workers, []);
+      document.getElementById("worker-count").textContent = String(workers.length);
+
+      const tbody = document.getElementById("worker-body");
+      if (!workers.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="muted">No workers yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = workers.map((w, i) => {
+        const revoked = w.status === "Revoked";
+        const daysLeft = revoked && w.purgeAt
+          ? Math.max(0, Math.ceil((w.purgeAt - Date.now()) / DAY_MS))
+          : "-";
+
+        return `
+          <tr>
+            <td>
+              <strong>${esc(w.username)}</strong><br>
+              <span class="muted">${esc(w.discordId || "No Discord ID")}</span>
+            </td>
+            <td>${esc(roleLabel(w.roleKey))}</td>
+            <td style="font-family:monospace">${esc(w.code)}</td>
+            <td>
+              <span class="status ${revoked ? "status-revoked" : "status-active"}">
+                ${revoked ? "Revoked" : "Active"}
+              </span>
+            </td>
+            <td>${revoked ? `${daysLeft} day(s)` : "-"}</td>
+            <td>
+              ${
+                revoked
+                  ? `<button class="btn btn-ghost" onclick="setWorkerStatus(${i}, 'Active')">Rehire</button>`
+                  : `<button class="btn btn-danger" onclick="setWorkerStatus(${i}, 'Revoked')">Fire</button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function statusLabel(s) {
+      const map = {
+        pending: "Order Received",
+        processing: "Making Order",
+        ready: "Ready to Pickup",
+        done: "Order Done",
+        order_received: "Order Received",
+        making_order: "Making Order",
+        order_done: "Order Done"
+      };
+      return map[s] || (s || "Pending");
+    }
+
+    function renderOrders() {
+      const orders = readJSON(KEYS.orders, []);
+      const tbody = document.getElementById("orders-body");
+
+      if (!orders.length) {
+        tbody.innerHTML = `<tr><td colspan="9" class="muted">No orders yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = [...orders].reverse().map(o => `
+        <tr>
+          <td style="font-family:monospace">${esc(o.id)}</td>
+          <td>${esc(o.customerDiscord || "-")}</td>
+          <td>${esc(o.paymentMethod || "-")}</td>
+          <td>${esc(o.qty ?? "-")}</td>
+          <td>${esc((o.tip ?? 0) + "p")}</td>
+          <td>${esc(((o.total ?? 0).toLocaleString ? o.total.toLocaleString() : o.total) + "p")}</td>
+          <td>${esc(statusLabel(o.status))}</td>
+          <td>${esc(o.seller || "Pending")}</td>
+          <td>${esc(o.meetup || "-")}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function postWebhook(url, payload) {
+      if (!url) return;
+
+      try {
+        await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        console.warn("Webhook failed", e);
+      }
+    }
+
+    function decideTransfer(id, decision) {
+      const tickets = readJSON(KEYS.transfers, []);
+      const idx = tickets.findIndex(t => t.id === id);
+      if (idx < 0) return;
+
+      tickets[idx].status = decision === "approve" ? "Approved" : "Declined";
+      tickets[idx].reviewedBy = ownerName;
+      tickets[idx].reviewedAt = new Date().toISOString();
+      writeJSON(KEYS.transfers, tickets);
+
+      const t = tickets[idx];
+
+      postWebhook(TRANSFER_WEBHOOK_URL, {
+        embeds: [{
+          title: `Owner ${tickets[idx].status}: ${t.id}`,
+          color: decision === "approve" ? 3066993 : 15158332,
+          fields: [
+            { name: "Discord Username", value: String(t.requesterUsername || "Unknown"), inline: true },
+            { name: "Role", value: String(t.requesterRole || "Unknown"), inline: true },
+            { name: "Item", value: String(t.item || "-"), inline: true },
+            { name: "Amount", value: String(t.amount || "-"), inline: true },
+            { name: "Pay", value: `${Number(t.totalPrice || 0).toLocaleString()}p`, inline: true },
+            { name: "Route", value: `${t.fromLocation || "-"} -> ${t.toLocation || "-"}`, inline: false },
+            { name: "Notes", value: t.notes || "None", inline: false }
+          ],
+          timestamp: new Date().toISOString()
+        }]
+      });
+
+      renderTransfers();
+    }
+
+    function renderTransfers() {
+      const tickets = readJSON(KEYS.transfers, []);
+      const tbody = document.getElementById("transfer-body");
+
+      if (!tickets.length) {
+        tbody.innerHTML = `<tr><td colspan="10" class="muted">No transfer tickets yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = [...tickets].reverse().map(t => {
+        const s = String(t.status || "Pending");
+        const cls = s === "Pending"
+          ? "status-pending"
+          : s === "Approved"
+            ? "status-approved"
+            : "status-declined";
+
+        return `
+          <tr>
+            <td style="font-family:monospace">${esc(t.id)}</td>
+            <td>${esc(t.requesterUsername || "-")}</td>
+            <td>${esc(t.requesterRole || "-")}</td>
+            <td>${esc(t.item || "-")}</td>
+            <td>${esc(t.amount ?? "-")}</td>
+            <td>${esc((t.totalPrice ?? 0).toLocaleString())}p</td>
+            <td>${esc((t.fromLocation || "-") + " -> " + (t.toLocation || "-"))}</td>
+            <td>${esc(t.notes || "-")}</td>
+            <td><span class="status ${cls}">${esc(s)}</span></td>
+            <td>
+              ${
+                s === "Pending"
+                  ? `<button class="btn" onclick="decideTransfer('${esc(t.id)}', 'approve')">Accept</button>
+                     <button class="btn btn-danger" style="margin-top:6px" onclick="decideTransfer('${esc(t.id)}', 'decline')">Decline</button>`
+                  : `<span class="muted">${esc(t.reviewedBy || "-")}</span>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function loadStock() {
+      const stock = Number(localStorage.getItem(KEYS.stock) || 0);
+      document.getElementById("stock-display").textContent = stock.toLocaleString();
+    }
+
+    function saveStock() {
+      const val = Number(document.getElementById("stock-input").value || 0);
+      if (val < 0) return;
+
+      localStorage.setItem(KEYS.stock, String(val));
+      document.getElementById("stock-input").value = "";
+      loadStock();
+    }
+
+    function switchView(id, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+
+      document.getElementById(id).classList.add("active");
+      btn.classList.add("active");
+
+      if (id === "view-workers") renderWorkers();
+      if (id === "view-orders") renderOrders();
+      if (id === "view-transfers") renderTransfers();
+      if (id === "view-stock") loadStock();
+    }
+
+    function logoutOwner() {
+      localStorage.removeItem("benji_active_seller_name");
+      localStorage.removeItem("benji_active_staff_role");
+      window.location.href = "../front%20side/index.html";
+    }
+
+    window.onload = () => {
+      renderWorkers();
+      renderOrders();
+      renderTransfers();
+      loadStock();
+    };
+  </script>
 </body>
 </html>

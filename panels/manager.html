@@ -1,104 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Benji HQ | Manager Terminal</title>
-    <style>
-        body { background: #09090b; color: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; display: flex; }
-        .top-navbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: #0a0a0a; border-bottom: 2px solid #f97316; display: flex; align-items: center; padding: 0 30px; z-index: 1000; }
-        .logo-text { color: white; font-weight: 900; font-size: 1.4rem; letter-spacing: 1px; }
-        .sidebar { position: fixed; top: 70px; left: 0; width: 250px; height: calc(100vh - 70px); background: #141619; border-right: 1px solid #27272a; padding: 20px; }
-        .nav-item { display: block; padding: 15px; color: #a1a1aa; text-decoration: none; font-weight: bold; border-radius: 4px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-        .nav-item:hover { background: #18181b; color: #fff; }
-        .nav-item.active { background: #f97316; color: #000; }
-        .main-content { margin-top: 70px; margin-left: 250px; padding: 40px; width: 100%; max-width: 800px; }
-        .admin-box { background: #141619; border: 1px solid #27272a; padding: 25px; border-radius: 8px; margin-bottom: 20px; }
-        label { display: block; font-size: 11px; font-weight: bold; color: #f97316; margin-bottom: 8px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; background: #0b0c0e; border: 1px solid #3f3f46; color: white; border-radius: 4px; margin-bottom: 15px; }
-        .btn { background: #f97316; color: #000; padding: 12px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benji HQ | Manager Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #09090b; color: #f4f4f5; display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; padding: 22px 0; display: flex; flex-direction: column; }
+    .logo { padding: 0 18px 18px; border-bottom: 1px solid #27272a; }
+    .logo .badge { display:inline-block; border:1px solid #f97316; color:#f97316; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:700; margin-bottom:8px; text-transform:uppercase; }
+    .logo h1 { font-size: 24px; font-weight: 900; }
+    .logo p { color:#a1a1aa; font-size:12px; margin-top:6px; }
+
+    .nav { padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .nav button { background:transparent; border:none; color:#a1a1aa; text-align:left; padding:12px; border-radius:6px; cursor:pointer; font-weight:700; }
+    .nav button:hover { background:#27272a; color:#fff; }
+    .nav button.active { background:#27272a; color:#f97316; }
+
+    .logout { margin-top:auto; padding:14px; border-top:1px solid #27272a; }
+    .logout button { width:100%; background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; border-radius:6px; padding:10px; font-weight:700; cursor:pointer; }
+
+    .main { flex:1; padding:30px; overflow:auto; }
+    .view { display:none; }
+    .view.active { display:block; }
+
+    .header { margin-bottom:20px; }
+    .header h2 { font-size:28px; font-weight:900; }
+    .header p { color:#a1a1aa; margin-top:6px; }
+
+    .card { background:#141619; border:1px solid #22252a; border-radius:8px; padding:20px; margin-bottom:16px; }
+    .card h3 { color:#f97316; margin-bottom:14px; }
+
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+
+    label { display:block; font-size:11px; text-transform:uppercase; color:#a1a1aa; font-weight:700; margin-bottom:6px; }
+    input, select, textarea { width:100%; background:#0b0c0e; border:1px solid #2c3036; color:#fff; border-radius:6px; padding:11px; margin-bottom:12px; outline:none; }
+    input:focus, select:focus, textarea:focus { border-color:#f97316; box-shadow:0 0 0 1px #f97316; }
+
+    .btn { border:none; background:#f97316; color:#000; padding:10px 12px; border-radius:6px; font-weight:900; cursor:pointer; }
+    .btn:hover { background:#ea580c; color:#fff; }
+
+    table { width:100%; border-collapse:collapse; background:#0b0c0e; border-radius:8px; overflow:hidden; }
+    th, td { padding:12px; border-bottom:1px solid #27272a; text-align:left; font-size:13px; color:#d4d4d8; }
+    th { color:#f97316; font-size:11px; text-transform:uppercase; font-weight:800; }
+    tr:last-child td { border-bottom:none; }
+
+    .status { display:inline-block; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:800; }
+    .s-pending { background:rgba(234,179,8,.15); color:#eab308; }
+    .s-approved { background:rgba(34,197,94,.15); color:#22c55e; }
+    .s-declined { background:rgba(239,68,68,.15); color:#ef4444; }
+
+    .total-box { font-size:20px; font-weight:900; color:#f97316; margin-top:6px; }
+    .sidebar-logo-wrap{
+  padding: 0 16px 16px;
+  margin: 0 0 14px;
+  border-bottom: 1px solid #27272a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-logo-img{
+  width: 170px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+.sidebar-logo-ver{
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: #f97316;
+}
+.sidebar-panel-name{
+  font-size: 12px;
+  color: #a1a1aa;
+}
+
+  </style>
 </head>
 <body>
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="badge">Community Hub v1.0</div>
+      <h1>BENJI HQ</h1>
+      <p>Manager Panel • <span id="manager-name">Manager</span></p>
+    </div>
 
-    <header class="top-navbar"><div class="logo-text">THE BENJI HQ</div></header>
+    <div class="nav">
+      <button class="active" onclick="switchView('view-create', this)">🧾 Create Transfer Ticket</button>
+      <button onclick="switchView('view-tickets', this)">📋 My Tickets</button>
+      <button onclick="switchView('view-prices', this)">💷 Price List</button>
+    </div>
 
-    <nav class="sidebar">
-        <div class="nav-item active" onclick="showSection('tickets')">Tickets</div>
-        <div class="nav-item" onclick="showSection('transfer')">Transfer Items</div>
-        <div class="nav-item" onclick="showSection('inventory')">Inventory</div>
-        <a href="index.html" class="nav-item" style="color: #ef4444;">Logout</a>
-    </nav>
+    <div class="logout">
+      <button onclick="window.location.href='../front side/index.html'">LOG OUT</button>
+    </div>
+  </aside>
 
-    <main class="main-content">
-        <div id="section-tickets" class="admin-box">
-            <h2>Pending Tickets</h2>
-            <div id="ticket-list">Loading tickets...</div>
-            <hr style="border: 0; border-top: 1px solid #27272a; margin: 20px 0;">
-            <label>Meeting Instructions</label>
-            <input type="text" id="meet-instr" placeholder="e.g. Meet at Server 5, Warehouse Alpha...">
-            <button class="btn" onclick="sendInstruction()">Send Instructions</button>
-        </div>
+  <main class="main">
+    <section id="view-create" class="view active">
+      <div class="header">
+        <h2>Create Transfer Ticket</h2>
+        <p>Format: Username, Item, Amount, Pay, Notes, From, To.</p>
+      </div>
 
-        <div id="section-transfer" class="admin-box" style="display:none;">
-            <h2>Transfer Items</h2>
+      <div class="card">
+        <div class="grid">
+          <div>
             <label>Item</label>
-            <select id="t-item">
-                <option value="Tuna">Tuna</option>
-                <option value="Pastry Dough">Pastry Dough</option>
-                <option value="Beans">Beans</option>
-                <option value="Peppers">Peppers</option>
-            </select>
+            <select id="item" onchange="calcTotal()"></select>
+
+            <label>Amount</label>
+            <input id="amount" type="number" min="1" value="1" oninput="calcTotal()" />
+
             <label>From</label>
-            <select id="t-from">
-                <option>Cantermange Warehouse</option><option>Cantermange Farmhouse</option>
-                <option>Bueval Warehouse</option><option>Bueval Farmhouse</option>
-                <option>Ellesmare Warehouse</option><option>Ellesmare Fishing Shack</option>
-            </select>
+            <select id="from-location"></select>
+
             <label>To</label>
-            <select id="t-to">
-                <option>Cantermange Warehouse</option><option>Cantermange Farmhouse</option>
-                <option>Bueval Warehouse</option><option>Bueval Farmhouse</option>
-                <option>Ellesmare Warehouse</option><option>Ellesmare Fishing Shack</option>
-            </select>
-            <button class="btn" onclick="submitTransfer()">Generate Transfer Ticket</button>
+            <select id="to-location"></select>
+          </div>
+
+          <div>
+            <label>Optional Order Notes</label>
+            <textarea id="notes" rows="7" placeholder="Any extra manager notes..."></textarea>
+
+            <label>Unit Price</label>
+            <input id="unit-price" readonly />
+
+            <label>Total Pay</label>
+            <input id="total-pay" readonly />
+
+            <div class="total-box" id="total-label">Total: 0p</div>
+          </div>
         </div>
 
-        <div id="section-inventory" class="admin-box" style="display:none;">
-            <h2>Global Inventory</h2>
-            <p>View stock levels across all your mapped warehouses here.</p>
-        </div>
-    </main>
+        <button class="btn" onclick="createTicket()">Create Ticket</button>
+      </div>
+    </section>
 
-    <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
+    <section id="view-tickets" class="view">
+      <div class="header">
+        <h2>My Tickets</h2>
+        <p>Owner can approve or decline these in owner panel.</p>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Item</th>
+              <th>Amount</th>
+              <th>Pay</th>
+              <th>Route</th>
+              <th>Status</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="ticket-body"></tbody>
+        </table>
+      </div>
+    </section>
 
-        function showSection(id) {
-            document.querySelectorAll('.admin-box').forEach(b => b.style.display = 'none');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('section-' + id).style.display = 'block';
-            event.currentTarget.classList.add('active');
-        }
+    <section id="view-prices" class="view">
+      <div class="header">
+        <h2>Price List</h2>
+        <p>Per item transfer values.</p>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Item</th><th>Price</th></tr></thead>
+          <tbody id="price-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
-        async function submitTransfer() {
-            const data = {
-                item: document.getElementById('t-item').value,
-                from: document.getElementById('t-from').value,
-                to: document.getElementById('t-to').value
-            };
+  <script>
+    const STORAGE = {
+      tickets: "benji_transfer_tickets",
+      transferWebhook: "benji_transfer_webhook"
+    };
 
-            await fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    embeds: [{ title: "🚛 Warehouse Transfer Ticket", color: 3066993, fields: [
-                        { name: "Item", value: data.item, inline: true },
-                        { name: "Origin", value: data.from, inline: false },
-                        { name: "Destination", value: data.to, inline: false }
-                    ]}]
-                })
-            });
-            alert("Transfer ticket sent to Discord!");
-        }
-    </script>
+    const PRICES = {
+      "Beans": 10,
+      "Peppers": 15,
+      "Salt": 5,
+      "Butter": 10,
+      "Flour": 5,
+      "Pastry Dough": 15,
+      "Yellowfin Tuna": 200
+    };
+
+    const FROM_LOCATIONS = [
+      "Inventory",
+      "Cantermange Warehouse",
+      "Cantermange Farmhouse",
+      "Bueval Warehouse",
+      "Bueval Farmhouse",
+      "Ellesmare Warehouse",
+      "Ellesmare Fish Hut"
+    ];
+
+    const TO_LOCATIONS = [
+      "Cantermange Warehouse",
+      "Cantermange Farmhouse",
+      "Bueval Warehouse",
+      "Bueval Farmhouse",
+      "Ellesmare Warehouse",
+      "Ellesmare Fish Hut"
+    ];
+
+    const managerName = localStorage.getItem("benji_active_seller_name") || "Manager";
+
+    function readJSON(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+      catch { return fallback; }
+    }
+
+    function writeJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function switchView(id, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.classList.add("active");
+      if (id === "view-tickets") renderTickets();
+      if (id === "view-prices") renderPrices();
+    }
+
+    function setupForm() {
+      document.getElementById("manager-name").textContent = managerName;
+
+      const itemSel = document.getElementById("item");
+      Object.keys(PRICES).forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item;
+        opt.textContent = `${item} - ${PRICES[item]}p`;
+        itemSel.appendChild(opt);
+      });
+
+      const fromSel = document.getElementById("from-location");
+      FROM_LOCATIONS.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        fromSel.appendChild(opt);
+      });
+
+      const toSel = document.getElementById("to-location");
+      TO_LOCATIONS.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        toSel.appendChild(opt);
+      });
+
+      calcTotal();
+    }
+
+    function calcTotal() {
+      const item = document.getElementById("item").value;
+      const amount = Math.max(1, Number(document.getElementById("amount").value || 1));
+      const unit = PRICES[item] || 0;
+      const total = unit * amount;
+
+      document.getElementById("unit-price").value = `${unit}p`;
+      document.getElementById("total-pay").value = `${total.toLocaleString()}p`;
+      document.getElementById("total-label").textContent = `Total: ${total.toLocaleString()}p`;
+    }
+
+    async function sendWebhook(ticket) {
+      const url = localStorage.getItem(STORAGE.transferWebhook) || "";
+      if (!url) return;
+
+      try {
+        await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            embeds: [{
+              title: `🔁 New Transfer Ticket (${ticket.id})`,
+              color: 16753920,
+              fields: [
+                { name: "Discord Username", value: ticket.requesterUsername, inline: true },
+                { name: "Role", value: ticket.requesterRole, inline: true },
+                { name: "Item", value: ticket.item, inline: true },
+                { name: "Amount", value: String(ticket.amount), inline: true },
+                { name: "Pay", value: `${ticket.totalPrice.toLocaleString()}p`, inline: true },
+                { name: "Route", value: `${ticket.fromLocation} -> ${ticket.toLocation}`, inline: false },
+                { name: "Notes", value: ticket.notes || "None", inline: false }
+              ],
+              timestamp: new Date().toISOString()
+            }]
+          })
+        });
+      } catch (e) {
+        console.warn("Webhook failed", e);
+      }
+    }
+
+    async function createTicket() {
+      const item = document.getElementById("item").value;
+      const amount = Math.max(1, Number(document.getElementById("amount").value || 1));
+      const fromLocation = document.getElementById("from-location").value;
+      const toLocation = document.getElementById("to-location").value;
+      const notes = document.getElementById("notes").value.trim();
+
+      if (fromLocation === toLocation) {
+        alert("From and To cannot be the same.");
+        return;
+      }
+
+      const unitPrice = PRICES[item] || 0;
+      const totalPrice = unitPrice * amount;
+
+      const ticket = {
+        id: `TR-${Math.floor(100000 + Math.random() * 900000)}`,
+        requesterUsername: managerName,
+        requesterRole: "Manager",
+        item,
+        amount,
+        unitPrice,
+        totalPrice,
+        fromLocation,
+        toLocation,
+        notes,
+        status: "Pending",
+        createdAt: new Date().toISOString()
+      };
+
+      const tickets = readJSON(STORAGE.tickets, []);
+      tickets.push(ticket);
+      writeJSON(STORAGE.tickets, tickets);
+
+      await sendWebhook(ticket);
+      document.getElementById("notes").value = "";
+      alert(`Ticket ${ticket.id} created.`);
+      renderTickets();
+    }
+
+    function renderTickets() {
+      const tbody = document.getElementById("ticket-body");
+      const tickets = readJSON(STORAGE.tickets, []).filter(t => t.requesterUsername === managerName);
+
+      if (!tickets.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="color:#a1a1aa;">No tickets yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = [...tickets].reverse().map(t => {
+        const cls = t.status === "Pending" ? "s-pending" : t.status === "Approved" ? "s-approved" : "s-declined";
+        return `
+          <tr>
+            <td style="font-family:monospace">${t.id}</td>
+            <td>${t.item}</td>
+            <td>${t.amount}</td>
+            <td>${t.totalPrice.toLocaleString()}p</td>
+            <td>${t.fromLocation} -> ${t.toLocation}</td>
+            <td><span class="status ${cls}">${t.status}</span></td>
+            <td>${t.notes || "-"}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderPrices() {
+      const tbody = document.getElementById("price-body");
+      tbody.innerHTML = Object.entries(PRICES).map(([item, p]) => `<tr><td>${item}</td><td>${p}p</td></tr>`).join("");
+    }
+
+    window.onload = () => {
+      setupForm();
+      renderTickets();
+      renderPrices();
+    };
+  </script>
 </body>
 </html>

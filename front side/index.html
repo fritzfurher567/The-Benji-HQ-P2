@@ -1,575 +1,502 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benji HQ | Central Hub</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #09090b; color: #f4f4f5; display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; display: flex; flex-direction: column; padding: 24px 0; }
+    .nav-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex-grow: 1; }
+    .nav-btn { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .nav-btn:hover { background: #27272a; color: #fff; }
+    .nav-btn.active { background: #27272a; color: #f97316; }
+    .employee-section { padding: 20px 16px; border-top: 1px solid #27272a; }
+    .login-box { display: flex; gap: 8px; flex-direction: column; }
+    .login-label { font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+    .login-inputs { display: flex; gap: 8px; }
+    .login-box input, .form-control {
+      width: 100%; background: #09090b; border: 1px solid #3f3f46; color: #fff; padding: 10px;
+      border-radius: 4px; font-size: 14px; outline: none;
+    }
+    .btn {
+      background: #f97316; color: #000; border: none; padding: 11px 14px; border-radius: 6px;
+      cursor: pointer; font-weight: 800;
+    }
+    .btn:hover { background: #ea580c; color: #fff; }
+    .btn-muted { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; }
+    .btn-muted:hover { background: #3f3f46; color: #fff; }
 
-<link rel="icon" type="image/png" href="../The%20Benji%20HQ.png"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    .main-content { flex-grow: 1; padding: 40px; display: flex; flex-direction: column; align-items: center; }
+    .view-section { display: none; width: 100%; max-width: 900px; }
+    .view-section.active { display: block; }
 
+    .hub-header { text-align: center; margin: 20px 0 30px; }
+    .welcome-badge {
+      display: inline-block; border: 1px solid #f97316; color: #f97316; padding: 4px 16px; border-radius: 50px;
+      font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase;
+    }
+    .hq-title {
+      font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px; margin-bottom: 16px;
+      text-shadow: 0 0 30px rgba(249,115,22,0.4); text-transform: uppercase;
+    }
+    .hq-subtext { color: #a1a1aa; font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
 
+    .card {
+      background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 24px; margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    }
+    .card h2 { color: #fff; margin-bottom: 14px; font-size: 20px; border-bottom: 1px solid #2c3036; padding-bottom: 10px; }
+    .row { display: flex; gap: 10px; }
+    .row > * { flex: 1; }
+    .hint { color: #a1a1aa; font-size: 12px; margin-top: -12px; margin-bottom: 14px; display: block; }
+    .total-display {
+      display: flex; justify-content: space-between; align-items: center; margin: 12px 0 16px;
+      background: #0b0c0e; border: 1px solid #2c3036; border-radius: 6px; padding: 14px;
+    }
+    .total-amount { color: #f97316; font-size: 24px; font-weight: 900; }
+    .quick-btn { background: #0b0c0e; color: #fff; border: 1px solid #2c3036; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: 700; }
+    .quick-btn:hover { background: #f97316; color: #000; border-color: #f97316; }
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benji HQ | Central Hub</title>
-    <style>
-        /* --- GLOBAL STYLES --- */
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: #09090b; color: #f4f4f5; display: flex; height: 100vh; overflow: hidden; }
+    .receipt { display: none; margin-top: 16px; padding: 16px; background: #0b0c0e; border: 1px dashed #2c3036; border-radius: 6px; }
+    .receipt .line { display: flex; justify-content: space-between; margin-bottom: 8px; color: #a1a1aa; }
+    .receipt .strong { color: #fff; font-weight: 700; }
 
-        /* --- SIDEBAR STYLES --- */
-        .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; display: flex; flex-direction: column; padding: 24px 0; z-index: 10; overflow-y: auto;}
-        .logo { padding: 0 24px; margin-bottom: 32px; display: flex; flex-direction: column; line-height: 0.85; user-select: none; }
-        .logo-the { font-size: 18px; color: #f4f4f5; font-weight: 800; margin-left: 2px; }
-        .logo-benji { font-size: 46px; color: #d8c29d; font-weight: 900; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .logo-hq { font-size: 34px; color: #f4f4f5; font-weight: 900; letter-spacing: -1px; margin-left: 24px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+    table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 6px; overflow: hidden; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; }
+    th { color: #f97316; text-transform: uppercase; font-size: 11px; letter-spacing: .5px; }
+    .badge { padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .b-pending { background: rgba(234,179,8,.14); color: #eab308; }
+    .b-progress { background: rgba(59,130,246,.14); color: #60a5fa; }
+    .b-done { background: rgba(34,197,94,.14); color: #22c55e; }
 
-        .nav-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex-grow: 1; }
-        .nav-btn { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .nav-btn:hover { background: #27272a; color: #fff; }
-        .nav-btn.active { background: #27272a; color: #f97316; }
+    #login-gate {
+      position: fixed; inset: 0; background: #09090b; z-index: 9999; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; color: #fff; text-align: center; padding: 20px;
+    }
+    #login-gate p { color: #a1a1aa; margin: 14px 0 18px; }
+    .discord-btn {
+      background: #5865F2; color: #fff; border: none; border-radius: 6px; padding: 12px 20px; width: 320px; font-weight: 800; cursor: pointer;
+    }
+    .discord-btn:hover { background: #4752c4; }
+    .sidebar-logo-wrap{
+  padding: 0 16px 16px;
+  margin: 0 0 14px;
+  border-bottom: 1px solid #27272a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-logo-img{
+  width: 170px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+.sidebar-logo-ver{
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: #f97316;
+}
+.sidebar-panel-name{
+  font-size: 12px;
+  color: #a1a1aa;
+}
 
-        .employee-section { padding: 20px 16px; border-top: 1px solid #27272a; }
-        .login-box { display: flex; gap: 8px; flex-direction: column;}
-        .login-label {font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
-        .login-inputs { display: flex; gap: 8px; }
-        .login-box input { flex-grow: 1; background: #09090b; border: 1px solid #3f3f46; color: #fff; padding: 10px; border-radius: 4px; font-size: 14px; outline: none; width: 100%;}
-        .login-box button { background: #3f3f46; color: #fff; border: none; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .login-box button:hover { background: #f97316; color: #000; }
-
-        /* --- MAIN CONTENT & VIEWS --- */
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
-        .view-section { display: none; width: 100%; max-width: 900px; }
-        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- THE BENJI HQ HUB DESIGN --- */
-        .hub-header { text-align: center; margin-top: 20px; margin-bottom: 30px; }
-        .welcome-badge { display: inline-block; border: 1px solid #f97316; color: #f97316; padding: 4px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase;}
-        .hq-title { font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px; margin-bottom: 16px; text-shadow: 0 0 30px rgba(249, 115, 22, 0.4); text-transform: uppercase; }
-        .hq-subtext { color: #a1a1aa; font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
-
-        /* --- SELLER / SHOP STYLES --- */
-        .shop-container { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
-        .shop-container h2 { font-size: 20px; color: #ffffff; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #2c3036; padding-bottom: 10px;}
-        .shop-container label { font-size: 12px; color: #a0a5b0; margin-bottom: 8px; display: block; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
-        .shop-container input, .shop-container select { width: 100%; padding: 12px; background: #0b0c0e; border: 1px solid #2c3036; color: #ffffff; border-radius: 4px; box-sizing: border-box; margin-bottom: 20px; outline: none; transition: 0.2s;}
-        .shop-container input:focus, .shop-container select:focus { border-color: #f97316; box-shadow: 0 0 0 1px #f97316;}
-        .quick-buy-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .quick-btn { flex: 1; background: #0b0c0e; color: #ffffff; border: 1px solid #2c3036; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;}
-        .quick-btn:hover, .quick-btn.active { background: #f97316; border-color: #f97316; color: #000; }
-        .pricing-box { background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.2); padding: 12px; margin-bottom: 20px; border-radius: 6px; }
-        .tip-text { font-size: 11px; color: #a0a5b0; margin-top: -15px; margin-bottom: 20px; display: block; }
-        .total-display { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #0b0c0e; padding: 15px; border-radius: 6px; border: 1px solid #2c3036;}
-        .total-amount { color: #f97316; font-size: 24px; font-weight: 900; }
-        .buy-btn { width: 100%; padding: 16px; background: #f97316; border: none; color: #000; font-weight: 900; font-size: 16px; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: 0.2s; letter-spacing: 1px;}
-        .buy-btn:hover { background: #ea580c; color: #fff;}
-
-        /* --- RECEIPT CSS --- */
-        #receipt-box { display: none; margin-top: 25px; padding: 20px; background: #0b0c0e; border: 1px dashed #2c3036; border-radius: 6px; }
-        .receipt-title { color: #f97316; font-weight: bold; margin-bottom: 15px; text-align: center; letter-spacing: 1px; }
-        .receipt-line { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #a0a5b0; }
-        .receipt-code { font-family: monospace; color: #ffffff; font-size: 18px; text-align: center; margin-top: 15px; display: flex; justify-content: center; align-items: center; background: #141619; padding: 10px; border-radius: 4px; border: 1px solid #3f3f46;}
-        #copy-btn { background-color: #2c3036; color: #a0a5b0; border: 1px solid #a0a5b0; padding: 4px 10px; margin-left: 10px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s; font-weight: bold;}
-        #copy-btn:hover { background-color: #f97316; color: #000; border-color: #f97316; }
-
-        /* --- PROFILE TABLE STYLES --- */
-        .profile-card { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; margin-bottom: 20px;}
-        table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 6px; overflow: hidden; margin-top: 10px;}
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 14px;}
-        th { color: #f97316; font-size: 12px; text-transform: uppercase; font-weight: 800;}
-
-        .credit-balance { display: flex; justify-content: space-between; align-items: center; background: rgba(249, 115, 22, 0.1); border: 1px solid #f97316; padding: 20px; border-radius: 6px; margin-bottom: 20px;}
-        .credit-balance h3 { color: #fff; font-size: 16px; margin: 0;}
-        .credit-amount { color: #f97316; font-size: 28px; font-weight: 900;}
-
-    </style>
+  </style>
 </head>
 <body>
+  <div id="login-gate">
+    <header class="hub-header">
+      <div class="welcome-badge">Community Hub v1.0</div>
+      <h1 class="hq-title">BENJI HQ</h1>
+      <p class="hq-subtext">The central command for all operations. Authenticate via Discord to access the marketplace.</p>
+    </header>
+    <button class="discord-btn" onclick="redirectToDiscord()">Login with Discord</button>
+  </div>
 
+  <aside class="sidebar">
+    <div class="sidebar-logo-wrap">
+  <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="The Benji HQ V2">
+  <div class="sidebar-logo-ver">Community Hub v2.0</div>
+</div>
 
-
-  <div class="sidebar">
-        <div class="logo">
-            <div class="logo-the">The</div>
-            <div class="logo-benji">Benji</div>
-            <div class="logo-hq">HQ</div>
-        </div>
-
-        <div class="nav-menu">
-            <button class="nav-btn active" onclick="switchNav('view-hub', this)">🛒 Buy Benjis</button>
-            <button class="nav-btn" onclick="switchNav('view-banking', this)">💰 Load Pounds (Bank)</button>
-            <button class="nav-btn" onclick="switchNav('view-profile', this)">👤 My Orders</button>
-        </div>
-
-
-        <div class="employee-section" id="customer-profile-section" style="display: none; background: rgba(249, 115, 22, 0.05); border-top: 1px solid #f97316;">
-            <div class="login-box">
-                <span class="login-label" style="color: #f97316;">Logged In As</span>
-                <span id="logged-in-username" style="color: #fff; font-weight: bold; font-size: 14px;">User</span>
-                <span style="color: #a1a1aa; font-size: 12px; margin-top: 4px;">Balance: <span id="logged-in-balance" style="color: #f97316; font-weight: bold;">0</span>p</span>
-                <button onclick="logoutCustomer()" style="margin-top: 8px; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa;">LOG OUT</button>
-            </div>
-        </div>
-
-        <div class="employee-section">
-            <div class="login-box">
-                <span class="login-label">Staff / Manager Portal</span>
-                <div class="login-inputs">
-                    <input type="password" id="empCode" placeholder="Enter Role Code...">
-                    <button onclick="attemptLogin()">GO</button>
-                </div>
-            </div>
-        </div>
-    </div> <div class="main-content">
-
-        <div id="view-hub" class="view-section active">
-            <div class="hub-header">
-                <div class="welcome-badge">Welcome to the Hub</div>
-                <h1 class="hq-title">THE BENJI HQ</h1>
-                <p class="hq-subtext">This is the Benji HQ. Benjis are used for treasure chests, make sure to buy one at our affordable prices.</p>
-            </div>
-
-            <div class="shop-container">
-                <h2>Process Order</h2>
-
-                <label>Payment Method</label>
-                <select id="paymentMethod">
-                    <option value="Cash/Pounds">Cash / Pounds (Direct Exchange)</option>
-                    <option value="Account Credits">Benji Credits (Pre-Loaded)</option>
-                </select>
-
-                <label>Quantity</label>
-                <div class="quick-buy-row">
-                    <button type="button" class="quick-btn" onclick="setQuantity(10)">10x</button>
-                    <button type="button" class="quick-btn" onclick="setQuantity(25)">25x</button>
-                    <button type="button" class="quick-btn" onclick="setQuantity(55)">55x</button>
-                </div>
-                <input type="number" id="qty" placeholder="Enter amount..." oninput="calculateTotal()" min="1">
-
-                <div class="pricing-box">
-                    <div style="font-size: 13px; color: #a0a5b0;">Base Price: 350p / item</div>
-                    <div style="font-size: 13px; color: #f97316; font-weight: bold; margin-top: 4px;">Bulk (55+): 300p / item</div>
-                </div>
-
-                <label>Tip Amount</label>
-                <input type="number" id="tip" placeholder="Optional tip in points..." oninput="calculateTotal()" min="0">
-                <span class="tip-text">Fixed point amount, no math required.</span>
-
-                <label>Client Username</label>
-                <input type="text" id="username" placeholder="Your Roblox Username And Northwind Username...">
-
-                <div class="total-display">
-                    <span style="font-weight:bold; color:#a1a1aa;">Total Due:</span>
-                    <span class="total-amount" id="display-total">0p</span>
-                </div>
-
-                <button class="buy-btn" id="submitOrderBtn" onclick="processOrder()">Purchase Order</button>
-
-                <div id="receipt-box">
-                    <div class="receipt-title">ORDER SUMMARY</div>
-                    <div class="receipt-line"><span>Method:</span> <span id="rec-method" style="color:#fff;">Cash</span></div>
-                    <div class="receipt-line"><span>Items:</span> <span id="rec-qty">0</span></div>
-                    <div class="receipt-line"><span>Unit Price:</span> <span id="rec-price">0p</span></div>
-                    <div class="receipt-line"><span>Tip:</span> <span id="rec-tip">0p</span></div>
-                    <hr style="border-color: #2c3036; margin: 10px 0;">
-                    <div class="receipt-line"><span style="color:#fff; font-weight:bold;">Final Total:</span> <span id="rec-total" style="color:#f97316; font-weight:bold;">0p</span></div>
-
-                    <div class="receipt-code">
-                        <span id="receipt-order-code">ORD-XXXXX</span>
-                        <button type="button" id="copy-btn" onclick="copyOrderCode()">Copy</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div id="view-banking" class="view-section">
-            <div style="display: flex; align-items: center; justify-content: center; height: 70vh; flex-direction: column; text-align: center;">
-                <div style="font-size: 5rem; font-weight: 900; color: #ffffff; margin-bottom: 20px; text-shadow: 0 0 10px #ff6b00, 0 0 20px #ff6b00, 0 0 40px #ff6b00, 0 0 80px #ff6b00;">BENJI HQ</div>
-                <div style="font-size: 2rem; font-weight: bold; color: #ff6b00; background-color: rgba(255, 107, 0, 0.1); border: 3px dashed #ff6b00; padding: 20px 40px; border-radius: 12px; animation: pulse 2s infinite;">⚠️ THIS TAB IS STILL BEING CODED ⚠️</div>
-                <p style="margin-top: 20px; font-size: 1.2rem; color: #9ca3af;">The Load Pounds feature is currently under construction. Check back later!</p>
-                <style>
-                    @keyframes pulse {
-                        0% { opacity: 1; box-shadow: 0 0 10px rgba(255,107,0,0.2); }
-                        50% { opacity: 0.6; box-shadow: 0 0 0px rgba(255,107,0,0); }
-                        100% { opacity: 1; box-shadow: 0 0 10px rgba(255,107,0,0.2); }
-                    }
-                </style>
-            </div>
-        </div>
+    <div class="nav-menu">
+      <button class="nav-btn active" onclick="switchNav('view-hub', this)">🛒 Buy Benjis</button>
+      <button class="nav-btn" onclick="switchNav('view-banking', this)">💰 Load Pounds</button>
+      <button class="nav-btn" onclick="switchNav('view-profile', this)">👤 My Dashboard</button>
     </div>
 
-<!-- 3. MY ORDERS / PROFILE TAB -->
-        <div id="view-profile" class="view-section">
-            <div class="hub-header">
-                <div class="welcome-badge">Client Portal</div>
-                <h1 class="hq-title">MY DASHBOARD</h1>
-            </div>
+    <div class="employee-section">
+      <div class="login-box">
+        <span class="login-label" style="color:#f97316;">Logged In As</span>
+        <span id="logged-in-username" style="color:#fff;font-weight:700;">Not logged in</span>
+        <span style="color:#a1a1aa;font-size:12px;">Balance: <span id="logged-in-balance" style="color:#f97316;font-weight:700;">0</span>p</span>
+        <button class="btn btn-muted" onclick="logoutCustomer()">LOG OUT</button>
+      </div>
+    </div>
 
-            <div class="profile-card">
-                <div class="credit-balance">
-                    <div>
-                        <h3>Available Benji Credits</h3>
-                        <p style="color: #a1a1aa; font-size: 12px; margin-top: 4px;">Used for quick checkout</p>
-                    </div>
-                    <div class="credit-amount" id="profile-balance">0p</div>
-                </div>
+    <div class="employee-section">
+      <div class="login-box">
+        <span class="login-label">Staff / Manager Portal</span>
+        <div class="login-inputs">
+          <input id="empCode" type="password" placeholder="Enter Role Code..." />
+          <button class="btn" onclick="attemptLogin()">GO</button>
+        </div>
+      </div>
+    </div>
+  </aside>
 
-                <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;">Recent Orders</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Order Code</th>
-                            <th>Items</th>
-                            <th>Total Paid</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="order-history-table">
-                    </tbody>
-                </table>
-            </div>
+  <main class="main-content">
+    <section id="view-hub" class="view-section active">
+      <header class="hub-header">
+        <div class="welcome-badge">Community Hub v1.0</div>
+        <h1 class="hq-title">BENJI HQ</h1>
+        <p class="hq-subtext">The central command for all operations. Authenticate via Discord to access the marketplace.</p>
+      </header>
+
+      <div class="card">
+        <h2>Process Order</h2>
+
+        <label class="login-label">Payment Method</label>
+        <select id="paymentMethod" class="form-control">
+          <option value="Cash/Pounds">Cash / Pounds</option>
+          <option value="Account Credits">Benji Credits</option>
+        </select>
+
+        <label class="login-label">Quantity</label>
+        <div class="row" style="margin-bottom:10px;">
+          <button class="quick-btn" type="button" onclick="setQuantity(10)">10x</button>
+          <button class="quick-btn" type="button" onclick="setQuantity(25)">25x</button>
+          <button class="quick-btn" type="button" onclick="setQuantity(55)">55x</button>
+        </div>
+        <input id="qty" class="form-control" type="number" min="1" placeholder="Enter amount..." oninput="calculateTotal()" />
+
+        <label class="login-label">Tip Amount</label>
+        <input id="tip" class="form-control" type="number" min="0" placeholder="Optional tip..." oninput="calculateTotal()" />
+        <span class="hint">Fixed amount in pounds.</span>
+
+        <div class="total-display">
+          <span style="color:#a1a1aa;font-weight:700;">Total Due:</span>
+          <span id="display-total" class="total-amount">0p</span>
         </div>
 
+        <button id="submitOrderBtn" class="btn" style="width:100%;" onclick="processOrder()">Purchase Order</button>
 
-    <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
+        <div id="receipt-box" class="receipt">
+          <div class="line"><span>Order Code</span><span id="rec-code" class="strong">ORD-XXXXX</span></div>
+          <div class="line"><span>Method</span><span id="rec-method">Cash/Pounds</span></div>
+          <div class="line"><span>Quantity</span><span id="rec-qty">0</span></div>
+          <div class="line"><span>Tip</span><span id="rec-tip">0p</span></div>
+          <div class="line"><span class="strong">Final Total</span><span id="rec-total" class="strong" style="color:#f97316;">0p</span></div>
+        </div>
+      </div>
+    </section>
 
-        // --- GLOBAL VARIABLES & MEMORY ---
-        let userBalances = JSON.parse(localStorage.getItem('benji_balances')) || {
-            "TestUser": 1000,
-            "test": 20000
-        };
-        let userOrders = JSON.parse(localStorage.getItem('benji_orders')) || {};
-        let currentUser = null;
+    <section id="view-banking" class="view-section">
+      <div class="card">
+        <h2>Load Pounds Request</h2>
+        <label class="login-label">Amount to Load</label>
+        <input id="loadAmount" class="form-control" type="number" min="1" placeholder="Enter pounds..." />
+        <button class="btn" style="width:100%;" onclick="submitLoadPounds()">Send Load Request</button>
+      </div>
 
-        function saveToDatabase() {
-            localStorage.setItem('benji_balances', JSON.stringify(userBalances));
-            localStorage.setItem('benji_orders', JSON.stringify(userOrders));
-        }
+      <div class="card">
+        <h2>My Load Requests</h2>
+        <table>
+          <thead>
+            <tr><th>Request ID</th><th>Amount</th><th>Status</th><th>Created</th></tr>
+          </thead>
+          <tbody id="bank-requests-table"></tbody>
+        </table>
+      </div>
+    </section>
 
-        // --- DISPLAY UPDATES ---
-        function updateBalanceDisplay() {
-            if (currentUser) {
-                const bal = userBalances[currentUser] || 0;
+    <section id="view-profile" class="view-section">
+      <div class="card">
+        <h2>My Orders</h2>
+        <table>
+          <thead>
+            <tr><th>Order Code</th><th>Qty</th><th>Tip</th><th>Total</th><th>Status</th></tr>
+          </thead>
+          <tbody id="order-history-table"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
-                const loggedInBal = document.getElementById('logged-in-balance');
-                if (loggedInBal) loggedInBal.innerText = bal.toLocaleString();
+<script>
+// ===== CONFIG (declared once) =====
+const API_URL = "/.netlify/functions/api";
+const DISCORD_CLIENT_ID = "1512209739629461554";
+const DISCORD_REDIRECT_URI = "https://thebenjihq.netlify.app/";
+const OAUTH_STATE_KEY = "benji_oauth_state";
 
-                const profileBal = document.getElementById('profile-balance');
-                if (profileBal) profileBal.innerText = bal.toLocaleString() + "p";
-            }
-        }
+let currentUser = null;
 
-        function renderOrderHistory() {
-            const tbody = document.getElementById('order-history-table');
-            if (!tbody) return;
+// ===== API HELPER =====
+async function api(action, payload = {}) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, ...payload })
+  });
+  const data = await res.json();
+  if (!res.ok || data.ok === false) throw new Error(data.error || "Request failed");
+  return data;
+}
 
-            tbody.innerHTML = "";
+// ===== DISCORD OAUTH (Authorization Code flow — matches boot()'s ?code handling) =====
+function redirectToDiscord() {
+  const state = crypto.randomUUID();
+  sessionStorage.setItem(OAUTH_STATE_KEY, state);
 
-            if (!currentUser || !userOrders[currentUser] || userOrders[currentUser].length === 0) {
-                tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No orders found.</td></tr>";
-                return;
-            }
+  const params = new URLSearchParams({
+    client_id: DISCORD_CLIENT_ID,
+    redirect_uri: DISCORD_REDIRECT_URI,
+    response_type: "code",
+    scope: "identify",
+    state
+  });
 
-            userOrders[currentUser].forEach(order => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="color: #f4f4f5;">${order.code}</td>
-                    <td>${order.qty}x Benjis</td>
-                    <td style="color: #f97316; font-weight: bold;">${order.total.toLocaleString()}p</td>
-                    <td><span style="background: rgba(249,115,22,0.1); color: #f97316; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${order.status}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+  window.location.href = `https://discord.com/api/oauth2/authorize?${params.toString()}`;
+}
 
-        // --- LOGIN LOGIC ---
-        function loginCustomer(usernameOverride = null) {
-            let user = usernameOverride;
+// ===== NAV / UI =====
+function switchNav(targetId, btn) {
+  document.querySelectorAll(".view-section").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(n => n.classList.remove("active"));
+  document.getElementById(targetId).classList.add("active");
+  btn.classList.add("active");
+}
 
-            // Fallback if not using Discord OAuth
-            if (!user) {
-                const inputEl = document.getElementById('customerUsername');
-                user = inputEl ? inputEl.value.trim() : "";
-            }
+function setQuantity(amount) {
+  document.getElementById("qty").value = amount;
+  calculateTotal();
+}
 
-            if (!user) {
-                alert("Please enter your Discord username to log in.");
-                return;
-            }
+function calculateTotal() {
+  const qty = parseInt(document.getElementById("qty").value || "0", 10);
+  const tip = parseInt(document.getElementById("tip").value || "0", 10);
+  let unitPrice = 350;
+  if (qty >= 55) unitPrice = 300;
+  else if (qty >= 40) unitPrice = 310;
+  else if (qty >= 30) unitPrice = 320;
+  else if (qty >= 20) unitPrice = 330;
+  else if (qty >= 10) unitPrice = 340;
+  const total = qty * unitPrice + tip;
+  document.getElementById("display-total").innerText = `${total.toLocaleString()}p`;
+  return { qty, tip, unitPrice, total };
+}
 
-            currentUser = user;
+// ===== SESSION =====
+function completeLogin(user) {
+  currentUser = user;
+  localStorage.setItem("benji_active_user", JSON.stringify(user));
+  document.getElementById("login-gate").style.display = "none";
+  document.getElementById("logged-in-username").innerText = user.username;
+  refreshAllUserData();
+}
 
-            if (userBalances[currentUser] === undefined) {
-                userBalances[currentUser] = 0;
-                saveToDatabase();
-            }
+function logoutCustomer() {
+  localStorage.removeItem("benji_active_user");
+  currentUser = null;
+  window.location.reload();
+}
 
-            // Swap UI
-            const loginSec = document.getElementById('customer-login-section');
-            if (loginSec) loginSec.style.display = 'none';
+async function refreshAllUserData() {
+  if (!currentUser) return;
 
-            const profileSec = document.getElementById('customer-profile-section');
-            if (profileSec) profileSec.style.display = 'block';
+  try {
+    const profile = await api("getUserProfile", { discordId: currentUser.id, username: currentUser.username });
+    document.getElementById("logged-in-balance").innerText = Number(profile.profile.pounds_balance || 0).toLocaleString();
+  } catch {}
 
-            const loggedInName = document.getElementById('logged-in-username');
-            if (loggedInName) loggedInName.innerText = currentUser;
+  try {
+    const orders = await api("listOrdersByUser", { discordId: currentUser.id });
+    const tbody = document.getElementById("order-history-table");
+    tbody.innerHTML = "";
+    if (!orders.orders.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No orders yet.</td></tr>`;
+    } else {
+      orders.orders.forEach(o => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="color:#fff;font-weight:700;">${o.id}</td>
+          <td>${o.qty}x</td>
+          <td>${o.tip}p</td>
+          <td style="color:#f97316;font-weight:700;">${Number(o.total).toLocaleString()}p</td>
+          <td>${badgeForStatus(o.status)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  } catch {}
 
-            // Lock input boxes
-            const checkoutUser = document.getElementById('username');
-            if (checkoutUser) {
-                checkoutUser.value = currentUser;
-                checkoutUser.disabled = true;
-                checkoutUser.style.opacity = "0.5";
-            }
+  try {
+    const reqs = await api("listBankLoadRequestsByUser", { discordId: currentUser.id });
+    const tbody = document.getElementById("bank-requests-table");
+    tbody.innerHTML = "";
+    if (!reqs.requests.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No requests yet.</td></tr>`;
+    } else {
+      reqs.requests.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="color:#fff;font-weight:700;">${r.id}</td>
+          <td>${Number(r.amount).toLocaleString()}p</td>
+          <td>${r.status}</td>
+          <td>${new Date(Number(r.created_at)).toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  } catch {}
+}
 
-            const bankUser = document.getElementById('bankUsername');
-            if (bankUser) {
-                bankUser.value = currentUser;
-                bankUser.disabled = true;
-                bankUser.style.opacity = "0.5";
-            }
+// ===== ORDERS =====
+async function processOrder() {
+  if (!currentUser) return alert("You must login with Discord first.");
+  const data = calculateTotal();
+  if (data.qty <= 0) return alert("Enter a valid quantity.");
 
-            updateBalanceDisplay();
-            renderOrderHistory();
-        }
+  const method = document.getElementById("paymentMethod").value;
+  const btn = document.getElementById("submitOrderBtn");
+  btn.disabled = true;
+  btn.innerText = "PROCESSING...";
 
-        // --- ONLOAD: DISCORD OAUTH CHECK ---
-        window.onload = () => {
-            const fragment = new URLSearchParams(window.location.hash.slice(1));
-            const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
+  try {
+    if (method === "Account Credits") {
+      await api("debitUserBalance", {
+        discordId: currentUser.id,
+        username: currentUser.username,
+        amount: data.total
+      });
+    }
 
-            if (!accessToken) return;
+    const orderId = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
+    await api("createOrder", {
+      orderId,
+      customerDiscord: currentUser.username,
+      customerDiscordId: currentUser.id,
+      paymentMethod: method,
+      qty: data.qty,
+      tip: data.tip,
+      total: data.total,
+      status: "order_received"
+    });
 
-            const loginGate = document.getElementById('login-gate');
-            if (loginGate) loginGate.style.display = 'none';
+    document.getElementById("receipt-box").style.display = "block";
+    document.getElementById("rec-code").innerText = orderId;
+    document.getElementById("rec-method").innerText = method;
+    document.getElementById("rec-qty").innerText = `${data.qty}x`;
+    document.getElementById("rec-tip").innerText = `${data.tip}p`;
+    document.getElementById("rec-total").innerText = `${data.total.toLocaleString()}p`;
 
-            fetch('https://discord.com/api/users/@me', {
-                headers: { authorization: `${tokenType} ${accessToken}` }
-            })
-            .then(result => result.json())
-            .then(response => {
-                const { username } = response;
+    await refreshAllUserData();
+    alert("✅ Order placed successfully.");
+  } catch (e) {
+    alert(e.message || "Order failed.");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Purchase Order";
+  }
+}
 
-                const customerUserEl = document.getElementById('customerUsername');
-                if (customerUserEl) customerUserEl.value = username;
+async function submitLoadPounds() {
+  if (!currentUser) return alert("You must login first.");
+  const amount = parseInt(document.getElementById("loadAmount").value || "0", 10);
+  if (!amount || amount <= 0) return alert("Enter a valid amount.");
 
-                loginCustomer(username);
-                window.history.replaceState({}, document.title, window.location.pathname);
-            })
-            .catch(console.error);
-        };
+  try {
+    await api("createBankLoadRequest", {
+      customerDiscord: currentUser.username,
+      customerDiscordId: currentUser.id,
+      amount
+    });
+    document.getElementById("loadAmount").value = "";
+    await refreshAllUserData();
+    alert("✅ Load request sent.");
+  } catch (e) {
+    alert(e.message || "Could not send request.");
+  }
+}
 
-        // --- NAVIGATION ---
-        function switchNav(targetId, btn) {
-            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(targetId).classList.add('active');
-            btn.classList.add('active');
-        }
+// ===== STAFF LOGIN =====
+function attemptLogin() {
+  const enteredCode = document.getElementById("empCode").value.trim().toUpperCase();
 
-        // --- STAFF LOGIN ---
-        function attemptLogin() {
-            let enteredCode = document.getElementById("empCode").value.trim();
+  const workers = JSON.parse(localStorage.getItem("benji_worker_codes") || "[]");
+  const worker = workers.find(w =>
+    String(w.code || "").toUpperCase() === enteredCode &&
+    w.status === "Active"
+  );
 
-            if (enteredCode === "W_DIST-1_nicho") {
-                window.location.href = "../panels/owner.html";
-            } else if (enteredCode.startsWith("W_MGMT_")) {
-                window.location.href = "../panels/manager.html";
-            } else if (enteredCode.startsWith("W_SELL_")) {
-                window.location.href = "../panels/seller.html";
-            } else if (enteredCode.startsWith("W_CHEF_")) {
-                window.location.href = "../panels/chef.html";
-            } else if (enteredCode.startsWith("W_FISH_")) {
-                window.location.href = "../panels/fisher.html";
-            } else if (enteredCode.startsWith("W_GATH_")) {
-                window.location.href = "../panels/gatherer.html";
-            } else if (enteredCode.startsWith("W_FARM_")) {
-                window.location.href = "../panels/farmer.html";
-            } else {
-                alert("Invalid code! Please check your roster code and try again.");
-            }
-        }
+  if (!worker) {
+    alert("Invalid or revoked code.");
+    return;
+  }
 
-        // --- ORDER MATH & PROCESS ---
-        function calculateTotal() {
-            let qty = parseInt(document.getElementById('qty').value) || 0;
-            let tip = parseInt(document.getElementById('tip').value) || 0;
+  localStorage.setItem("benji_active_seller_name", worker.username || worker.discordId || "Staff");
+  localStorage.setItem("benji_active_staff_role", worker.roleKey || worker.role || "");
 
-            let unitPrice = 350;
-            if (qty >= 55) unitPrice = 300;
-            else if (qty >= 40) unitPrice = 310;
-            else if (qty >= 30) unitPrice = 320;
-            else if (qty >= 20) unitPrice = 330;
-            else if (qty >= 10) unitPrice = 340;
+  const role = worker.roleKey || worker.role;
+  if (role === "W_MGMT") window.location.href = "../panels/manager.html";
+  else if (role === "W_SELL") window.location.href = "../panels/seller.html";
+  else if (role === "W_CHEF") window.location.href = "../panels/chef.html";
+  else if (role === "W_FISH") window.location.href = "../panels/fisher.html";
+  else if (role === "W_GATH") window.location.href = "../panels/gatherer.html";
+  else if (role === "W_FARM") window.location.href = "../panels/farmer.html";
+  else if (role === "W_OWNER") window.location.href = "../panels/owner.html";
+  else alert("Role route is not configured.");
+}
 
-            let total = (qty * unitPrice) + tip;
+// ===== BOOT (single copy) =====
+async function boot() {
+  const saved = localStorage.getItem("benji_active_user");
+  if (saved) {
+    try { completeLogin(JSON.parse(saved)); } catch {}
+  }
 
-            document.getElementById('display-total').innerText = total.toLocaleString() + "p";
+  const qp = new URLSearchParams(window.location.search);
+  const code = qp.get("code");
+  const state = qp.get("state");
 
-            return { qty: qty, tip: tip, unitPrice: unitPrice, total: total };
-        }
+  if (!code) return;
 
-        function setQuantity(amount) {
-            document.getElementById('qty').value = amount;
-            calculateTotal();
-        }
+  const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY);
+  if (!expectedState || state !== expectedState) {
+    alert("OAuth state mismatch. Please try again.");
+    return;
+  }
 
-        async function processOrder() {
-            const orderData = calculateTotal();
-            const username = document.getElementById('username').value.trim();
-            const method = document.getElementById('paymentMethod').value;
-            const orderCode = "ORD-" + Math.floor(10000 + Math.random() * 90000);
-            const btn = document.getElementById('submitOrderBtn');
+  try {
+    const res = await fetch("/.netlify/functions/discord-auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code })
+    });
 
-            if (orderData.qty <= 0 || !username) {
-                alert("Please fill all fields including your username!");
-                return;
-            }
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || "Discord login failed");
 
-            if (method === "Account Credits") {
-                if (!currentUser) {
-                    alert("❌ You must log in using the Customer Portal on the left to pay with Account Credits.");
-                    return;
-                }
-                const currentBalance = userBalances[currentUser] || 0;
-                if (orderData.total > currentBalance) {
-                    alert("❌ Order Declined: Insufficient funds! You have " + currentBalance.toLocaleString() + "p, but need " + orderData.total.toLocaleString() + "p.");
-                    return;
-                }
-                // Deduct balance and save
-                userBalances[currentUser] -= orderData.total;
-                saveToDatabase();
-                updateBalanceDisplay();
-            }
+    completeLogin(data.user);
+    sessionStorage.removeItem(OAUTH_STATE_KEY);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } catch (e) {
+    alert(e.message || "Discord login failed.");
+  }
+}
 
-            btn.disabled = true;
-            btn.innerText = "PROCESSING...";
+window.onload = boot;
 
-            const payload = {
-                embeds: [{
-                    title: "🛒 New Storefront Sale",
-                    color: 0xFFA500,
-                    fields: [
-                        {name: "Customer", value: username, inline: true},
-                        {name: "Order Code", value: orderCode, inline: true},
-                        {name: "Payment Method", value: method, inline: true},
-                        {name: "Quantity", value: `**${orderData.qty}x Benjis**`, inline: true},
-                        {name: "Tip Amount", value: orderData.tip + "p", inline: true},
-                        {name: "Final Total", value: orderData.total.toLocaleString() + "p", inline: true}
-                    ]
-                }]
-            };
 
-            try {
-                // 1. Send to Discord
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
 
-                // 2. Send to Turso Database via Netlify API
-                await fetch('/.netlify/functions/api', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'createOrder',
-                        orderId: orderCode,
-                        customerDiscord: username,
-                        status: 'Pending'
-                    })
-                });
-
-                // 3. Save to local history if logged in
-                if (currentUser) {
-                    if (!userOrders[currentUser]) userOrders[currentUser] = [];
-                    userOrders[currentUser].unshift({
-                        code: orderCode,
-                        qty: orderData.qty,
-                        total: orderData.total,
-                        status: "Pending"
-                    });
-                    saveToDatabase();
-                    renderOrderHistory();
-                }
-
-                alert("✅ Order Placed! It is now waiting for the seller.");
-
-                document.getElementById('receipt-box').style.display = 'block';
-                document.getElementById('receipt-order-code').innerText = orderCode;
-                document.getElementById('rec-method').innerText = method;
-                document.getElementById('rec-qty').innerText = orderData.qty;
-                document.getElementById('rec-price').innerText = orderData.unitPrice + "p";
-                document.getElementById('rec-tip').innerText = orderData.tip + "p";
-                document.getElementById('rec-total').innerText = orderData.total.toLocaleString() + "p";
-
-            } catch (err) {
-                console.error(err);
-                alert("Order failed to send.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Purchase Order";
-            }
-        }
-
-        // --- BANK DEPOSIT ---
-        async function submitPoundRequest() {
-            const username = document.getElementById('bankUsername').value.trim();
-            const amount = parseInt(document.getElementById('loadAmount').value);
-            const btn = document.getElementById('loadBtn');
-            const statusBox = document.getElementById('bank-status');
-
-            if (!username || !amount || amount <= 0) {
-                alert("Please enter a valid username and amount to load.");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "SENDING TICKET...";
-            if (statusBox) statusBox.style.display = "none";
-
-            const payload = {
-                embeds: [{
-                    title: "💰 Bank Deposit Request (Load Pounds)",
-                    color: 0x22c55e,
-                    description: "A user is requesting to meet and load pounds into their account.",
-                    fields: [
-                        {name: "Customer", value: username, inline: true},
-                        {name: "Amount to Load", value: amount.toLocaleString() + "p", inline: true},
-                        {name: "Action Required", value: "DM user with meeting location. Collect cash, then manually update database.", inline: false}
-                    ]
-                }]
-            };
-
-            try {
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-
-                if (statusBox) statusBox.style.display = "block";
-                document.getElementById('loadAmount').value = '';
-
-            } catch (err) {
-                console.error("Webhook failed:", err);
-                alert("Failed to send deposit ticket. Try again.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Request Deposit";
-            }
-        }
-
-        // --- UTILITY ---
-        function copyOrderCode() {
-            const codeText = document.getElementById('receipt-order-code').innerText;
-            navigator.clipboard.writeText(codeText).then(() => {
-                const copyBtn = document.getElementById('copy-btn');
-                copyBtn.innerText = "Copied!";
-                setTimeout(() => {
-                    copyBtn.innerText = "Copy";
-                }, 2000);
-            });
-        }
-    </script>
+</script>
+</body>
+</html>

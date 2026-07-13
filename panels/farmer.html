@@ -1,259 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benji HQ | Farmer Terminal</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        body {
-            background: #0b0c0e; /* Deep black */
-            color: #e5e7eb;
-            padding: 40px;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-        .wrapper {
-            width: 100%;
-            max-width: 500px;
-            background: #141619;
-            border: 1px solid #1a202c;
-            border-top: 4px solid #10b981; /* Sleek Emerald Green */
-            border-radius: 8px;
-            padding: 32px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .header {
-            border-bottom: 1px solid #2c3036;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-        }
-        h2 {
-            font-size: 22px;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: #9ca3af;
-        }
-        .form-group {
-            margin-bottom: 24px;
-        }
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            color: #10b981;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            letter-spacing: 0.5px;
-        }
-        input[type="text"], input[type="number"], select {
-            width: 100%;
-            background: #0b0c0e;
-            border: 1px solid #374151;
-            color: #fff;
-            padding: 14px;
-            border-radius: 4px;
-            font-size: 15px;
-            transition: border-color 0.2s;
-            appearance: none;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 1px #10b981;
-        }
-        .calc-view {
-            background: rgba(16, 185, 129, 0.05);
-            padding: 16px;
-            border-radius: 4px;
-            text-align: center;
-            margin-bottom: 24px;
-            font-weight: 600;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            color: #d1d5db;
-        }
-        .payout-amount {
-            color: #10b981;
-            font-size: 20px;
-            display: block;
-            margin-top: 4px;
-        }
-        .dispatch-btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 4px;
-            background: #10b981;
-            color: #000000;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .dispatch-btn:hover {
-            background: #059669;
-            color: #ffffff;
-        }
-        .dispatch-btn:disabled {
-            background: #4b5563;
-            color: #9ca3af;
-            cursor: not-allowed;
-        }
-        #statusMessage {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 14px;
-            padding: 16px;
-            border-radius: 4px;
-            display: none;
-            font-weight: 600;
-        }
-        .success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        .error {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-        .transfer-code {
-            font-family: monospace;
-            background: #000;
-            padding: 4px 8px;
-            border-radius: 4px;
-            color: #fff;
-            letter-spacing: 2px;
-            font-size: 16px;
-            display: inline-block;
-            margin-top: 8px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benji HQ | Farmer Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #09090b; color: #f4f4f5; display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; padding: 22px 0; display: flex; flex-direction: column; }
+    .logo { padding: 0 18px 18px; border-bottom: 1px solid #27272a; }
+    .logo .badge { display:inline-block; border:1px solid #f97316; color:#f97316; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:700; margin-bottom:8px; text-transform:uppercase; }
+    .logo h1 { font-size:24px; font-weight:900; }
+    .logo p { color:#a1a1aa; font-size:12px; margin-top:6px; }
+
+    .nav { padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .nav button { background:transparent; border:none; color:#a1a1aa; text-align:left; padding:12px; border-radius:6px; cursor:pointer; font-weight:700; }
+    .nav button:hover { background:#27272a; color:#fff; }
+    .nav button.active { background:#27272a; color:#f97316; }
+
+    .logout { margin-top:auto; padding:14px; border-top:1px solid #27272a; }
+    .logout button { width:100%; background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; border-radius:6px; padding:10px; font-weight:700; cursor:pointer; }
+
+    .main { flex:1; padding:30px; overflow:auto; }
+    .view { display:none; }
+    .view.active { display:block; }
+
+    .header { margin-bottom:20px; }
+    .header h2 { font-size:28px; font-weight:900; }
+    .header p { color:#a1a1aa; margin-top:6px; }
+
+    .card { background:#141619; border:1px solid #22252a; border-radius:8px; padding:20px; margin-bottom:16px; }
+
+    label { display:block; font-size:11px; text-transform:uppercase; color:#a1a1aa; font-weight:700; margin-bottom:6px; }
+    input, select { width:100%; background:#0b0c0e; border:1px solid #2c3036; color:#fff; border-radius:6px; padding:11px; margin-bottom:12px; outline:none; }
+    input:focus, select:focus { border-color:#f97316; box-shadow:0 0 0 1px #f97316; }
+
+    .btn { border:none; background:#f97316; color:#000; padding:10px 12px; border-radius:6px; font-weight:900; cursor:pointer; }
+    .btn:hover { background:#ea580c; color:#fff; }
+
+    table { width:100%; border-collapse:collapse; background:#0b0c0e; border-radius:8px; overflow:hidden; }
+    th, td { padding:12px; border-bottom:1px solid #27272a; text-align:left; font-size:13px; color:#d4d4d8; }
+    th { color:#f97316; font-size:11px; text-transform:uppercase; font-weight:800; }
+    tr:last-child td { border-bottom:none; }
+
+    .total { font-size:22px; font-weight:900; color:#f97316; margin-top:6px; }
+    .sidebar-logo-wrap{
+      padding: 0 16px 16px;
+      margin: 0 0 14px;
+      border-bottom: 1px solid #27272a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-logo-img{
+      width: 170px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    }
+    .sidebar-logo-ver{
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: #f97316;
+    }
+    .sidebar-panel-name{
+      font-size: 12px;
+      color: #a1a1aa;
+    }
+  </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="header">
-            <h2>Farmer Terminal</h2>
-            <div class="subtitle">Log agricultural harvests for warehouse transfer.</div>
-        </div>
-
-        <div class="form-group">
-            <label for="farmerName">Farmer Identification</label>
-            <input type="text" id="farmerName" placeholder="Enter your username..." required>
-        </div>
-
-        <div class="form-group">
-            <label>Crop Selection</label>
-            <select id="vegType">
-                <option value="Beans">🫘 Beans</option>
-                <option value="Peppers">🫑 Peppers</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Batch Quantity</label>
-            <input type="number" id="cropCount" min="1" placeholder="Enter amount..." oninput="calculatePayout()">
-        </div>
-
-        <div class="calc-view">
-            Estimated Bulk Payout
-            <span class="payout-amount" id="payoutDisplay">0p</span>
-        </div>
-
-        <button class="dispatch-btn" id="dispatchBtn" onclick="submitFarmerTicket()">Generate Transfer Ticket</button>
-        <div id="statusMessage"></div>
+  <aside class="sidebar">
+    <div class="sidebar-logo-wrap">
+      <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="The Benji HQ V2">
+      <div class="sidebar-logo-ver">Community Hub v2.0</div>
+      <div class="sidebar-panel-name">Farmer Panel</div>
     </div>
 
-    <script>
-        function calculatePayout() {
-            const count = parseInt(document.getElementById('cropCount').value) || 0;
-            // Calculates payout at 25p per unit
-            document.getElementById('payoutDisplay').innerText = (count * 25).toLocaleString() + 'p';
-        }
+    <div class="nav">
+      <button class="active" onclick="switchView('view-transfer', this)">📦 Transfer to Manager</button>
+      <button onclick="switchView('view-stock', this)">📊 My Stock</button>
+      <button onclick="switchView('view-history', this)">🧾 My Tickets</button>
+    </div>
 
-        // Generates a random 6-character alphanumeric code for tracking
-        function generateTransferCode() {
-            return 'FRM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
+    <div class="logout">
+      <button onclick="window.location.href='../front side/index.html'">LOG OUT</button>
+    </div>
+  </aside>
 
-        async function submitFarmerTicket() {
-            const btn = document.getElementById('dispatchBtn');
-            const statusBox = document.getElementById('statusMessage');
+  <main class="main">
+    <section id="view-transfer" class="view active">
+      <div class="header">
+        <h2>Transfer Ticket</h2>
+        <p>Items: Beans, Peppers (auto price calculation). Sent directly to the Manager.</p>
+      </div>
 
-            const farmerName = document.getElementById('farmerName').value.trim();
-            const vegType = document.getElementById('vegType').value;
-            const count = parseInt(document.getElementById('cropCount').value);
+      <div class="card">
+        <label>Item</label>
+        <select id="item" onchange="calcTotal()"></select>
 
-            if (!farmerName) return alert("Please enter your Farmer Identification.");
-            if (!count || count <= 0) return alert("Please enter a valid crop batch quantity.");
+        <label>Amount</label>
+        <input id="amount" type="number" min="1" value="1" oninput="calcTotal()" />
 
-            // Generate the unique code
-            const uniqueCode = generateTransferCode();
-            const totalPayout = (count * 25).toLocaleString() + 'p';
+        <label>From</label>
+        <input value="Inventory" readonly />
 
-            btn.disabled = true;
-            btn.innerText = "TRANSMITTING...";
-            statusBox.style.display = "none";
+        <label>To</label>
+        <input value="Manager" readonly />
 
-            // Standardized payload matching the system you built
-            const payloadData = {
-                actionType: "Agriculture Transfer",
-                submittedBy: farmerName,
-                cropHarvested: vegType,
-                batchQuantity: count + " Units",
-                estimatedPayout: totalPayout,
-                transferCode: uniqueCode, // This code will show in the Discord channel
-                managerNotes: "Awaiting manager intake confirmation."
-            };
+        <label>Unit Price</label>
+        <input id="unit-price" readonly />
 
-            try {
-                const response = await ('http://localhost:3000/api/notify-discord', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payloadData)
-                });
+        <label>Total Pay</label>
+        <input id="total-price" readonly />
 
-                if (response.ok) {
-                    statusBox.className = "success";
-                    // Display the code to the farmer so they can give it to the manager
-                    statusBox.innerHTML = `
-                        ✓ Transfer Ticket Sent.<br>
-                        Give this code to the manager:<br>
-                        <span class="transfer-code">${uniqueCode}</span>
-                    `;
-                    statusBox.style.display = "block";
+        <div class="total" id="total-label">Total: 0p</div>
+        <button class="btn" onclick="submitTransfer()">Send Transfer to Manager</button>
+      </div>
+    </section>
 
-                    // Clear inputs
-                    document.getElementById('farmerName').value = '';
-                    document.getElementById('cropCount').value = '';
-                    calculatePayout(); // Reset payout display
-                } else {
-                    throw new Error("Server response failed.");
-                }
+    <section id="view-stock" class="view">
+      <div class="header">
+        <h2>My Personal Stock</h2>
+        <p>You can only update your own stock.</p>
+      </div>
 
-            } catch (error) {
-                console.error("Transmission Error:", error);
-                statusBox.className = "error";
-                statusBox.innerText = "✗ Transmission Failed. Please try again.";
-                statusBox.style.display = "block";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "GENERATE TRANSFER TICKET";
-            }
-        }
-    </script>
+      <div class="card">
+        <label>Beans</label>
+        <input id="stock-beans" type="number" min="0" />
+        <label>Peppers</label>
+        <input id="stock-peppers" type="number" min="0" />
+        <button class="btn" onclick="saveMyStock()">Save My Stock</button>
+      </div>
+    </section>
+
+    <section id="view-history" class="view">
+      <div class="header">
+        <h2>My Transfer Tickets</h2>
+        <p>Manager/Owner approval status appears here.</p>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Item</th>
+              <th>Amount</th>
+              <th>Pay</th>
+              <th>To</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE = {
+      tickets: "benji_transfer_tickets",
+      transferWebhook: "benji_transfer_webhook",
+      farmerStock: "benji_farmer_stock_by_user"
+    };
+
+    const PRICES = {
+      "Beans": 10,
+      "Peppers": 15
+    };
+
+    const farmerName = localStorage.getItem("benji_active_seller_name") || "Farmer";
+
+    function readJSON(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+      catch { return fallback; }
+    }
+
+    function writeJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function switchView(id, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.classList.add("active");
+      if (id === "view-stock") loadMyStock();
+      if (id === "view-history") renderHistory();
+    }
+
+    function setup() {
+      const itemSel = document.getElementById("item");
+      Object.entries(PRICES).forEach(([name, p]) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = `${name} - ${p}p`;
+        itemSel.appendChild(opt);
+      });
+      calcTotal();
+    }
+
+    function calcTotal() {
+      const item = document.getElementById("item").value;
+      const amount = Math.max(1, Number(document.getElementById("amount").value || 1));
+      const unit = PRICES[item] || 0;
+      const total = unit * amount;
+
+      document.getElementById("unit-price").value = `${unit}p`;
+      document.getElementById("total-price").value = `${total.toLocaleString()}p`;
+      document.getElementById("total-label").textContent = `Total: ${total.toLocaleString()}p`;
+    }
+
+    async function sendWebhook(ticket) {
+      const url = localStorage.getItem(STORAGE.transferWebhook) || "";
+      if (!url) return;
+      try {
+        await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            embeds: [{
+              title: `🌾 Farmer Transfer Ticket (${ticket.id})`,
+              color: 16753920,
+              fields: [
+                { name: "Discord Username", value: ticket.requesterUsername, inline: true },
+                { name: "Role", value: ticket.requesterRole, inline: true },
+                { name: "Item", value: ticket.item, inline: true },
+                { name: "Amount", value: String(ticket.amount), inline: true },
+                { name: "Pay", value: `${ticket.totalPrice.toLocaleString()}p`, inline: true },
+                { name: "From", value: ticket.fromLocation, inline: true },
+                { name: "To", value: ticket.toLocation, inline: true }
+              ],
+              timestamp: new Date().toISOString()
+            }]
+          })
+        });
+      } catch (e) {
+        console.warn("Webhook failed", e);
+      }
+    }
+
+    async function submitTransfer() {
+      const item = document.getElementById("item").value;
+      const amount = Math.max(1, Number(document.getElementById("amount").value || 1));
+      const unitPrice = PRICES[item] || 0;
+      const totalPrice = unitPrice * amount;
+
+      const ticket = {
+        id: `TR-${Math.floor(100000 + Math.random() * 900000)}`,
+        requesterUsername: farmerName,
+        requesterRole: "Farmer",
+        item,
+        amount,
+        unitPrice,
+        totalPrice,
+        fromLocation: "Inventory",
+        toLocation: "Manager",
+        notes: "",
+        status: "Pending",
+        createdAt: new Date().toISOString()
+      };
+
+      const tickets = readJSON(STORAGE.tickets, []);
+      tickets.push(ticket);
+      writeJSON(STORAGE.tickets, tickets);
+
+      await sendWebhook(ticket);
+      alert(`Ticket ${ticket.id} sent to Manager.`);
+      document.getElementById("amount").value = 1;
+      calcTotal();
+      renderHistory();
+    }
+
+    function loadMyStock() {
+      const byUser = readJSON(STORAGE.farmerStock, {});
+      const mine = byUser[farmerName] || { Beans: 0, Peppers: 0 };
+      document.getElementById("stock-beans").value = mine.Beans || 0;
+      document.getElementById("stock-peppers").value = mine.Peppers || 0;
+    }
+
+    function saveMyStock() {
+      const byUser = readJSON(STORAGE.farmerStock, {});
+      byUser[farmerName] = {
+        Beans: Math.max(0, Number(document.getElementById("stock-beans").value || 0)),
+        Peppers: Math.max(0, Number(document.getElementById("stock-peppers").value || 0))
+      };
+      writeJSON(STORAGE.farmerStock, byUser);
+      alert("Your stock was updated.");
+    }
+
+    function renderHistory() {
+      const tbody = document.getElementById("history-body");
+      const mine = readJSON(STORAGE.tickets, []).filter(t => t.requesterUsername === farmerName && t.requesterRole === "Farmer");
+
+      if (!mine.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color:#a1a1aa;">No tickets yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = [...mine].reverse().map(t => `
+        <tr>
+          <td style="font-family:monospace">${t.id}</td>
+          <td>${t.item}</td>
+          <td>${t.amount}</td>
+          <td>${Number(t.totalPrice || 0).toLocaleString()}p</td>
+          <td>${t.toLocation}</td>
+          <td>${t.status}</td>
+        </tr>
+      `).join("");
+    }
+
+    window.onload = () => {
+      setup();
+      loadMyStock();
+      renderHistory();
+    };
+  </script>
 </body>
 </html>

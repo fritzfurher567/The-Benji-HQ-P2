@@ -1,283 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benji HQ | Seller Panel</title>
-    <style>
-        /* --- EXACT GLOBAL STYLES FROM INDEX.HTML --- */
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-        body { background: #09090b; color: #f4f4f5; display: flex; height: 100vh; overflow: hidden; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benji HQ | Seller Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #09090b; color: #f4f4f5; display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; display: flex; flex-direction: column; padding: 24px 0; }
+    .nav-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex-grow: 1; }
+    .nav-btn { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-weight: 700; }
+    .nav-btn:hover { background: #27272a; color: #fff; }
+    .nav-btn.active { background: #27272a; color: #f97316; }
+    .employee { padding: 20px 16px; border-top: 1px solid #27272a; }
+    .btn { border: none; border-radius: 6px; padding: 10px 12px; cursor: pointer; font-weight: 700; }
+    .btn-muted { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; }
 
-        /* --- SIDEBAR STYLES --- */
-        .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; display: flex; flex-direction: column; padding: 24px 0; z-index: 10; overflow-y: auto;}
+    .main { flex: 1; padding: 30px; overflow-y: auto; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .card { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 22px; margin-bottom: 16px; }
+    .title { font-size: 34px; font-weight: 900; margin-bottom: 8px; color: #fff; }
+    .sub { color: #a1a1aa; margin-bottom: 16px; }
 
-        .logo { padding: 0 24px; margin-bottom: 32px; display: flex; justify-content: center; align-items: center; }
-        .logo img { max-width: 140px; height: auto; display: block; }
-
-        .nav-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex-grow: 1; }
-        .nav-btn { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .nav-btn:hover { background: #27272a; color: #fff; }
-        .nav-btn.active { background: #27272a; color: #f97316; }
-
-        .employee-section { padding: 20px 16px; border-top: 1px solid #27272a; }
-        .login-box { display: flex; gap: 8px; flex-direction: column;}
-        .login-label {font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
-
-        /* --- MAIN CONTENT & VIEWS --- */
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
-        .view-section { display: none; width: 100%; max-width: 1100px; }
-        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- THE BENJI HQ HUB DESIGN --- */
-        .hub-header { text-align: center; margin-top: 20px; margin-bottom: 30px; }
-        .welcome-badge { display: inline-block; border: 1px solid #f97316; color: #f97316; padding: 4px 16px; border-radius: 50px; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase;}
-        .hq-title { font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px; margin-bottom: 16px; text-shadow: 0 0 30px rgba(249, 115, 22, 0.4); text-transform: uppercase; }
-        .hq-subtext { color: #a1a1aa; font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
-
-        /* --- PROFILE / TABLE STYLES --- */
-        .profile-card { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 30px; margin-bottom: 20px; width: 100%; overflow-x: auto;}
-        table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 6px; overflow: hidden; margin-top: 10px;}
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; white-space: nowrap;}
-        th { color: #f97316; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;}
-
-        /* Meetup Input Box */
-        .meetup-input { width: 160px; padding: 8px 10px; background: #09090b; border: 1px solid #27272a; color: #ffffff; border-radius: 4px; outline: none; transition: 0.2s; font-size: 13px;}
-        .meetup-input:focus { border-color: #f97316;}
-
-        /* Status Dropdown */
-        .status-dropdown {
-            background: #09090b;
-            color: #f4f4f5;
-            border: 1px solid #27272a;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            outline: none;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 600;
-            width: 100%;
-            max-width: 160px;
-        }
-        .status-dropdown:focus { border-color: #f97316; }
-        .status-dropdown option { background: #18181b; color: #f4f4f5; font-weight: normal; }
-
-        .stock-number { text-align: center; font-size: 100px; font-weight: 900; color: #f97316; text-shadow: 0 0 40px rgba(249, 115, 22, 0.4); margin: 30px 0; }
-    </style>
+    table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 6px; overflow: hidden; }
+    th, td { padding: 12px; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; text-align: left; }
+    th { color: #f97316; text-transform: uppercase; font-size: 11px; letter-spacing: .5px; }
+    input, select {
+      width: 100%; background: #09090b; border: 1px solid #3f3f46; color: #fff;
+      border-radius: 4px; padding: 8px; outline: none;
+    }
+    .stock-number { text-align: center; font-size: 90px; font-weight: 900; color: #f97316; text-shadow: 0 0 40px rgba(249,115,22,.4); }
+    .badge { padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .b-pending { background: rgba(234,179,8,.14); color: #eab308; }
+    .b-progress { background: rgba(59,130,246,.14); color: #60a5fa; }
+    .b-done { background: rgba(34,197,94,.14); color: #22c55e; }
+    .sidebar-logo-wrap{
+  padding: 0 16px 16px;
+  margin: 0 0 14px;
+  border-bottom: 1px solid #27272a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-logo-text{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  line-height:1;
+}
+.logo-benji{
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:3px;
+  color:#fff;
+  text-transform:uppercase;
+}
+.logo-hq{
+  font-size:36px;
+  font-weight:900;
+  letter-spacing:4px;
+  color:#f97316;
+  text-transform:uppercase;
+  text-shadow:0 0 20px rgba(249,115,22,0.4);
+}
+  </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="logo">
-            <img src="../image_58085d.png" alt="The Benji HQ">
-        </div>
+  <aside class="sidebar">
+    <div class="sidebar-logo-wrap">
+  <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="The Benji HQ V2">
+  <div class="sidebar-logo-ver">Community Hub v2.0</div>
+  <div class="sidebar-panel-name">Seller Panel</div>
+</div>
 
-        <div class="nav-menu">
-            <button class="nav-btn active" onclick="switchTab('view-sell', this)">📝 SELL BENJIS</button>
-            <button class="nav-btn" onclick="switchTab('view-stock', this)">📦 BENJI STOCK</button>
-        </div>
-
-        <div class="employee-section">
-            <div class="login-box">
-                <span class="login-label" style="color: #f97316;">Logged In As</span>
-                <span id="seller-username-display" style="color: #fff; font-weight: bold; font-size: 14px;">Loading...</span>
-                <button onclick="window.location.href='../front side/index.html'" style="margin-top: 8px; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-weight: bold;">LOG OUT</button>
-            </div>
-        </div>
+    <div class="nav-menu">
+      <button class="nav-btn active" onclick="switchTab('orders', this)">📝 Active Orders</button>
+      <button class="nav-btn" onclick="switchTab('stock', this)">📦 Benji Stock</button>
     </div>
-
-    <div class="main-content">
-
-        <div id="view-sell" class="view-section active">
-            <div class="hub-header">
-                <div class="welcome-badge">Fulfillment Portal</div>
-                <h1 class="hq-title">ACTIVE ORDERS</h1>
-                <p class="hq-subtext">Manage active orders through processing, staging, and final customer handoff.</p>
-            </div>
-
-            <div class="profile-card">
-                <h2 style="color: #fff; margin-bottom: 15px; font-size: 18px;">Order Execution Pipeline</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Order Num</th>
-                            <th>Customer Discord</th>
-                            <th>Meetup Location</th>
-                            <th>Seller Discord</th>
-                            <th>Status Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="color: #f4f4f5; font-weight: bold;">ORD-84321</td>
-                            <td>ExampleUser#1234</td>
-                            <td>
-                                <input type="text" class="meetup-input" placeholder="Enter location...">
-                            </td>
-                            <td class="seller-table-display">Loading...</td>
-                            <td>
-                                <select class="status-dropdown">
-                                    <option value="pending">⏳ Pending</option>
-                                    <option value="processing">⚙️ Processing</option>
-                                    <option value="ready">📦 Ready to Pickup</option>
-                                    <option value="done">✅ Order Done</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="view-stock" class="view-section">
-            <div class="hub-header">
-                <div class="welcome-badge">Inventory Management</div>
-                <h1 class="hq-title">BENJI STOCK</h1>
-                <p class="hq-subtext">Current global stock of Benjis available for customers to purchase.</p>
-            </div>
-
-            <div class="profile-card">
-                <div class="stock-number">1,000</div>
-                <p style="text-align: center; color: #a1a1aa;">Stock levels are updated automatically by the Owner.</p>
-            </div>
-        </div>
-
+    <div class="employee">
+      <div style="font-size:11px;color:#71717a;text-transform:uppercase;font-weight:700;">Logged In As</div>
+      <div id="sellerName" style="color:#fff;font-weight:700;margin:6px 0 10px;">Loading...</div>
+      <button class="btn btn-muted" onclick="logout()">LOG OUT</button>
     </div>
+  </aside>
 
+  <main class="main">
+    <section id="orders" class="view active">
+      <div class="card">
+        <div class="title">ACTIVE ORDERS</div>
+        <div class="sub">Order pipeline: Order Received → Making Order → Order Done</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Method</th>
+              <th>Qty</th>
+              <th>Tip</th>
+              <th>Total</th>
+              <th>Meetup</th>
+              <th>Seller</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+    </section>
 
-    <td style="color: #f4f4f5; font-weight: bold;">${order.id}</td>
-    <td>${order.customerDiscord}</td>
-    <td>${order.meetup}</td>
-    <td style="color: #f97316; font-weight: bold;">${order.seller}</td>
-    <td>
-        <button onclick="finishOrder('${order.id}', '${order.customerDiscord}', '${order.meetup}', '${order.seller}')"
-                style="background: #22c55e; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">
-            ✅ Finish
-        </button>
-    </td>
+    <section id="stock" class="view">
+      <div class="card">
+        <div class="title">BENJI STOCK</div>
+        <div class="sub">Global stock set by Owner panel.</div>
+        <div id="stockNumber" class="stock-number">0</div>
+      </div>
+    </section>
+  </main>
 
-<script>
-    // --- SET YOUR API FILENAME HERE ---
-const API_URL = '/.netlify/functions/api';
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
+  <script>
+    const API_URL = "/.netlify/functions/api";
+    let activeWorker = null;
 
-// Tab switching controller
-function switchTab(targetViewId, activeBtn) {
-    document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(targetViewId).classList.add('active');
-    activeBtn.classList.add('active');
-}
+    async function api(action, payload = {}) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ...payload })
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.error || "Request failed");
+      return data;
+    }
 
-// --- SYSTEM IDENTITY ---
-const currentSeller = localStorage.getItem('benji_active_seller_name') || "Duty Seller";
+    function switchTab(id, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(n => n.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.classList.add("active");
+      if (id === "stock") loadStock();
+    }
 
-function loadSellerIdentity() {
-    const display = document.getElementById('seller-username-display');
-    if (display) display.innerText = currentSeller;
-}
+    function logout() {
+      localStorage.removeItem("benji_active_worker");
+      window.location.href = "../front side/index.html";
+    }
 
-// --- FETCH FROM TURSO BACKEND ---
-async function loadActiveOrders() {
-    try {
-        const response = await fetch(API_URL);
-        const activeOrders = await response.json();
+    function statusBadge(status) {
+      if (status === "order_done") return `<span class="badge b-done">Order Done</span>`;
+      if (status === "making_order") return `<span class="badge b-progress">Making Order</span>`;
+      return `<span class="badge b-pending">Order Received</span>`;
+    }
 
-        const tbody = document.querySelector('tbody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
+    async function loadOrders() {
+      try {
+        const r = await api("listOrders");
+        const body = document.getElementById("ordersBody");
+        body.innerHTML = "";
 
-        if (!activeOrders || activeOrders.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">No active orders right now.</td></tr>`;
-            return;
+        const rows = r.orders.filter(o => o.status !== "order_done");
+        if (!rows.length) {
+          body.innerHTML = `<tr><td colspan="9" style="text-align:center;">No active orders.</td></tr>`;
+          return;
         }
 
-        // Generate rows (filtering out finished ones just in case)
-        let orderCount = 0;
-        activeOrders.forEach(order => {
-            if (order.status === 'done') return;
-
-            orderCount++;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="color: #f4f4f5; font-weight: bold;">${order.id}</td>
-                <td>${order.customerDiscord}</td>
-                <td>${order.meetup || 'Not Set'}</td>
-                <td style="color: ${order.seller === 'Pending' || order.seller === 'Unassigned' ? '#a1a1aa' : '#f97316'}; font-weight: bold;">
-                    ${order.seller}
-                </td>
-                <td>
-                    <button onclick="finishOrder('${order.id}', '${order.customerDiscord}', '${order.meetup}')"
-                            style="background: #22c55e; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold;">
-                        ✅ Finish
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+        rows.forEach(o => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td style="color:#fff;font-weight:700;">${o.id}</td>
+            <td style="color:#60a5fa;">${o.customer_discord || "-"}</td>
+            <td>${o.payment_method || "-"}</td>
+            <td>${o.qty}x</td>
+            <td>${o.tip}p</td>
+            <td style="color:#f97316;font-weight:700;">${Number(o.total).toLocaleString()}p</td>
+            <td><input value="${o.meetup || ""}" placeholder="Location..." onblur="saveMeetup('${o.id}', this.value)" /></td>
+            <td>${o.seller || "Pending"}</td>
+            <td>
+              <select onchange="changeStatus('${o.id}', this.value)">
+                <option value="order_received" ${o.status==="order_received"?"selected":""}>Order Received</option>
+                <option value="making_order" ${o.status==="making_order"?"selected":""}>Making Order</option>
+                <option value="order_done" ${o.status==="order_done"?"selected":""}>Order Done</option>
+              </select>
+              <div style="margin-top:6px;">${statusBadge(o.status)}</div>
+            </td>
+          `;
+          body.appendChild(tr);
         });
-
-        if (orderCount === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">No active orders right now.</td></tr>`;
-        }
-
-    } catch (error) {
-        console.error("Error fetching database:", error);
+      } catch (e) {
+        document.getElementById("ordersBody").innerHTML = `<tr><td colspan="9" style="text-align:center;color:#ef4444;">${e.message}</td></tr>`;
+      }
     }
-}
 
-// --- DISCORD WEBHOOK & FINISH LOGIC ---
-async function finishOrder(orderId, customer, meetup) {
-    try {
-        // 1. Send to Discord
-        await fetch(WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                embeds: [{
-                    title: "Order Completed! ✅",
-                    color: 5763719,
-                    fields: [
-                        { name: "Order ID", value: orderId, inline: true },
-                        { name: "Customer", value: customer, inline: true },
-                        { name: "Meetup", value: meetup || "Not provided", inline: true },
-                        { name: "Completed By", value: currentSeller, inline: true },
-                    ],
-                    timestamp: new Date()
-                }]
-            })
+    async function changeStatus(orderId, status) {
+      try {
+        await api("updateOrderStatus", {
+          orderId,
+          status,
+          seller: activeWorker.username || "Seller"
         });
-
-        // 2. Update Database (Added missing Content-Type header!)
-        await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'updateStatus',
-                orderId: orderId,
-                status: 'done',
-                seller: currentSeller
-            })
-        });
-
-        // 3. Refresh the list to remove the finished order
-        loadActiveOrders();
-
-    } catch (error) {
-        console.error("Error finishing order:", error);
-        alert("Failed to finish order. Check console.");
+        await loadOrders();
+      } catch (e) {
+        alert(e.message);
+      }
     }
-}
 
-// --- BOOTUP SEQUENCE ---
-window.onload = () => {
-    loadSellerIdentity();
-    loadActiveOrders();
+    async function saveMeetup(orderId, meetup) {
+      try {
+        await api("updateOrderMeetup", { orderId, meetup });
+      } catch (e) {
+        alert(e.message);
+      }
+    }
 
-    // Auto-refresh the orders every 5 seconds
-    setInterval(loadActiveOrders, 5000);
-};
-</script>
+    async function loadStock() {
+      try {
+        const r = await api("getStock");
+        document.getElementById("stockNumber").innerText = Number(r.stock || 0).toLocaleString();
+      } catch (e) {
+        document.getElementById("stockNumber").innerText = "0";
+      }
+    }
+
+    function bootAuth() {
+      activeWorker = JSON.parse(localStorage.getItem("benji_active_worker") || "null");
+      if (!activeWorker || !["Seller", "Management", "Owner"].includes(activeWorker.role)) {
+        window.location.href = "../front side/index.html";
+        return;
+      }
+      document.getElementById("sellerName").innerText = activeWorker.username || activeWorker.role;
+    }
+
+    window.onload = async () => {
+      bootAuth();
+      await loadOrders();
+      await loadStock();
+      setInterval(loadOrders, 5000);
+    };
+  </script>
 </body>
 </html>

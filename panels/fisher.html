@@ -1,328 +1,792 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benji HQ | Fisher Terminal</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        body {
-            background: #080a0f; /* Deep oceanic black */
-            color: #e5e7eb;
-            padding: 40px;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-        .wrapper {
-            width: 100%;
-            max-width: 500px;
-            background: #11141a;
-            border: 1px solid #1e293b;
-            border-top: 4px solid #0ea5e9; /* Neon Sky Blue */
-            border-radius: 8px;
-            padding: 32px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-        }
-        .header {
-            border-bottom: 1px solid #1e293b;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-        }
-        h2 {
-            font-size: 22px;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: #94a3b8;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benji HQ | Fisher Panel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        /* Dual-Action Toggle Grid */
-        .action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-        .action-option { display: none; }
-        .action-label {
-            display: block;
-            background: #080a0f;
-            border: 1px solid #334155;
-            color: #94a3b8;
-            text-align: center;
-            padding: 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .action-label:hover {
-            border-color: #64748b;
-            color: #fff;
-        }
-        .action-option:checked + .action-label {
-            background: rgba(14, 165, 233, 0.1);
-            border-color: #0ea5e9;
-            color: #0ea5e9;
-            box-shadow: inset 0 0 0 1px #0ea5e9;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #09090b;
+      color: #f4f4f5;
+      min-height: 100vh;
+    }
 
-        .form-group { margin-bottom: 20px; }
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            color: #0ea5e9;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            letter-spacing: 0.5px;
-        }
-        input[type="text"], input[type="number"], select, textarea {
-            width: 100%;
-            background: #080a0f;
-            border: 1px solid #334155;
-            color: #fff;
-            padding: 14px;
-            border-radius: 4px;
-            font-size: 15px;
-            transition: border-color 0.2s;
-            appearance: none;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #0ea5e9;
-            box-shadow: 0 0 0 1px #0ea5e9;
-        }
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
 
-        .calc-view {
-            background: rgba(14, 165, 233, 0.05);
-            padding: 16px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            font-weight: 600;
-            border: 1px solid rgba(14, 165, 233, 0.2);
-            color: #cbd5e1;
-        }
-        .payout-amount {
-            color: #0ea5e9;
-            font-size: 20px;
-            font-weight: 700;
-        }
-        .dispatch-btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 4px;
-            background: #0ea5e9;
-            color: #000000;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .dispatch-btn:hover { background: #0284c7; color: #ffffff; }
-        .dispatch-btn:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
+    .sidebar {
+      background: #18181b;
+      border-right: 1px solid #27272a;
+      padding: 22px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
 
-        #statusMessage {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 14px;
-            padding: 16px;
-            border-radius: 4px;
-            display: none;
-            font-weight: 600;
-        }
-        .success {
-            background: rgba(14, 165, 233, 0.1);
-            color: #0ea5e9;
-            border: 1px solid rgba(14, 165, 233, 0.2);
-        }
-        .error {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-        .transfer-code {
-            font-family: monospace;
-            background: #000;
-            padding: 6px 12px;
-            border-radius: 4px;
-            color: #0ea5e9;
-            letter-spacing: 2px;
-            font-size: 18px;
-            display: inline-block;
-            margin-top: 12px;
-            border: 1px solid #0ea5e9;
-        }
-    </style>
+    .sidebar-logo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 4px 16px;
+      border-bottom: 1px solid #27272a;
+    }
+
+    .sidebar-logo-img {
+      width: 150px;
+      max-width: 100%;
+      border-radius: 10px;
+      border: 1px solid #27272a;
+      background: #0a0a0a;
+    }
+
+    .sidebar-logo-ver {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      color: #f97316;
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+
+    .sidebar-panel-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fafafa;
+      letter-spacing: 0.4px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #d4d4d8;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid #27272a;
+      background: #111114;
+      font-weight: 700;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav a:hover {
+      color: #fff;
+      border-color: #f97316;
+      background: #1a1a1f;
+    }
+
+    .nav a.active {
+      color: #111;
+      background: #f97316;
+      border-color: #f97316;
+    }
+
+    .logout-btn {
+      margin-top: auto;
+      border: 1px solid #3f3f46;
+      background: #111114;
+      color: #e4e4e7;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      border-color: #f97316;
+      color: #fff;
+    }
+
+    .main {
+      padding: 30px;
+    }
+
+    .topbar {
+      margin-bottom: 22px;
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #a1a1aa;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .card {
+      background: #141417;
+      border: 1px solid #27272a;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .card h3 {
+      font-size: 17px;
+      margin-bottom: 12px;
+      color: #fff7ed;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .muted {
+      color: #a1a1aa;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: #fdba74;
+      margin-bottom: 7px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      background: #0f0f12;
+      color: #f4f4f5;
+      border: 1px solid #3f3f46;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #f97316;
+      box-shadow: 0 0 0 1px #f97316;
+    }
+
+    .readonly {
+      background: #111114;
+      color: #f5f5f5;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      background: rgba(249, 115, 22, 0.1);
+      color: #fdba74;
+      font-size: 12px;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 8px 11px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .money-box {
+      border: 1px solid #3f3f46;
+      background: #111114;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 15px;
+      color: #e4e4e7;
+      margin-bottom: 14px;
+    }
+
+    .money-box strong {
+      color: #fb923c;
+      font-size: 18px;
+    }
+
+    .btn {
+      border: none;
+      background: #f97316;
+      color: #111;
+      width: 100%;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      background: #ea580c;
+      color: #fff;
+    }
+
+    .btn:disabled {
+      background: #52525b;
+      color: #d4d4d8;
+      cursor: not-allowed;
+    }
+
+    .btn.secondary {
+      background: #1f1f23;
+      border: 1px solid #3f3f46;
+      color: #fafafa;
+      font-weight: 800;
+    }
+
+    .btn.secondary:hover {
+      border-color: #f97316;
+      color: #fff;
+      background: #242428;
+    }
+
+    .status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .status.ok {
+      display: block;
+      color: #fdba74;
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      background: rgba(249, 115, 22, 0.12);
+    }
+
+    .status.err {
+      display: block;
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .small-note {
+      color: #a1a1aa;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    th,
+    td {
+      padding: 11px 8px;
+      border-bottom: 1px solid #27272a;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #fdba74;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tag.pending {
+      color: #fdba74;
+      background: rgba(249, 115, 22, 0.15);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+    }
+
+    .tag.approved {
+      color: #86efac;
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .tag.rejected {
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #27272a;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="header">
-            <h2>Fisher Terminal</h2>
-            <div class="subtitle">Log daily catches or issue warehouse transfers.</div>
-        </div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-logo-wrap">
+        <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="Benji HQ Logo" />
+        <span class="sidebar-logo-ver">Community Hub v2.0</span>
+        <div class="sidebar-panel-name">Fisher Terminal</div>
+      </div>
 
-        <!-- Action Toggle -->
-        <div class="action-grid">
-            <input type="radio" name="actionType" id="modeStock" value="Fisher Stock Update" checked onchange="updateUIText()">
-            <label for="modeStock" class="action-label">Log Catch (Stock)</label>
+      <nav class="nav">
+        <a href="#stock" class="active">Personal Stock</a>
+        <a href="#transfer">Transfer to Manager</a>
+        <a href="#history">Transfer History</a>
+      </nav>
 
-            <input type="radio" name="actionType" id="modeTransfer" value="Fisher Transfer Request" onchange="updateUIText()">
-            <label for="modeTransfer" class="action-label">Transfer to Manager</label>
-        </div>
+      <button class="logout-btn" onclick="logoutWorker()">LOG OUT</button>
+    </aside>
 
-        <div class="form-group">
-            <label for="fisherName">Fisher Identification</label>
-            <input type="text" id="fisherName" placeholder="Enter your username..." required>
-        </div>
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Fisher Operations</div>
+        <div class="subtitle">Manage your tuna stock and send transfer tickets to Manager.</div>
+      </div>
 
-        <div class="form-group">
-            <label>Catch Selection</label>
-            <select id="fishType">
-                <option value="Tuna">🐟 Premium Tuna</option>
-                <option value="Salmon">🐡 Wild Salmon</option>
-                <option value="Mixed">🦐 Mixed Catch</option>
-            </select>
-        </div>
+      <div class="grid">
+        <section class="card" id="stock">
+          <h3>Personal Stock Update</h3>
+          <div class="muted">Username is auto-filled from active worker login.</div>
 
-        <div class="form-group">
-            <label>Quantity</label>
-            <input type="number" id="fishCount" min="1" placeholder="Enter amount..." oninput="calculateValue()">
-        </div>
+          <div class="field">
+            <label>Username</label>
+            <input type="text" id="activeUsername" class="readonly" readonly />
+          </div>
 
-        <div class="calc-view">
-            <span id="calcLabel">Total Stock Value</span>
-            <span class="payout-amount" id="payoutDisplay">0p</span>
-        </div>
+          <div class="pill">Item: Yellowfin Tuna • Unit Price: 200p</div>
 
-        <div class="form-group">
-            <label for="fisherNotes">Location / Log Notes (Optional)</label>
-            <textarea id="fisherNotes" placeholder="Enter grid coordinates or manager notes..."></textarea>
-        </div>
+          <div class="money-box">
+            Current Personal Stock:
+            <strong><span id="currentStock">0</span> units</strong>
+          </div>
 
-        <button class="dispatch-btn" id="dispatchBtn" onclick="submitFisherTicket()">Update Stock Log</button>
-        <div id="statusMessage"></div>
-    </div>
+          <div class="row">
+            <div class="field">
+              <label>Adjustment Type</label>
+              <select id="stockAction">
+                <option value="add">Add Stock</option>
+                <option value="remove">Remove Stock</option>
+                <option value="set">Set Exact Value</option>
+              </select>
+            </div>
 
-    <script>
-        // Changes UI text dynamically based on what action they select
-        function updateUIText() {
-            const isTransfer = document.getElementById('modeTransfer').checked;
-            const btn = document.getElementById('dispatchBtn');
-            const calcLabel = document.getElementById('calcLabel');
+            <div class="field">
+              <label>Units</label>
+              <input type="number" id="stockAmount" min="0" placeholder="e.g. 12" />
+            </div>
+          </div>
 
-            if (isTransfer) {
-                btn.innerText = "GENERATE TRANSFER TICKET";
-                calcLabel.innerText = "Estimated Transfer Payout";
-            } else {
-                btn.innerText = "UPDATE STOCK LOG";
-                calcLabel.innerText = "Total Stock Value";
-            }
-        }
+          <button class="btn secondary" onclick="updatePersonalStock()">Update Personal Stock</button>
+          <div id="stockStatus" class="status"></div>
+        </section>
 
-        // Calculates value at 200p per unit based on your original code
-        function calculateValue() {
-            const count = parseInt(document.getElementById('fishCount').value) || 0;
-            document.getElementById('payoutDisplay').innerText = (count * 200).toLocaleString() + 'p';
-        }
+        <section class="card" id="transfer">
+          <h3>Transfer Ticket to Manager</h3>
+          <div class="muted">Only Yellowfin Tuna is allowed here at fixed price 200p.</div>
 
-        // Generates a random 6-character code
-        function generateTrackingCode() {
-            return 'FSH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
+          <div class="row">
+            <div class="field">
+              <label>Item</label>
+              <input type="text" value="Yellowfin Tuna" class="readonly" readonly />
+            </div>
 
-        async function submitFisherTicket() {
-            const btn = document.getElementById('dispatchBtn');
-            const statusBox = document.getElementById('statusMessage');
+            <div class="field">
+              <label>Unit Price</label>
+              <input type="text" value="200p" class="readonly" readonly />
+            </div>
+          </div>
 
-            const actionType = document.querySelector('input[name="actionType"]:checked').value;
-            const fisherName = document.getElementById('fisherName').value.trim();
-            const fishType = document.getElementById('fishType').value;
-            const count = parseInt(document.getElementById('fishCount').value);
-            const notes = document.getElementById('fisherNotes').value.trim();
-            const isTransfer = actionType.includes("Transfer");
+          <div class="row">
+            <div class="field">
+              <label>Quantity</label>
+              <input type="number" id="transferQty" min="1" placeholder="Enter quantity..." oninput="recalcTransferTotal()" />
+            </div>
 
-            if (!fisherName) return alert("Please enter your Fisher Identification.");
-            if (!count || count <= 0) return alert("Please enter a valid catch quantity.");
+            <div class="field">
+              <label>Total Payout</label>
+              <input type="text" id="transferTotal" class="readonly" value="0p" readonly />
+            </div>
+          </div>
 
-            const uniqueCode = generateTrackingCode();
-            const totalValue = (count * 200).toLocaleString() + 'p';
+          <div class="field">
+            <label>Notes (Optional)</label>
+            <textarea id="transferNotes" placeholder="Any details for manager..."></textarea>
+          </div>
 
-            btn.disabled = true;
-            btn.innerText = "TRANSMITTING...";
-            statusBox.style.display = "none";
+          <button id="sendTransferBtn" class="btn" onclick="submitTransferTicket()">Send Transfer Ticket</button>
+          <div id="transferStatus" class="status"></div>
+          <div class="small-note">Ticket includes your username automatically.</div>
+        </section>
 
-            // Structured perfectly for your notify-discord.js file
-            const payloadData = {
-                actionType: actionType,
-                submittedBy: fisherName,
-                catchType: fishType,
-                batchQuantity: count + " Units",
-                calculatedValue: totalValue,
-                managerNotes: notes || "No additional notes logged.",
-                trackingCode: uniqueCode
-            };
+        <section class="card full" id="history">
+          <h3>Your Transfer History</h3>
+          <div class="muted">Shows Fisher tickets from your active username.</div>
 
-            try {
-                const response = await fetch('/.netlify/functions/notify-discord', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payloadData)
-                });
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket</th>
+                <th>Date</th>
+                <th>Qty</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyRows">
+              <tr>
+                <td colspan="5" style="color:#a1a1aa;">No transfer tickets yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
 
-                if (response.ok) {
-                    statusBox.className = "success";
+  <script>
+    const STOCK_KEY = "benji_fisher_stock_by_user";
+    const TICKETS_KEY = "benji_transfer_tickets";
+    const ACTIVE_USER_KEY = "benji_active_seller_name";
+    const ROLE_KEY = "benji_active_staff_role";
 
-                    let successMsg = isTransfer
-                        ? `✓ Transfer Request Sent.<br>Give this code to the manager:`
-                        : `✓ Personal Stock Log Updated.<br>Log verification code:`;
+    const UNIT_PRICE = 200;
+    const DEFAULT_FROM_LOCATION = "Fisher Dock";
+    const DEFAULT_TO_LOCATION = "Manager Warehouse";
 
-                    statusBox.innerHTML = `
-                        ${successMsg}<br>
-                        <span class="transfer-code">${uniqueCode}</span>
-                    `;
-                    statusBox.style.display = "block";
+    let activeUsername = "";
 
-                    // Clear inputs for the next log
-                    document.getElementById('fishCount').value = '';
-                    document.getElementById('fisherNotes').value = '';
-                    calculateValue();
-                } else {
-                    throw new Error("Server response failed.");
-                }
+    function loadActiveUser() {
+      const stored = localStorage.getItem(ACTIVE_USER_KEY);
+      activeUsername = (stored || "").trim();
 
-            } catch (error) {
-                console.error("Transmission Error:", error);
-                statusBox.className = "error";
-                statusBox.innerText = "✗ Transmission Failed. Please try again.";
-                statusBox.style.display = "block";
-            } finally {
-                btn.disabled = false;
-                updateUIText(); // Resets button text to correct state
-            }
-        }
-    </script>
+      document.getElementById("activeUsername").value = activeUsername || "Unknown Fisher";
+      loadPersonalStock();
+      loadHistory();
+    }
+
+    function getStockMap() {
+      try {
+        return JSON.parse(localStorage.getItem(STOCK_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+
+    function saveStockMap(map) {
+      localStorage.setItem(STOCK_KEY, JSON.stringify(map));
+    }
+
+    function getCurrentStockValue() {
+      const map = getStockMap();
+      const key = activeUsername || "unknown_fisher";
+      return Number(map[key] || 0);
+    }
+
+    function setCurrentStockValue(units) {
+      const map = getStockMap();
+      const key = activeUsername || "unknown_fisher";
+      map[key] = Math.max(0, Number(units) || 0);
+      saveStockMap(map);
+      loadPersonalStock();
+    }
+
+    function loadPersonalStock() {
+      document.getElementById("currentStock").textContent = getCurrentStockValue().toLocaleString();
+    }
+
+    function setStatus(elId, type, text) {
+      const el = document.getElementById(elId);
+      el.className = "status " + type;
+      el.textContent = text;
+    }
+
+    function clearStatus(elId) {
+      const el = document.getElementById(elId);
+      el.className = "status";
+      el.textContent = "";
+    }
+
+    function updatePersonalStock() {
+      clearStatus("stockStatus");
+
+      if (!activeUsername) {
+        setStatus("stockStatus", "err", "No active fisher username found. Please log in again.");
+        return;
+      }
+
+      const action = document.getElementById("stockAction").value;
+      const amount = Number(document.getElementById("stockAmount").value);
+
+      if (!Number.isFinite(amount) || amount < 0) {
+        setStatus("stockStatus", "err", "Enter a valid stock amount.");
+        return;
+      }
+
+      const current = getCurrentStockValue();
+      let next = current;
+
+      if (action === "add") next = current + amount;
+      else if (action === "remove") next = current - amount;
+      else next = amount;
+
+      if (next < 0) next = 0;
+
+      setCurrentStockValue(next);
+      document.getElementById("stockAmount").value = "";
+
+      setStatus("stockStatus", "ok", "Personal stock updated successfully.");
+    }
+
+    function recalcTransferTotal() {
+      const qty = Number(document.getElementById("transferQty").value) || 0;
+      const total = qty * UNIT_PRICE;
+      document.getElementById("transferTotal").value = total.toLocaleString() + "p";
+    }
+
+    function generateTicketId() {
+      return "TRF-" + Date.now().toString().slice(-6) + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+    }
+
+    function getTickets() {
+      try {
+        const arr = JSON.parse(localStorage.getItem(TICKETS_KEY) || "[]");
+        return Array.isArray(arr) ? arr : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTickets(arr) {
+      localStorage.setItem(TICKETS_KEY, JSON.stringify(arr));
+    }
+
+    function statusClass(s) {
+      const raw = String(s || "pending").toLowerCase();
+      if (raw.includes("approve")) return "approved";
+      if (raw.includes("reject") || raw.includes("decline")) return "rejected";
+      return "pending";
+    }
+
+    function formatDate(iso) {
+      try {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return "-";
+        return d.toLocaleString();
+      } catch {
+        return "-";
+      }
+    }
+
+    function loadHistory() {
+      const tbody = document.getElementById("historyRows");
+      const all = getTickets();
+
+      const list = all
+        .filter(t => String(t.requesterRole || "").toLowerCase() === "fisher")
+        .filter(t => !activeUsername || t.requesterUsername === activeUsername)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#a1a1aa;">No transfer tickets yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(t => {
+        const st = statusClass(t.status);
+        return `
+          <tr>
+            <td>${t.id || "-"}</td>
+            <td>${formatDate(t.createdAt)}</td>
+            <td>${Number(t.amount || 0).toLocaleString()}</td>
+            <td>${Number(t.totalPrice || 0).toLocaleString()}p</td>
+            <td><span class="tag ${st}">${t.status || "pending"}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function pingTransferWebhook(ticket) {
+      const webhook = localStorage.getItem("benji_transfer_webhook");
+      if (!webhook) return;
+
+      const payload = {
+        username: "Benji HQ Transfers",
+        embeds: [{
+          title: "Fisher Transfer Request",
+          color: 0xf97316,
+          fields: [
+            { name: "Ticket", value: String(ticket.id), inline: true },
+            { name: "Worker", value: String(ticket.requesterUsername || "Unknown"), inline: true },
+            { name: "Role", value: "Fisher", inline: true },
+            { name: "Item", value: "Yellowfin Tuna", inline: true },
+            { name: "Quantity", value: String(ticket.amount), inline: true },
+            { name: "Unit Price", value: "200p", inline: true },
+            { name: "Total", value: String(ticket.totalPrice) + "p", inline: true },
+            { name: "Notes", value: String(ticket.notes || "No notes.") }
+          ],
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      try {
+        await fetch(webhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch {
+        // ignore webhook failure
+      }
+    }
+
+    async function submitTransferTicket() {
+      clearStatus("transferStatus");
+
+      if (!activeUsername) {
+        setStatus("transferStatus", "err", "No active fisher username found. Please log in again.");
+        return;
+      }
+
+      const qty = Number(document.getElementById("transferQty").value);
+      const notes = document.getElementById("transferNotes").value.trim();
+
+      if (!Number.isFinite(qty) || qty <= 0) {
+        setStatus("transferStatus", "err", "Enter a valid transfer quantity.");
+        return;
+      }
+
+      const current = getCurrentStockValue();
+      if (qty > current) {
+        setStatus("transferStatus", "err", `Not enough personal stock. You have ${current} unit(s).`);
+        return;
+      }
+
+      const total = qty * UNIT_PRICE;
+      const ticket = {
+        id: generateTicketId(),
+        requesterUsername: activeUsername,
+        requesterRole: "Fisher",
+        item: "Yellowfin Tuna",
+        amount: qty,
+        unitPrice: UNIT_PRICE,
+        totalPrice: total,
+        fromLocation: DEFAULT_FROM_LOCATION,
+        toLocation: DEFAULT_TO_LOCATION,
+        notes: notes || "No notes provided.",
+        status: "Pending",
+        createdAt: new Date().toISOString()
+      };
+
+      const btn = document.getElementById("sendTransferBtn");
+      btn.disabled = true;
+      btn.textContent = "Sending...";
+
+      try {
+        const tickets = getTickets();
+        tickets.push(ticket);
+        saveTickets(tickets);
+
+        setCurrentStockValue(current - qty);
+
+        await pingTransferWebhook(ticket);
+
+        document.getElementById("transferQty").value = "";
+        document.getElementById("transferNotes").value = "";
+        recalcTransferTotal();
+        loadHistory();
+
+        setStatus("transferStatus", "ok", `Transfer ticket sent to Manager. Ticket: ${ticket.id}`);
+      } catch {
+        setStatus("transferStatus", "err", "Failed to create transfer ticket. Try again.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Send Transfer Ticket";
+      }
+    }
+
+    function logoutWorker() {
+      localStorage.removeItem(ACTIVE_USER_KEY);
+      localStorage.removeItem(ROLE_KEY);
+      window.location.href = "../front%20side/index.html";
+    }
+
+    window.addEventListener("storage", (e) => {
+      if (e.key === TICKETS_KEY) loadHistory();
+      if (e.key === STOCK_KEY) loadPersonalStock();
+    });
+
+    window.onload = () => {
+      loadActiveUser();
+      recalcTransferTotal();
+    };
+  </script>
 </body>
 </html>
