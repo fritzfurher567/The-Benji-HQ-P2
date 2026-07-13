@@ -446,13 +446,13 @@ function attemptLogin() {
   localStorage.setItem("benji_active_staff_role", worker.roleKey || worker.role || "");
 
   const role = worker.roleKey || worker.role;
-  if (role === "W_MGMT") window.location.href = "../panels/manager.html";
-  else if (role === "W_SELL") window.location.href = "../panels/seller.html";
-  else if (role === "W_CHEF") window.location.href = "../panels/chef.html";
-  else if (role === "W_FISH") window.location.href = "../panels/fisher.html";
-  else if (role === "W_GATH") window.location.href = "../panels/gatherer.html";
-  else if (role === "W_FARM") window.location.href = "../panels/farmer.html";
-  else if (role === "W_OWNER") window.location.href = "../panels/owner.html";
+  if (role === "W_MGMT") window.location.href = "panels/manager.html";
+  else if (role === "W_SELL") window.location.href = "panels/seller.html";
+  else if (role === "W_CHEF") window.location.href = "panels/chef.html";
+  else if (role === "W_FISH") window.location.href = "panels/fisher.html";
+  else if (role === "W_GATH") window.location.href = "panels/gatherer.html";
+  else if (role === "W_FARM") window.location.href = "panels/farmer.html";
+  else if (role === "W_OWNER") window.location.href = "panels/owner.html";
   else alert("Role route is not configured.");
 }
 

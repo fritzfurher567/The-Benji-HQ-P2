@@ -145,7 +145,7 @@
 
     function logout() {
       localStorage.removeItem("benji_active_worker");
-      window.location.href = "../front side/index.html";
+      window.location.href = "../index.html";
     }
 
     function statusBadge(status) {
@@ -226,7 +226,7 @@
     function bootAuth() {
       activeWorker = JSON.parse(localStorage.getItem("benji_active_worker") || "null");
       if (!activeWorker || !["Seller", "Management", "Owner"].includes(activeWorker.role)) {
-        window.location.href = "../front side/index.html";
+        window.location.href = "../index.html";
         return;
       }
       document.getElementById("sellerName").innerText = activeWorker.username || activeWorker.role;
