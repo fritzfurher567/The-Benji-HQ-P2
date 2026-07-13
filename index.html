@@ -234,8 +234,7 @@
 // ===== CONFIG (declared once) =====
 const API_URL = "/.netlify/functions/api";
 const DISCORD_CLIENT_ID = "1512209739629461554";
-const DISCORD_REDIRECT_URI = "https://thebenjihq.netlify.app/";
-const OAUTH_STATE_KEY = "benji_oauth_state";
+const DISCORD_REDIRECT_URI = "https://thebenjihq.netlify.app";
 
 let currentUser = null;
 
@@ -251,20 +250,11 @@ async function api(action, payload = {}) {
   return data;
 }
 
-// ===== DISCORD OAUTH (Authorization Code flow — matches boot()'s ?code handling) =====
+// ===== AUTHENTICATION =====
 function redirectToDiscord() {
-  const state = crypto.randomUUID();
-  sessionStorage.setItem(OAUTH_STATE_KEY, state);
-
-  const params = new URLSearchParams({
-    client_id: DISCORD_CLIENT_ID,
-    redirect_uri: DISCORD_REDIRECT_URI,
-    response_type: "code",
-    scope: "identify",
-    state
-  });
-
-  window.location.href = `https://discord.com/api/oauth2/authorize?${params.toString()}`;
+    // We ripped out the state handshake. Just send them straight to Discord.
+    const encodedURI = encodeURIComponent(DISCORD_REDIRECT_URI);
+    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodedURI}&response_type=code&scope=identify`;
 }
 
 // ===== NAV / UI =====
@@ -465,15 +455,10 @@ async function boot() {
 
   const qp = new URLSearchParams(window.location.search);
   const code = qp.get("code");
-  const state = qp.get("state");
 
   if (!code) return;
 
-  const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY);
-  if (!expectedState || state !== expectedState) {
-    alert("OAuth state mismatch. Please try again.");
-    return;
-  }
+  // The state check is completely gone. It will bypass it and immediately request the token.
 
   try {
     const res = await fetch("/.netlify/functions/discord-auth", {
@@ -486,7 +471,6 @@ async function boot() {
     if (!res.ok || !data.ok) throw new Error(data.error || "Discord login failed");
 
     completeLogin(data.user);
-    sessionStorage.removeItem(OAUTH_STATE_KEY);
     window.history.replaceState({}, document.title, window.location.pathname);
   } catch (e) {
     alert(e.message || "Discord login failed.");
@@ -494,9 +478,6 @@ async function boot() {
 }
 
 window.onload = boot;
-
-
-
 </script>
 </body>
 </html>
