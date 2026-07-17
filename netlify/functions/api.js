@@ -5,47 +5,76 @@ const db = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 let schemaReady = false;
 async function ensureSchema() {
   if (schemaReady) return;
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS platform_user_profiles (
-      discordId TEXT PRIMARY KEY,
-      username TEXT,
-      pounds_balance INTEGER NOT NULL DEFAULT 0
-    )
-  `);
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS orders (
-      id TEXT PRIMARY KEY,
-      customerDiscord TEXT,
-      customerDiscordId TEXT,
-      paymentMethod TEXT,
-      qty INTEGER,
-      tip INTEGER,
-      total INTEGER,
-      status TEXT,
-      created_at INTEGER
-    )
-  `);
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS bank_load_requests (
-      id TEXT PRIMARY KEY,
-      customerDiscord TEXT,
-      customerDiscordId TEXT,
-      amount INTEGER,
-      status TEXT,
-      created_at INTEGER
-    )
-  `);
+  await db.execute(`CREATE TABLE IF NOT EXISTS platform_user_profiles (
+    discordId TEXT PRIMARY KEY, username TEXT, pounds_balance INTEGER NOT NULL DEFAULT 0
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS orders (
+    id TEXT PRIMARY KEY, customerDiscord TEXT, customerDiscordId TEXT, paymentMethod TEXT,
+    qty INTEGER, tip INTEGER, total INTEGER, status TEXT, seller TEXT, meetup TEXT, created_at INTEGER
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS bank_load_requests (
+    id TEXT PRIMARY KEY, customerDiscord TEXT, customerDiscordId TEXT, amount INTEGER, status TEXT, created_at INTEGER
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS worker_codes (
+    code TEXT PRIMARY KEY, username TEXT, discordId TEXT, roleKey TEXT, status TEXT,
+    created_at INTEGER, fired_at INTEGER, purge_at INTEGER
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS transfer_tickets (
+    id TEXT PRIMARY KEY, requesterUsername TEXT, requesterRole TEXT, item TEXT, amount INTEGER,
+    unitPrice INTEGER, totalPrice INTEGER, fromLocation TEXT, toLocation TEXT, notes TEXT,
+    status TEXT, reviewedBy TEXT, created_at INTEGER, reviewed_at INTEGER
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS personal_stock (
+    username TEXT, item TEXT, quantity INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (username, item)
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY, value TEXT
+  )`);
   schemaReady = true;
 }
 
-function ok(body) {
-  return { statusCode: 200, body: JSON.stringify({ ok: true, ...body }) };
+function ok(body) { return { statusCode: 200, body: JSON.stringify({ ok: true, ...body }) }; }
+function fail(statusCode, error) { return { statusCode, body: JSON.stringify({ ok: false, error }) }; }
+
+async function getSetting(key, fallback = null) {
+  const r = await db.execute({ sql: "SELECT value FROM app_settings WHERE key = ?", args: [key] });
+  return r.rows.length ? r.rows[0].value : fallback;
 }
-function fail(statusCode, error) {
-  return { statusCode, body: JSON.stringify({ ok: false, error }) };
+async function setSetting(key, value) {
+  await db.execute({
+    sql: "INSERT INTO app_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+    args: [key, String(value)]
+  });
+}
+
+async function postWebhook(url, payload) {
+  if (!url) return;
+  try {
+    await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  } catch (e) {
+    console.warn("Webhook dispatch failed", e);
+  }
+}
+
+function validateCodeForRole(roleKey, code) {
+  const m = String(code).toUpperCase().match(/^W_(MGMT|SELL|CHEF|FISH|GATH|FARM|OWNER)_(\d{2})$/);
+  if (!m) return false;
+  const num = parseInt(m[2], 10);
+  if (num < 1 || num > 20) return false;
+  return `W_${m[1]}` === roleKey;
+}
+
+async function purgeExpiredWorkers() {
+  const now = Date.now();
+  await db.execute({
+    sql: "DELETE FROM worker_codes WHERE status = 'Revoked' AND purge_at IS NOT NULL AND purge_at <= ?",
+    args: [now]
+  });
 }
 
 exports.handler = async (event) => {
@@ -53,45 +82,32 @@ exports.handler = async (event) => {
     await ensureSchema();
 
     if (event.httpMethod === "GET") {
-      const result = await db.execute("SELECT * FROM orders WHERE status != 'done' ORDER BY created_at DESC");
+      const result = await db.execute("SELECT * FROM orders WHERE status != 'order_done' ORDER BY created_at DESC");
       return ok({ orders: result.rows });
     }
-
-    if (event.httpMethod !== "POST") {
-      return fail(405, "Method not allowed");
-    }
+    if (event.httpMethod !== "POST") return fail(405, "Method not allowed");
 
     const data = JSON.parse(event.body || "{}");
     const { action } = data;
 
     switch (action) {
+
+      // ---------- CUSTOMER PROFILE / ORDERS ----------
       case "getUserProfile": {
         const { discordId, username } = data;
         if (!discordId) return fail(400, "Missing discordId");
-
-        let result = await db.execute({
-          sql: "SELECT * FROM platform_user_profiles WHERE discordId = ?",
-          args: [discordId]
-        });
-
+        let result = await db.execute({ sql: "SELECT * FROM platform_user_profiles WHERE discordId = ?", args: [discordId] });
         if (result.rows.length === 0) {
-          await db.execute({
-            sql: "INSERT INTO platform_user_profiles (discordId, username, pounds_balance) VALUES (?, ?, 0)",
-            args: [discordId, username || ""]
-          });
+          await db.execute({ sql: "INSERT INTO platform_user_profiles (discordId, username, pounds_balance) VALUES (?, ?, 0)", args: [discordId, username || ""] });
           return ok({ profile: { discordId, username, pounds_balance: 0 } });
         }
-
         return ok({ profile: result.rows[0] });
       }
 
       case "listOrdersByUser": {
         const { discordId } = data;
         if (!discordId) return fail(400, "Missing discordId");
-        const result = await db.execute({
-          sql: "SELECT * FROM orders WHERE customerDiscordId = ? ORDER BY created_at DESC",
-          args: [discordId]
-        });
+        const result = await db.execute({ sql: "SELECT * FROM orders WHERE customerDiscordId = ? ORDER BY created_at DESC", args: [discordId] });
         return ok({ orders: result.rows });
       }
 
@@ -100,68 +116,265 @@ exports.handler = async (event) => {
         if (!orderId || !customerDiscordId) return fail(400, "Missing orderId or customerDiscordId");
 
         await db.execute({
-          sql: `INSERT INTO orders (id, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          sql: `INSERT INTO orders (id, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, status, seller, meetup, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', '', ?)`,
           args: [orderId, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, status || "order_received", Date.now()]
         });
+
+        const webhookUrl = await getSetting("order_webhook_url");
+        await postWebhook(webhookUrl, {
+          embeds: [{
+            title: `🛒 New Order (${orderId})`,
+            color: 0xf97316,
+            fields: [
+              { name: "Customer", value: String(customerDiscord || "Unknown"), inline: true },
+              { name: "Method", value: String(paymentMethod || "-"), inline: true },
+              { name: "Qty", value: `${qty}x`, inline: true },
+              { name: "Tip", value: `${tip}p`, inline: true },
+              { name: "Total", value: `${Number(total).toLocaleString()}p`, inline: true }
+            ],
+            timestamp: new Date().toISOString()
+          }]
+        });
+
         return ok({ orderId });
       }
 
-      case "updateStatus": {
-        const { orderId, status } = data;
+      case "listOrders": {
+        const result = await db.execute("SELECT * FROM orders WHERE status != 'order_done' ORDER BY created_at DESC");
+        return ok({ orders: result.rows });
+      }
+
+      case "updateOrderStatus": {
+        const { orderId, status, seller } = data;
         if (!orderId || !status) return fail(400, "Missing orderId or status");
-        await db.execute({
-          sql: "UPDATE orders SET status = ? WHERE id = ?",
-          args: [status, orderId]
-        });
+        await db.execute({ sql: "UPDATE orders SET status = ?, seller = ? WHERE id = ?", args: [status, seller || "", orderId] });
+        return ok({});
+      }
+
+      case "updateOrderMeetup": {
+        const { orderId, meetup } = data;
+        if (!orderId) return fail(400, "Missing orderId");
+        await db.execute({ sql: "UPDATE orders SET meetup = ? WHERE id = ?", args: [meetup || "", orderId] });
         return ok({});
       }
 
       case "debitUserBalance": {
-        const { discordId, username, amount } = data;
+        const { discordId, amount } = data;
         if (!discordId || !amount || amount <= 0) return fail(400, "Missing discordId or invalid amount");
-
-        const result = await db.execute({
-          sql: "SELECT pounds_balance FROM platform_user_profiles WHERE discordId = ?",
-          args: [discordId]
-        });
-
-        const currentBalance = result.rows.length ? Number(result.rows[0].pounds_balance) : 0;
-        if (result.rows.length === 0) {
-          return fail(400, "No profile found for this user");
-        }
-        if (currentBalance < amount) {
-          return fail(400, "Insufficient balance");
-        }
-
-        await db.execute({
-          sql: "UPDATE platform_user_profiles SET pounds_balance = pounds_balance - ? WHERE discordId = ?",
-          args: [amount, discordId]
-        });
+        const result = await db.execute({ sql: "SELECT pounds_balance FROM platform_user_profiles WHERE discordId = ?", args: [discordId] });
+        if (result.rows.length === 0) return fail(400, "No profile found for this user");
+        const currentBalance = Number(result.rows[0].pounds_balance);
+        if (currentBalance < amount) return fail(400, "Insufficient balance");
+        await db.execute({ sql: "UPDATE platform_user_profiles SET pounds_balance = pounds_balance - ? WHERE discordId = ?", args: [amount, discordId] });
         return ok({ newBalance: currentBalance - amount });
       }
 
       case "listBankLoadRequestsByUser": {
         const { discordId } = data;
         if (!discordId) return fail(400, "Missing discordId");
-        const result = await db.execute({
-          sql: "SELECT * FROM bank_load_requests WHERE customerDiscordId = ? ORDER BY created_at DESC",
-          args: [discordId]
-        });
+        const result = await db.execute({ sql: "SELECT * FROM bank_load_requests WHERE customerDiscordId = ? ORDER BY created_at DESC", args: [discordId] });
         return ok({ requests: result.rows });
       }
 
       case "createBankLoadRequest": {
         const { customerDiscord, customerDiscordId, amount } = data;
         if (!customerDiscordId || !amount || amount <= 0) return fail(400, "Missing customerDiscordId or invalid amount");
-
         const id = `REQ-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         await db.execute({
-          sql: `INSERT INTO bank_load_requests (id, customerDiscord, customerDiscordId, amount, status, created_at)
-                VALUES (?, ?, ?, ?, 'pending', ?)`,
+          sql: `INSERT INTO bank_load_requests (id, customerDiscord, customerDiscordId, amount, status, created_at) VALUES (?, ?, ?, ?, 'pending', ?)`,
           args: [id, customerDiscord, customerDiscordId, amount, Date.now()]
         });
         return ok({ id });
+      }
+
+      // ---------- STOCK ----------
+      case "getStock": {
+        const stock = await getSetting("global_stock", "0");
+        return ok({ stock: Number(stock) });
+      }
+
+      case "setStock": {
+        const { value } = data;
+        if (value === undefined || Number(value) < 0) return fail(400, "Invalid stock value");
+        await setSetting("global_stock", Number(value));
+        return ok({});
+      }
+
+      case "getPersonalStock": {
+        const { username } = data;
+        if (!username) return fail(400, "Missing username");
+        const result = await db.execute({ sql: "SELECT item, quantity FROM personal_stock WHERE username = ?", args: [username] });
+        const map = {};
+        result.rows.forEach(r => { map[r.item] = Number(r.quantity); });
+        return ok({ stock: map });
+      }
+
+      case "savePersonalStock": {
+        const { username, stock } = data;
+        if (!username || typeof stock !== "object") return fail(400, "Missing username or stock");
+        for (const [item, qty] of Object.entries(stock)) {
+          await db.execute({
+            sql: `INSERT INTO personal_stock (username, item, quantity) VALUES (?, ?, ?)
+                  ON CONFLICT(username, item) DO UPDATE SET quantity = excluded.quantity`,
+            args: [username, item, Math.max(0, Number(qty) || 0)]
+          });
+        }
+        return ok({});
+      }
+
+      // ---------- WORKER CODES ----------
+      case "validateWorkerCode": {
+        const { code } = data;
+        if (!code) return fail(400, "Missing code");
+        const upper = String(code).trim().toUpperCase();
+
+        if (process.env.OWNER_BOOTSTRAP_CODE && upper === process.env.OWNER_BOOTSTRAP_CODE.toUpperCase()) {
+          return ok({ worker: { username: "Owner", roleKey: "W_OWNER" } });
+        }
+
+        await purgeExpiredWorkers();
+        const result = await db.execute({ sql: "SELECT * FROM worker_codes WHERE code = ? AND status = 'Active'", args: [upper] });
+        if (!result.rows.length) return fail(400, "Invalid or revoked code.");
+        const w = result.rows[0];
+        return ok({ worker: { username: w.username, roleKey: w.roleKey } });
+      }
+
+      case "registerWorker": {
+        const { username, discordId, roleKey, code } = data;
+        if (!username || !code) return fail(400, "Username and code are required.");
+        if (!validateCodeForRole(roleKey, code)) return fail(400, "Code format invalid for selected role. Example: W_SELL_01 to W_SELL_20");
+
+        const upper = String(code).toUpperCase();
+        const existing = await db.execute({ sql: "SELECT code FROM worker_codes WHERE code = ?", args: [upper] });
+        if (existing.rows.length) return fail(400, "That code already exists.");
+
+        await db.execute({
+          sql: `INSERT INTO worker_codes (code, username, discordId, roleKey, status, created_at) VALUES (?, ?, ?, ?, 'Active', ?)`,
+          args: [upper, username, discordId || "", roleKey, Date.now()]
+        });
+        return ok({});
+      }
+
+      case "listWorkers": {
+        await purgeExpiredWorkers();
+        const result = await db.execute("SELECT * FROM worker_codes ORDER BY created_at DESC");
+        return ok({ workers: result.rows });
+      }
+
+      case "setWorkerStatus": {
+        const { code, status } = data;
+        if (!code || !status) return fail(400, "Missing code or status");
+        if (status === "Revoked") {
+          await db.execute({
+            sql: "UPDATE worker_codes SET status = 'Revoked', fired_at = ?, purge_at = ? WHERE code = ?",
+            args: [Date.now(), Date.now() + 7 * DAY_MS, code]
+          });
+        } else {
+          await db.execute({
+            sql: "UPDATE worker_codes SET status = 'Active', fired_at = NULL, purge_at = NULL WHERE code = ?",
+            args: [code]
+          });
+        }
+        return ok({});
+      }
+
+      // ---------- TRANSFER TICKETS ----------
+      case "createTransferTicket": {
+        const { requesterUsername, requesterRole, item, amount, unitPrice, totalPrice, fromLocation, toLocation, notes } = data;
+        if (!requesterUsername || !requesterRole || !item) return fail(400, "Missing ticket fields");
+
+        const id = `TR-${Math.floor(100000 + Math.random() * 900000)}`;
+        await db.execute({
+          sql: `INSERT INTO transfer_tickets (id, requesterUsername, requesterRole, item, amount, unitPrice, totalPrice, fromLocation, toLocation, notes, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?)`,
+          args: [id, requesterUsername, requesterRole, item, amount, unitPrice ?? null, totalPrice ?? null, fromLocation || "", toLocation || "", notes || "", Date.now()]
+        });
+
+        const webhookUrl = await getSetting("transfer_webhook_url");
+        await postWebhook(webhookUrl, {
+          embeds: [{
+            title: `🔁 New Transfer Ticket (${id})`,
+            color: 16753920,
+            fields: [
+              { name: "Discord Username", value: String(requesterUsername), inline: true },
+              { name: "Role", value: String(requesterRole), inline: true },
+              { name: "Item", value: String(item), inline: true },
+              { name: "Amount", value: String(amount), inline: true },
+              { name: "Pay", value: totalPrice != null ? `${Number(totalPrice).toLocaleString()}p` : "-", inline: true },
+              { name: "Route", value: `${fromLocation || "-"} -> ${toLocation || "-"}`, inline: false },
+              { name: "Notes", value: notes || "None", inline: false }
+            ],
+            timestamp: new Date().toISOString()
+          }]
+        });
+
+        return ok({ id });
+      }
+
+      case "listTransferTicketsByUser": {
+        const { username, role } = data;
+        if (!username || !role) return fail(400, "Missing username or role");
+        const result = await db.execute({
+          sql: "SELECT * FROM transfer_tickets WHERE requesterUsername = ? AND requesterRole = ? ORDER BY created_at DESC",
+          args: [username, role]
+        });
+        return ok({ tickets: result.rows });
+      }
+
+      case "listTransferTickets": {
+        const result = await db.execute("SELECT * FROM transfer_tickets ORDER BY created_at DESC");
+        return ok({ tickets: result.rows });
+      }
+
+      case "decideTransferTicket": {
+        const { id, decision, reviewedBy } = data;
+        if (!id || !decision) return fail(400, "Missing id or decision");
+        const status = decision === "approve" ? "Approved" : "Declined";
+        await db.execute({
+          sql: "UPDATE transfer_tickets SET status = ?, reviewedBy = ?, reviewed_at = ? WHERE id = ?",
+          args: [status, reviewedBy || "", Date.now(), id]
+        });
+
+        const ticketResult = await db.execute({ sql: "SELECT * FROM transfer_tickets WHERE id = ?", args: [id] });
+        const t = ticketResult.rows[0];
+        if (t) {
+          const webhookUrl = await getSetting("transfer_webhook_url");
+          await postWebhook(webhookUrl, {
+            embeds: [{
+              title: `Owner ${status}: ${t.id}`,
+              color: decision === "approve" ? 3066993 : 15158332,
+              fields: [
+                { name: "Discord Username", value: String(t.requesterUsername || "Unknown"), inline: true },
+                { name: "Role", value: String(t.requesterRole || "Unknown"), inline: true },
+                { name: "Item", value: String(t.item || "-"), inline: true },
+                { name: "Amount", value: String(t.amount || "-"), inline: true },
+                { name: "Pay", value: t.totalPrice != null ? `${Number(t.totalPrice).toLocaleString()}p` : "-", inline: true },
+                { name: "Route", value: `${t.fromLocation || "-"} -> ${t.toLocation || "-"}`, inline: false },
+                { name: "Notes", value: t.notes || "None", inline: false }
+              ],
+              timestamp: new Date().toISOString()
+            }]
+          });
+        }
+
+        return ok({});
+      }
+
+      // ---------- OWNER SETTINGS (webhook URLs never returned outside these two actions) ----------
+      case "getOwnerSettings": {
+        const orderWebhook = await getSetting("order_webhook_url", "");
+        const transferWebhook = await getSetting("transfer_webhook_url", "");
+        const stock = await getSetting("global_stock", "0");
+        return ok({ settings: { order_webhook_url: orderWebhook, transfer_webhook_url: transferWebhook, global_stock: Number(stock) } });
+      }
+
+      case "saveOwnerSettings": {
+        const { order_webhook_url, transfer_webhook_url, global_stock } = data;
+        if (order_webhook_url !== undefined) await setSetting("order_webhook_url", order_webhook_url);
+        if (transfer_webhook_url !== undefined) await setSetting("transfer_webhook_url", transfer_webhook_url);
+        if (global_stock !== undefined) await setSetting("global_stock", Number(global_stock));
+        return ok({});
       }
 
       default:

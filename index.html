@@ -14,7 +14,7 @@
     .nav-btn.active { background: #27272a; color: #f97316; }
     .employee-section { padding: 20px 16px; border-top: 1px solid #27272a; }
     .login-box { display: flex; gap: 8px; flex-direction: column; }
-    .login-label { font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+    .login-label { font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 6px; }
     .login-inputs { display: flex; gap: 8px; }
     .login-box input, .form-control {
       width: 100%; background: #09090b; border: 1px solid #3f3f46; color: #fff; padding: 10px;
@@ -25,6 +25,7 @@
       cursor: pointer; font-weight: 800;
     }
     .btn:hover { background: #ea580c; color: #fff; }
+    .btn:disabled { background: #4b5563; color: #9ca3af; cursor: not-allowed; }
     .btn-muted { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; }
     .btn-muted:hover { background: #3f3f46; color: #fff; }
 
@@ -80,51 +81,65 @@
       background: #5865F2; color: #fff; border: none; border-radius: 6px; padding: 12px 20px; width: 320px; font-weight: 800; cursor: pointer;
     }
     .discord-btn:hover { background: #4752c4; }
-    .sidebar-logo-wrap{
-  padding: 0 16px 16px;
-  margin: 0 0 14px;
-  border-bottom: 1px solid #27272a;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-.sidebar-logo-img{
-  width: 170px;
-  max-width: 100%;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.35);
-}
-.sidebar-logo-ver{
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .8px;
-  text-transform: uppercase;
-  color: #f97316;
-}
-.sidebar-panel-name{
-  font-size: 12px;
-  color: #a1a1aa;
-}
+    .discord-btn:disabled { background: #4b5563; cursor: not-allowed; }
 
+    #diag-box {
+      display: none; margin-top: 18px; max-width: 480px; text-align: left; background: #141619;
+      border: 1px solid #ef4444; border-radius: 6px; padding: 14px; font-size: 12px; color: #fca5a5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; white-space: pre-wrap;
+      word-break: break-word; max-height: 220px; overflow-y: auto;
+    }
+
+    .sidebar-logo-wrap{
+      padding: 0 16px 16px;
+      margin: 0 0 14px;
+      border-bottom: 1px solid #27272a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-logo-text{ display:flex; flex-direction:column; align-items:center; line-height:1; }
+    .logo-benji{ font-size:22px; font-weight:900; letter-spacing:3px; color:#fff; text-transform:uppercase; }
+    .logo-hq{ font-size:36px; font-weight:900; letter-spacing:4px; color:#f97316; text-transform:uppercase; text-shadow:0 0 20px rgba(249,115,22,0.4); }
+    .sidebar-logo-ver{
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: #f97316;
+    }
+    .sidebar-panel-name{
+      font-size: 12px;
+      color: #a1a1aa;
+    }
+
+    /* Load Pounds — extra breathing room, scoped to this view only */
+    #view-banking .card { padding: 28px; }
+    #view-banking .login-label { margin-bottom: 10px; }
+    #view-banking .form-control { margin-bottom: 20px; }
+    #view-banking .btn { margin-top: 4px; }
   </style>
 </head>
 <body>
   <div id="login-gate">
     <header class="hub-header">
-      <div class="welcome-badge">Community Hub v1.0</div>
+      <div class="welcome-badge">Community Hub v2.0</div>
       <h1 class="hq-title">BENJI HQ</h1>
       <p class="hq-subtext">The central command for all operations. Authenticate via Discord to access the marketplace.</p>
     </header>
-    <button class="discord-btn" onclick="redirectToDiscord()">Login with Discord</button>
+    <button id="discordBtn" class="discord-btn" onclick="redirectToDiscord()">Login with Discord</button>
+    <div id="diag-box"></div>
   </div>
 
   <aside class="sidebar">
     <div class="sidebar-logo-wrap">
-  <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="The Benji HQ V2">
-  <div class="sidebar-logo-ver">Community Hub v2.0</div>
-</div>
+      <div class="sidebar-logo-text">
+        <span class="logo-benji">BENJI</span>
+        <span class="logo-hq">HQ</span>
+      </div>
+      <div class="sidebar-logo-ver">Community Hub v2.0</div>
+    </div>
 
     <div class="nav-menu">
       <button class="nav-btn active" onclick="switchNav('view-hub', this)">🛒 Buy Benjis</button>
@@ -146,7 +161,7 @@
         <span class="login-label">Staff / Manager Portal</span>
         <div class="login-inputs">
           <input id="empCode" type="password" placeholder="Enter Role Code..." />
-          <button class="btn" onclick="attemptLogin()">GO</button>
+          <button id="staffGoBtn" class="btn" onclick="attemptLogin()">GO</button>
         </div>
       </div>
     </div>
@@ -155,7 +170,7 @@
   <main class="main-content">
     <section id="view-hub" class="view-section active">
       <header class="hub-header">
-        <div class="welcome-badge">Community Hub v1.0</div>
+        <div class="welcome-badge">Community Hub v2.0</div>
         <h1 class="hq-title">BENJI HQ</h1>
         <p class="hq-subtext">The central command for all operations. Authenticate via Discord to access the marketplace.</p>
       </header>
@@ -231,33 +246,91 @@
   </main>
 
 <script>
-// ===== CONFIG (declared once) =====
+// ===== CONFIG =====
 const API_URL = "/.netlify/functions/api";
+const DISCORD_AUTH_URL = "/.netlify/functions/discord-auth";
 const DISCORD_CLIENT_ID = "1512209739629461554";
-const DISCORD_REDIRECT_URI = "https://thebenjihq.netlify.app";
+const DISCORD_REDIRECT_URI = "https://thebenjihq.netlify.app/";
+const OAUTH_STATE_KEY = "benji_oauth_state";
 
 let currentUser = null;
 
-// ===== API HELPER =====
+// ===== DIAGNOSTICS =====
+// Shows the *real* failure reason on-screen instead of a vague alert, so we
+// can actually tell whether this is a missing deploy, a missing env var, or
+// something else, instead of guessing.
+function showDiag(title, details) {
+  const box = document.getElementById("diag-box");
+  box.style.display = "block";
+  box.textContent = `⚠ ${title}\n\n${details}`;
+  console.error(title, details);
+}
+
+function clearDiag() {
+  const box = document.getElementById("diag-box");
+  box.style.display = "none";
+  box.textContent = "";
+}
+
+// Wraps every fetch to api.js. If the response isn't valid JSON, that means
+// the function either isn't deployed at this path, crashed before returning
+// JSON, or a proxy/redirect served an HTML error page instead — all very
+// different from an actual "Invalid code" style application error.
 async function api(action, payload = {}) {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action, ...payload })
-  });
-  const data = await res.json();
-  if (!res.ok || data.ok === false) throw new Error(data.error || "Request failed");
+  console.log(`[api] -> ${action}`, payload);
+
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ...payload })
+    });
+  } catch (networkErr) {
+    throw new Error(
+      `Network error reaching ${API_URL} (action "${action}"): ${networkErr.message}. ` +
+      `This usually means api.js isn't deployed at that path, or the site isn't live yet.`
+    );
+  }
+
+  const raw = await res.text();
+  console.log(`[api] <- ${action} (HTTP ${res.status})`, raw.slice(0, 300));
+
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error(
+      `api.js returned non-JSON for "${action}" (HTTP ${res.status}). ` +
+      `Likely causes: the function crashed (check Netlify function logs), or ` +
+      `TURSO_DATABASE_URL / TURSO_AUTH_TOKEN aren't set. First 200 chars of response:\n${raw.slice(0, 200)}`
+    );
+  }
+
+  if (!res.ok || data.ok === false) {
+    throw new Error(`[${action}] ${data.error || "Request failed"} (HTTP ${res.status})`);
+  }
   return data;
 }
 
-// ===== AUTHENTICATION =====
 function redirectToDiscord() {
-    // We ripped out the state handshake. Just send them straight to Discord.
-    const encodedURI = encodeURIComponent(DISCORD_REDIRECT_URI);
-    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodedURI}&response_type=code&scope=identify`;
+  clearDiag();
+  const state = crypto.randomUUID();
+  sessionStorage.setItem(OAUTH_STATE_KEY, state);
+
+  const params = new URLSearchParams({
+    client_id: DISCORD_CLIENT_ID,
+    redirect_uri: DISCORD_REDIRECT_URI,
+    response_type: "code",
+    scope: "identify",
+    state
+  });
+
+  const url = `https://discord.com/api/oauth2/authorize?${params.toString()}`;
+  console.log("[discord] redirecting to", url);
+  window.location.href = url;
 }
 
-// ===== NAV / UI =====
 function switchNav(targetId, btn) {
   document.querySelectorAll(".view-section").forEach(v => v.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(n => n.classList.remove("active"));
@@ -284,7 +357,6 @@ function calculateTotal() {
   return { qty, tip, unitPrice, total };
 }
 
-// ===== SESSION =====
 function completeLogin(user) {
   currentUser = user;
   localStorage.setItem("benji_active_user", JSON.stringify(user));
@@ -305,7 +377,9 @@ async function refreshAllUserData() {
   try {
     const profile = await api("getUserProfile", { discordId: currentUser.id, username: currentUser.username });
     document.getElementById("logged-in-balance").innerText = Number(profile.profile.pounds_balance || 0).toLocaleString();
-  } catch {}
+  } catch (e) {
+    console.warn("Could not load profile:", e.message);
+  }
 
   try {
     const orders = await api("listOrdersByUser", { discordId: currentUser.id });
@@ -326,7 +400,9 @@ async function refreshAllUserData() {
         tbody.appendChild(tr);
       });
     }
-  } catch {}
+  } catch (e) {
+    console.warn("Could not load orders:", e.message);
+  }
 
   try {
     const reqs = await api("listBankLoadRequestsByUser", { discordId: currentUser.id });
@@ -346,10 +422,17 @@ async function refreshAllUserData() {
         tbody.appendChild(tr);
       });
     }
-  } catch {}
+  } catch (e) {
+    console.warn("Could not load load-requests:", e.message);
+  }
 }
 
-// ===== ORDERS =====
+function badgeForStatus(status) {
+  if (status === "order_done") return `<span class="badge b-done">Order Done</span>`;
+  if (status === "making_order") return `<span class="badge b-progress">Making Order</span>`;
+  return `<span class="badge b-pending">Order Received</span>`;
+}
+
 async function processOrder() {
   if (!currentUser) return alert("You must login with Discord first.");
   const data = calculateTotal();
@@ -418,35 +501,44 @@ async function submitLoadPounds() {
 }
 
 // ===== STAFF LOGIN =====
-function attemptLogin() {
+async function attemptLogin() {
+  clearDiag();
   const enteredCode = document.getElementById("empCode").value.trim().toUpperCase();
+  if (!enteredCode) return alert("Enter a role code.");
 
-  const workers = JSON.parse(localStorage.getItem("benji_worker_codes") || "[]");
-  const worker = workers.find(w =>
-    String(w.code || "").toUpperCase() === enteredCode &&
-    w.status === "Active"
-  );
+  const btn = document.getElementById("staffGoBtn");
+  btn.disabled = true;
+  btn.innerText = "...";
 
-  if (!worker) {
-    alert("Invalid or revoked code.");
-    return;
+  try {
+    const res = await api("validateWorkerCode", { code: enteredCode });
+    const { username, roleKey } = res.worker;
+
+    localStorage.setItem("benji_active_seller_name", username || "Staff");
+    localStorage.setItem("benji_active_staff_role", roleKey || "");
+
+    const routes = {
+      W_MGMT: "../panels/manager.html",
+      W_SELL: "../panels/seller.html",
+      W_CHEF: "../panels/chef.html",
+      W_FISH: "../panels/fisher.html",
+      W_GATH: "../panels/gatherer.html",
+      W_FARM: "../panels/farmer.html",
+      W_OWNER: "../panels/owner.html"
+    };
+
+    if (routes[roleKey]) window.location.href = routes[roleKey];
+    else showDiag("Role route not configured", `roleKey "${roleKey}" has no entry in the routes map.`);
+  } catch (e) {
+    showDiag("Worker code login failed", e.message);
+    alert("Login failed — see the red box below the Discord button for the exact reason.");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "GO";
   }
-
-  localStorage.setItem("benji_active_seller_name", worker.username || worker.discordId || "Staff");
-  localStorage.setItem("benji_active_staff_role", worker.roleKey || worker.role || "");
-
-  const role = worker.roleKey || worker.role;
-  if (role === "W_MGMT") window.location.href = "panels/manager.html";
-  else if (role === "W_SELL") window.location.href = "panels/seller.html";
-  else if (role === "W_CHEF") window.location.href = "panels/chef.html";
-  else if (role === "W_FISH") window.location.href = "panels/fisher.html";
-  else if (role === "W_GATH") window.location.href = "panels/gatherer.html";
-  else if (role === "W_FARM") window.location.href = "panels/farmer.html";
-  else if (role === "W_OWNER") window.location.href = "panels/owner.html";
-  else alert("Role route is not configured.");
 }
 
-// ===== BOOT (single copy) =====
+// ===== BOOT =====
 async function boot() {
   const saved = localStorage.getItem("benji_active_user");
   if (saved) {
@@ -455,26 +547,75 @@ async function boot() {
 
   const qp = new URLSearchParams(window.location.search);
   const code = qp.get("code");
+  const state = qp.get("state");
 
   if (!code) return;
 
-  // The state check is completely gone. It will bypass it and immediately request the token.
+  console.log("[discord] got ?code param back from Discord");
 
+  const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY);
+  if (!expectedState || state !== expectedState) {
+    showDiag(
+      "OAuth state mismatch",
+      "The 'state' returned by Discord doesn't match what was stored before redirecting. " +
+      "This happens if sessionStorage got cleared mid-flow, or if you opened the Discord " +
+      "consent link twice. Try clicking 'Login with Discord' again from a fresh page load."
+    );
+    return;
+  }
+
+  const btn = document.getElementById("discordBtn");
+  if (btn) { btn.disabled = true; btn.innerText = "Signing in..."; }
+
+  let res, raw;
   try {
-    const res = await fetch("/.netlify/functions/discord-auth", {
+    res = await fetch(DISCORD_AUTH_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code })
     });
-
-    const data = await res.json();
-    if (!res.ok || !data.ok) throw new Error(data.error || "Discord login failed");
-
-    completeLogin(data.user);
-    window.history.replaceState({}, document.title, window.location.pathname);
-  } catch (e) {
-    alert(e.message || "Discord login failed.");
+  } catch (networkErr) {
+    showDiag(
+      "Could not reach discord-auth function",
+      `Network error hitting ${DISCORD_AUTH_URL}: ${networkErr.message}\n\n` +
+      `This means the discord-auth serverless function isn't deployed at that path.`
+    );
+    if (btn) { btn.disabled = false; btn.innerText = "Login with Discord"; }
+    return;
   }
+
+  raw = await res.text();
+  console.log(`[discord-auth] HTTP ${res.status}`, raw.slice(0, 300));
+
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    showDiag(
+      `discord-auth returned non-JSON (HTTP ${res.status})`,
+      `This means the function crashed before returning JSON, or isn't deployed at ` +
+      `${DISCORD_AUTH_URL}. Check Netlify's function logs for discord-auth. ` +
+      `First 200 chars of response:\n${raw.slice(0, 200)}`
+    );
+    if (btn) { btn.disabled = false; btn.innerText = "Login with Discord"; }
+    return;
+  }
+
+  if (!res.ok || !data.ok) {
+    showDiag(
+      "Discord login rejected",
+      data.error || `HTTP ${res.status} with no error message.\n\n` +
+      `Common causes: DISCORD_CLIENT_SECRET missing/wrong in Netlify env vars, or the ` +
+      `redirect_uri registered in the Discord Developer Portal doesn't exactly match ` +
+      `"${DISCORD_REDIRECT_URI}" (trailing slash matters).`
+    );
+    if (btn) { btn.disabled = false; btn.innerText = "Login with Discord"; }
+    return;
+  }
+
+  completeLogin(data.user);
+  sessionStorage.removeItem(OAUTH_STATE_KEY);
+  window.history.replaceState({}, document.title, window.location.pathname);
 }
 
 window.onload = boot;

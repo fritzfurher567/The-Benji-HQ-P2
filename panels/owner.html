@@ -5,317 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Benji HQ | Owner Panel</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #09090b; color: #f4f4f5; display: flex; min-height: 100vh; }
+    .sidebar { width: 270px; background: #18181b; border-right: 1px solid #27272a; padding: 22px 0; display: flex; flex-direction: column; }
 
-    body {
-      background: #09090b;
-      color: #f4f4f5;
-      display: flex;
-      min-height: 100vh;
-    }
+    .sidebar-logo-wrap{ padding: 0 16px 16px; margin: 0 0 14px; border-bottom: 1px solid #27272a; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .sidebar-logo-text{ display:flex; flex-direction:column; align-items:center; line-height:1; }
+    .logo-benji{ font-size:22px; font-weight:900; letter-spacing:3px; color:#fff; text-transform:uppercase; }
+    .logo-hq{ font-size:36px; font-weight:900; letter-spacing:4px; color:#f97316; text-transform:uppercase; text-shadow:0 0 20px rgba(249,115,22,0.4); }
+    .sidebar-logo-ver{ font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #f97316; }
+    .sidebar-panel-name { font-size: 12px; color: #a1a1aa; }
 
-    .sidebar {
-      width: 270px;
-      background: #18181b;
-      border-right: 1px solid #27272a;
-      padding: 22px 0;
-      display: flex;
-      flex-direction: column;
-    }
+    .nav { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .nav button { background: transparent; border: none; color: #a1a1aa; text-align: left; padding: 12px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; }
+    .nav button:hover { background: #27272a; color: #fff; }
+    .nav button.active { background: #27272a; color: #f97316; }
 
-.sidebar-logo-text{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  line-height:1;
-}
-.logo-benji{
-  font-size:22px;
-  font-weight:900;
-  letter-spacing:3px;
-  color:#fff;
-  text-transform:uppercase;
-}
-.logo-hq{
-  font-size:36px;
-  font-weight:900;
-  letter-spacing:4px;
-  color:#f97316;
-  text-transform:uppercase;
-  text-shadow:0 0 20px rgba(249,115,22,0.4);
-}
+    .logout-box { margin-top: auto; padding: 14px; border-top: 1px solid #27272a; }
+    .logout-box button { width: 100%; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 800; }
+    .logout-box button:hover { border-color: #f97316; color: #fff; }
 
-    .sidebar-panel-name {
-      font-size: 12px;
-      color: #a1a1aa;
-    }
+    .main { flex: 1; padding: 30px; overflow: auto; }
+    .view { display: none; }
+    .view.active { display: block; animation: fade 0.2s ease; }
+    @keyframes fade { from { opacity: 0.5; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    .nav {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .header { margin-bottom: 20px; }
+    .header h2 { font-size: 28px; font-weight: 900; margin-bottom: 6px; }
+    .header p { color: #a1a1aa; margin-top: 4px; }
 
-    .nav button {
-      background: transparent;
-      border: none;
-      color: #a1a1aa;
-      text-align: left;
-      padding: 12px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 700;
-    }
+    .card { background: #141619; border: 1px solid #22252a; border-radius: 8px; padding: 20px; margin-bottom: 18px; }
+    .card h3 { color: #f97316; margin-bottom: 14px; }
 
-    .nav button:hover {
-      background: #27272a;
-      color: #fff;
-    }
+    .grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; }
+    @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } .sidebar { width: 100%; max-width: 280px; } }
 
-    .nav button.active {
-      background: #27272a;
-      color: #f97316;
-    }
+    label { display: block; font-size: 11px; text-transform: uppercase; color: #a1a1aa; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px; }
+    input, select, textarea { width: 100%; background: #0b0c0e; border: 1px solid #2c3036; color: #fff; border-radius: 6px; padding: 11px; margin-bottom: 12px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #f97316; box-shadow: 0 0 0 1px #f97316; }
 
-    .logout-box {
-      margin-top: auto;
-      padding: 14px;
-      border-top: 1px solid #27272a;
-    }
+    .btn { border: none; background: #f97316; color: #000; padding: 10px 12px; border-radius: 6px; font-weight: 900; cursor: pointer; }
+    .btn:hover { background: #ea580c; color: #fff; }
+    .btn-ghost { background: #27272a; color: #fff; }
+    .btn-danger { background: #dc2626; color: #fff; }
 
-    .logout-box button {
-      width: 100%;
-      background: #27272a;
-      border: 1px solid #3f3f46;
-      color: #a1a1aa;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 800;
-    }
+    table { width: 100%; border-collapse: collapse; background: #0b0c0e; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px; border-bottom: 1px solid #27272a; text-align: left; font-size: 13px; color: #d4d4d8; vertical-align: top; }
+    th { color: #f97316; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800; }
+    tr:last-child td { border-bottom: none; }
 
-    .logout-box button:hover {
-      border-color: #f97316;
-      color: #fff;
-    }
+    .status { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+    .status-active { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .status-revoked { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .status-pending { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+    .status-approved { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .status-declined { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 
-    .main {
-      flex: 1;
-      padding: 30px;
-      overflow: auto;
-    }
-
-    .view {
-      display: none;
-    }
-
-    .view.active {
-      display: block;
-      animation: fade 0.2s ease;
-    }
-
-    @keyframes fade {
-      from { opacity: 0.5; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .header {
-      margin-bottom: 20px;
-    }
-
-    .header h2 {
-      font-size: 28px;
-      font-weight: 900;
-      margin-bottom: 6px;
-    }
-
-    .header p {
-      color: #a1a1aa;
-      margin-top: 4px;
-    }
-
-    .card {
-      background: #141619;
-      border: 1px solid #22252a;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 18px;
-    }
-
-    .card h3 {
-      color: #f97316;
-      margin-bottom: 14px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 16px;
-    }
-
-    @media (max-width: 980px) {
-      .grid { grid-template-columns: 1fr; }
-      .sidebar { width: 100%; max-width: 280px; }
-    }
-
-    label {
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      color: #a1a1aa;
-      font-weight: 700;
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      background: #0b0c0e;
-      border: 1px solid #2c3036;
-      color: #fff;
-      border-radius: 6px;
-      padding: 11px;
-      margin-bottom: 12px;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #f97316;
-      box-shadow: 0 0 0 1px #f97316;
-    }
-
-    .btn {
-      border: none;
-      background: #f97316;
-      color: #000;
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background: #ea580c;
-      color: #fff;
-    }
-
-    .btn-ghost {
-      background: #27272a;
-      color: #fff;
-    }
-
-    .btn-danger {
-      background: #dc2626;
-      color: #fff;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #0b0c0e;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    th,
-    td {
-      padding: 12px;
-      border-bottom: 1px solid #27272a;
-      text-align: left;
-      font-size: 13px;
-      color: #d4d4d8;
-      vertical-align: top;
-    }
-
-    th {
-      color: #f97316;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 800;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    .status {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .status-active {
-      background: rgba(34, 197, 94, 0.15);
-      color: #22c55e;
-    }
-
-    .status-revoked {
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-    }
-
-    .status-pending {
-      background: rgba(234, 179, 8, 0.15);
-      color: #eab308;
-    }
-
-    .status-approved {
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-    }
-
-    .status-declined {
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-    }
-
-    .stock-big {
-      font-size: 54px;
-      font-weight: 900;
-      color: #f97316;
-      text-shadow: 0 0 30px rgba(249, 115, 22, 0.25);
-      text-align: center;
-      margin: 12px 0;
-    }
-
-    .muted {
-      color: #a1a1aa;
-      font-size: 12px;
-    }
-
-    .webhook-note {
-      border: 1px solid rgba(249, 115, 22, 0.35);
-      background: rgba(249, 115, 22, 0.08);
-      color: #fdba74;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 12px;
-      margin-bottom: 16px;
-    }
-
-    code {
-      color: #fdba74;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
+    .stock-big { font-size: 54px; font-weight: 900; color: #f97316; text-shadow: 0 0 30px rgba(249, 115, 22, 0.25); text-align: center; margin: 12px 0; }
+    .muted { color: #a1a1aa; font-size: 12px; }
+    code { color: #fdba74; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
   </style>
 </head>
 <body>
   <aside class="sidebar">
     <div class="sidebar-logo-wrap">
-      <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="The Benji HQ V2" />
+      <div class="sidebar-logo-text">
+        <span class="logo-benji">BENJI</span>
+        <span class="logo-hq">HQ</span>
+      </div>
       <div class="sidebar-logo-ver">Community Hub v2.0</div>
       <div class="sidebar-panel-name">Owner Command Center</div>
     </div>
@@ -325,6 +82,7 @@
       <button onclick="switchView('view-orders', this)">🛒 Benji Orders</button>
       <button onclick="switchView('view-transfers', this)">🔁 Transfer Tickets</button>
       <button onclick="switchView('view-stock', this)">📦 Benji Stock</button>
+      <button onclick="switchView('view-settings', this)">⚙️ Settings</button>
     </div>
 
     <div class="logout-box">
@@ -337,12 +95,7 @@
     <section id="view-workers" class="view active">
       <div class="header">
         <h2>Worker Codes</h2>
-        <p>Only active registered codes can log in. Fired workers auto-delete in 7 days.</p>
-      </div>
-
-      <div class="webhook-note">
-        Webhook is now code-locked in this file:
-        <code>https://discord.com/api/webhooks/1519403176930054329/t0hT6O936JluOaD476NiwyEzseafVFEPH8rUgxVE0wfPKAZAGLCM2aCDzin2TkOrRSpo</code>
+        <p>Only active registered codes can log in. Fired workers auto-delete in 7 days. Codes are stored in the database now, so they work from any device.</p>
       </div>
 
       <div class="grid">
@@ -363,6 +116,7 @@
             <option value="W_FISH">Fisher</option>
             <option value="W_GATH">Gatherer</option>
             <option value="W_FARM">Farmer</option>
+            <option value="W_OWNER">Owner</option>
           </select>
 
           <label>Code</label>
@@ -449,14 +203,14 @@
     <section id="view-stock" class="view">
       <div class="header">
         <h2>Global Benji Stock</h2>
-        <p>Changes here reflect in seller panel stock display.</p>
+        <p>Changes here reflect in the seller panel stock display.</p>
       </div>
 
       <div class="grid">
         <div class="card">
           <h3>Current Stock</h3>
           <div id="stock-display" class="stock-big">0</div>
-          <p class="muted">Broadcasted to seller panel via <code>benji_global_stock</code>.</p>
+          <p class="muted">Stored in the database, shared with every device.</p>
         </div>
 
         <div class="card">
@@ -467,33 +221,44 @@
         </div>
       </div>
     </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settings" class="view">
+      <div class="header">
+        <h2>Settings</h2>
+        <p>These webhook URLs live in the database and are only ever read server-side — customers and staff never see them.</p>
+      </div>
+
+      <div class="card">
+        <h3>Order Notifications Webhook</h3>
+        <label>Discord Webhook URL</label>
+        <input id="order-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
+      </div>
+
+      <div class="card">
+        <h3>Transfer Ticket Webhook</h3>
+        <label>Discord Webhook URL</label>
+        <input id="transfer-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
+      </div>
+
+      <button class="btn" onclick="saveSettings()">Save Settings</button>
+    </section>
   </main>
 
   <script>
-    const KEYS = {
-      workers: "benji_worker_codes",
-      orders: "benji_global_orders",
-      transfers: "benji_transfer_tickets",
-      stock: "benji_global_stock"
-    };
-
-    // Put your Discord webhook here (owner decisions use THIS directly)
-    const TRANSFER_WEBHOOK_URL = "PASTE_YOUR_DISCORD_WEBHOOK_HERE";
-
+    const API_URL = "/.netlify/functions/api";
     const DAY_MS = 24 * 60 * 60 * 1000;
-    const ownerName = localStorage.getItem("benji_active_seller_name") || "Owner";
+    let ownerName = "Owner";
 
-    function readJSON(key, fallback) {
-      try {
-        const v = JSON.parse(localStorage.getItem(key));
-        return v ?? fallback;
-      } catch {
-        return fallback;
-      }
-    }
-
-    function writeJSON(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
+    async function api(action, payload = {}) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ...payload })
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.error || "Request failed");
+      return data;
     }
 
     function esc(v) {
@@ -507,278 +272,207 @@
 
     function roleLabel(roleKey) {
       return {
-        W_MGMT: "Management",
-        W_SELL: "Seller",
-        W_CHEF: "Chef",
-        W_FISH: "Fisher",
-        W_GATH: "Gatherer",
-        W_FARM: "Farmer"
+        W_MGMT: "Management", W_SELL: "Seller", W_CHEF: "Chef",
+        W_FISH: "Fisher", W_GATH: "Gatherer", W_FARM: "Farmer", W_OWNER: "Owner"
       }[roleKey] || roleKey;
     }
 
-    function validateCodeForRole(roleKey, code) {
-      const m = String(code).toUpperCase().match(/^W_(MGMT|SELL|CHEF|FISH|GATH|FARM)_(\d{2})$/);
-      if (!m) return false;
-      const num = parseInt(m[2], 10);
-      if (num < 1 || num > 20) return false;
-      return `W_${m[1]}` === roleKey;
+    function bootAuth() {
+      const username = localStorage.getItem("benji_active_seller_name");
+      const roleKey = localStorage.getItem("benji_active_staff_role");
+      if (!username || roleKey !== "W_OWNER") {
+        window.location.href = "../front%20side/index.html";
+        return false;
+      }
+      ownerName = username;
+      return true;
     }
 
-    function purgeExpiredWorkers() {
-      let workers = readJSON(KEYS.workers, []);
-      const now = Date.now();
-
-      workers = workers.filter(w => !(w.status === "Revoked" && w.purgeAt && now >= w.purgeAt));
-      writeJSON(KEYS.workers, workers);
-    }
-
-    function registerWorker() {
+    async function registerWorker() {
       const username = document.getElementById("w-username").value.trim();
       const discordId = document.getElementById("w-discord-id").value.trim();
       const roleKey = document.getElementById("w-role").value;
       const code = document.getElementById("w-code").value.trim().toUpperCase();
 
-      if (!username || !code) {
-        alert("Username and code are required.");
-        return;
+      if (!username || !code) return alert("Username and code are required.");
+
+      try {
+        await api("registerWorker", { username, discordId, roleKey, code });
+        document.getElementById("w-username").value = "";
+        document.getElementById("w-discord-id").value = "";
+        document.getElementById("w-code").value = "";
+        await renderWorkers();
+      } catch (e) {
+        alert(e.message);
       }
-
-      if (!validateCodeForRole(roleKey, code)) {
-        alert("Code format invalid for selected role. Example: W_SELL_01 to W_SELL_20");
-        return;
-      }
-
-      const workers = readJSON(KEYS.workers, []);
-      if (workers.some(w => String(w.code).toUpperCase() === code)) {
-        alert("That code already exists.");
-        return;
-      }
-
-      workers.push({
-        username,
-        discordId,
-        roleKey,
-        code,
-        status: "Active",
-        createdAt: new Date().toISOString()
-      });
-
-      writeJSON(KEYS.workers, workers);
-
-      document.getElementById("w-username").value = "";
-      document.getElementById("w-discord-id").value = "";
-      document.getElementById("w-code").value = "";
-
-      renderWorkers();
     }
 
-    function setWorkerStatus(index, status) {
-      const workers = readJSON(KEYS.workers, []);
-      const w = workers[index];
-      if (!w) return;
-
-      if (status === "Revoked") {
-        if (!confirm(`Fire/revoke ${w.username}?`)) return;
-        w.status = "Revoked";
-        w.firedAt = Date.now();
-        w.purgeAt = Date.now() + (7 * DAY_MS);
-      } else {
-        w.status = "Active";
-        delete w.firedAt;
-        delete w.purgeAt;
+    async function setWorkerStatus(code, status) {
+      if (status === "Revoked" && !confirm("Fire/revoke this worker?")) return;
+      try {
+        await api("setWorkerStatus", { code, status });
+        await renderWorkers();
+      } catch (e) {
+        alert(e.message);
       }
-
-      workers[index] = w;
-      writeJSON(KEYS.workers, workers);
-      renderWorkers();
     }
 
-    function renderWorkers() {
-      purgeExpiredWorkers();
-
-      const workers = readJSON(KEYS.workers, []);
-      document.getElementById("worker-count").textContent = String(workers.length);
-
+    async function renderWorkers() {
       const tbody = document.getElementById("worker-body");
-      if (!workers.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="muted">No workers yet.</td></tr>`;
-        return;
+      try {
+        const { workers } = await api("listWorkers");
+        document.getElementById("worker-count").textContent = String(workers.length);
+
+        if (!workers.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="muted">No workers yet.</td></tr>`;
+          return;
+        }
+
+        const now = Date.now();
+        tbody.innerHTML = workers.map(w => {
+          const revoked = w.status === "Revoked";
+          const daysLeft = revoked && w.purge_at ? Math.max(0, Math.ceil((w.purge_at - now) / DAY_MS)) : "-";
+          return `
+            <tr>
+              <td><strong>${esc(w.username)}</strong><br><span class="muted">${esc(w.discordId || "No Discord ID")}</span></td>
+              <td>${esc(roleLabel(w.roleKey))}</td>
+              <td style="font-family:monospace">${esc(w.code)}</td>
+              <td><span class="status ${revoked ? "status-revoked" : "status-active"}">${revoked ? "Revoked" : "Active"}</span></td>
+              <td>${revoked ? `${daysLeft} day(s)` : "-"}</td>
+              <td>
+                ${revoked
+                  ? `<button class="btn btn-ghost" onclick="setWorkerStatus('${esc(w.code)}', 'Active')">Rehire</button>`
+                  : `<button class="btn btn-danger" onclick="setWorkerStatus('${esc(w.code)}', 'Revoked')">Fire</button>`}
+              </td>
+            </tr>
+          `;
+        }).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" class="muted">${esc(e.message)}</td></tr>`;
       }
-
-      tbody.innerHTML = workers.map((w, i) => {
-        const revoked = w.status === "Revoked";
-        const daysLeft = revoked && w.purgeAt
-          ? Math.max(0, Math.ceil((w.purgeAt - Date.now()) / DAY_MS))
-          : "-";
-
-        return `
-          <tr>
-            <td>
-              <strong>${esc(w.username)}</strong><br>
-              <span class="muted">${esc(w.discordId || "No Discord ID")}</span>
-            </td>
-            <td>${esc(roleLabel(w.roleKey))}</td>
-            <td style="font-family:monospace">${esc(w.code)}</td>
-            <td>
-              <span class="status ${revoked ? "status-revoked" : "status-active"}">
-                ${revoked ? "Revoked" : "Active"}
-              </span>
-            </td>
-            <td>${revoked ? `${daysLeft} day(s)` : "-"}</td>
-            <td>
-              ${
-                revoked
-                  ? `<button class="btn btn-ghost" onclick="setWorkerStatus(${i}, 'Active')">Rehire</button>`
-                  : `<button class="btn btn-danger" onclick="setWorkerStatus(${i}, 'Revoked')">Fire</button>`
-              }
-            </td>
-          </tr>
-        `;
-      }).join("");
     }
 
     function statusLabel(s) {
-      const map = {
-        pending: "Order Received",
-        processing: "Making Order",
-        ready: "Ready to Pickup",
-        done: "Order Done",
-        order_received: "Order Received",
-        making_order: "Making Order",
-        order_done: "Order Done"
-      };
+      const map = { order_received: "Order Received", making_order: "Making Order", order_done: "Order Done" };
       return map[s] || (s || "Pending");
     }
 
-    function renderOrders() {
-      const orders = readJSON(KEYS.orders, []);
+    async function renderOrders() {
       const tbody = document.getElementById("orders-body");
-
-      if (!orders.length) {
-        tbody.innerHTML = `<tr><td colspan="9" class="muted">No orders yet.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = [...orders].reverse().map(o => `
-        <tr>
-          <td style="font-family:monospace">${esc(o.id)}</td>
-          <td>${esc(o.customerDiscord || "-")}</td>
-          <td>${esc(o.paymentMethod || "-")}</td>
-          <td>${esc(o.qty ?? "-")}</td>
-          <td>${esc((o.tip ?? 0) + "p")}</td>
-          <td>${esc(((o.total ?? 0).toLocaleString ? o.total.toLocaleString() : o.total) + "p")}</td>
-          <td>${esc(statusLabel(o.status))}</td>
-          <td>${esc(o.seller || "Pending")}</td>
-          <td>${esc(o.meetup || "-")}</td>
-        </tr>
-      `).join("");
-    }
-
-    async function postWebhook(url, payload) {
-      if (!url) return;
-
       try {
-        await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-      } catch (e) {
-        console.warn("Webhook failed", e);
-      }
-    }
-
-    function decideTransfer(id, decision) {
-      const tickets = readJSON(KEYS.transfers, []);
-      const idx = tickets.findIndex(t => t.id === id);
-      if (idx < 0) return;
-
-      tickets[idx].status = decision === "approve" ? "Approved" : "Declined";
-      tickets[idx].reviewedBy = ownerName;
-      tickets[idx].reviewedAt = new Date().toISOString();
-      writeJSON(KEYS.transfers, tickets);
-
-      const t = tickets[idx];
-
-      postWebhook(TRANSFER_WEBHOOK_URL, {
-        embeds: [{
-          title: `Owner ${tickets[idx].status}: ${t.id}`,
-          color: decision === "approve" ? 3066993 : 15158332,
-          fields: [
-            { name: "Discord Username", value: String(t.requesterUsername || "Unknown"), inline: true },
-            { name: "Role", value: String(t.requesterRole || "Unknown"), inline: true },
-            { name: "Item", value: String(t.item || "-"), inline: true },
-            { name: "Amount", value: String(t.amount || "-"), inline: true },
-            { name: "Pay", value: `${Number(t.totalPrice || 0).toLocaleString()}p`, inline: true },
-            { name: "Route", value: `${t.fromLocation || "-"} -> ${t.toLocation || "-"}`, inline: false },
-            { name: "Notes", value: t.notes || "None", inline: false }
-          ],
-          timestamp: new Date().toISOString()
-        }]
-      });
-
-      renderTransfers();
-    }
-
-    function renderTransfers() {
-      const tickets = readJSON(KEYS.transfers, []);
-      const tbody = document.getElementById("transfer-body");
-
-      if (!tickets.length) {
-        tbody.innerHTML = `<tr><td colspan="10" class="muted">No transfer tickets yet.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = [...tickets].reverse().map(t => {
-        const s = String(t.status || "Pending");
-        const cls = s === "Pending"
-          ? "status-pending"
-          : s === "Approved"
-            ? "status-approved"
-            : "status-declined";
-
-        return `
+        const { orders } = await api("listOrders");
+        if (!orders.length) {
+          tbody.innerHTML = `<tr><td colspan="9" class="muted">No orders yet.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = orders.map(o => `
           <tr>
-            <td style="font-family:monospace">${esc(t.id)}</td>
-            <td>${esc(t.requesterUsername || "-")}</td>
-            <td>${esc(t.requesterRole || "-")}</td>
-            <td>${esc(t.item || "-")}</td>
-            <td>${esc(t.amount ?? "-")}</td>
-            <td>${esc((t.totalPrice ?? 0).toLocaleString())}p</td>
-            <td>${esc((t.fromLocation || "-") + " -> " + (t.toLocation || "-"))}</td>
-            <td>${esc(t.notes || "-")}</td>
-            <td><span class="status ${cls}">${esc(s)}</span></td>
-            <td>
-              ${
-                s === "Pending"
+            <td style="font-family:monospace">${esc(o.id)}</td>
+            <td>${esc(o.customerDiscord || "-")}</td>
+            <td>${esc(o.paymentMethod || "-")}</td>
+            <td>${esc(o.qty ?? "-")}</td>
+            <td>${esc((o.tip ?? 0) + "p")}</td>
+            <td>${esc(Number(o.total ?? 0).toLocaleString() + "p")}</td>
+            <td>${esc(statusLabel(o.status))}</td>
+            <td>${esc(o.seller || "Pending")}</td>
+            <td>${esc(o.meetup || "-")}</td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="9" class="muted">${esc(e.message)}</td></tr>`;
+      }
+    }
+
+    async function decideTransfer(id, decision) {
+      try {
+        await api("decideTransferTicket", { id, decision, reviewedBy: ownerName });
+        await renderTransfers();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function renderTransfers() {
+      const tbody = document.getElementById("transfer-body");
+      try {
+        const { tickets } = await api("listTransferTickets");
+        if (!tickets.length) {
+          tbody.innerHTML = `<tr><td colspan="10" class="muted">No transfer tickets yet.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = tickets.map(t => {
+          const s = String(t.status || "Pending");
+          const cls = s === "Pending" ? "status-pending" : s === "Approved" ? "status-approved" : "status-declined";
+          return `
+            <tr>
+              <td style="font-family:monospace">${esc(t.id)}</td>
+              <td>${esc(t.requesterUsername || "-")}</td>
+              <td>${esc(t.requesterRole || "-")}</td>
+              <td>${esc(t.item || "-")}</td>
+              <td>${esc(t.amount ?? "-")}</td>
+              <td>${t.totalPrice != null ? esc(Number(t.totalPrice).toLocaleString()) + "p" : "-"}</td>
+              <td>${esc((t.fromLocation || "-") + " -> " + (t.toLocation || "-"))}</td>
+              <td>${esc(t.notes || "-")}</td>
+              <td><span class="status ${cls}">${esc(s)}</span></td>
+              <td>
+                ${s === "Pending"
                   ? `<button class="btn" onclick="decideTransfer('${esc(t.id)}', 'approve')">Accept</button>
                      <button class="btn btn-danger" style="margin-top:6px" onclick="decideTransfer('${esc(t.id)}', 'decline')">Decline</button>`
-                  : `<span class="muted">${esc(t.reviewedBy || "-")}</span>`
-              }
-            </td>
-          </tr>
-        `;
-      }).join("");
+                  : `<span class="muted">${esc(t.reviewedBy || "-")}</span>`}
+              </td>
+            </tr>
+          `;
+        }).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="10" class="muted">${esc(e.message)}</td></tr>`;
+      }
     }
 
-    function loadStock() {
-      const stock = Number(localStorage.getItem(KEYS.stock) || 0);
-      document.getElementById("stock-display").textContent = stock.toLocaleString();
+    async function loadStock() {
+      try {
+        const { stock } = await api("getStock");
+        document.getElementById("stock-display").textContent = Number(stock).toLocaleString();
+      } catch (e) {
+        document.getElementById("stock-display").textContent = "0";
+      }
     }
 
-    function saveStock() {
+    async function saveStock() {
       const val = Number(document.getElementById("stock-input").value || 0);
       if (val < 0) return;
+      try {
+        await api("setStock", { value: val });
+        document.getElementById("stock-input").value = "";
+        await loadStock();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
 
-      localStorage.setItem(KEYS.stock, String(val));
-      document.getElementById("stock-input").value = "";
-      loadStock();
+    async function loadSettings() {
+      try {
+        const { settings } = await api("getOwnerSettings");
+        document.getElementById("order-webhook-input").value = settings.order_webhook_url || "";
+        document.getElementById("transfer-webhook-input").value = settings.transfer_webhook_url || "";
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function saveSettings() {
+      const order_webhook_url = document.getElementById("order-webhook-input").value.trim();
+      const transfer_webhook_url = document.getElementById("transfer-webhook-input").value.trim();
+      try {
+        await api("saveOwnerSettings", { order_webhook_url, transfer_webhook_url });
+        alert("Settings saved.");
+      } catch (e) {
+        alert(e.message);
+      }
     }
 
     function switchView(id, btn) {
       document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
       document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
-
       document.getElementById(id).classList.add("active");
       btn.classList.add("active");
 
@@ -786,6 +480,7 @@
       if (id === "view-orders") renderOrders();
       if (id === "view-transfers") renderTransfers();
       if (id === "view-stock") loadStock();
+      if (id === "view-settings") loadSettings();
     }
 
     function logoutOwner() {
@@ -795,10 +490,8 @@
     }
 
     window.onload = () => {
+      if (!bootAuth()) return;
       renderWorkers();
-      renderOrders();
-      renderTransfers();
-      loadStock();
     };
   </script>
 </body>

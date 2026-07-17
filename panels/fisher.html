@@ -5,385 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Benji HQ | Fisher Panel</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { background: #09090b; color: #f4f4f5; min-height: 100vh; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #09090b;
-      color: #f4f4f5;
-      min-height: 100vh;
-    }
+    .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
 
-    .app {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      min-height: 100vh;
-    }
+    .sidebar { background: #18181b; border-right: 1px solid #27272a; padding: 22px 16px; display: flex; flex-direction: column; gap: 18px; }
 
-    .sidebar {
-      background: #18181b;
-      border-right: 1px solid #27272a;
-      padding: 22px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .sidebar-logo-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 4px 16px;
-      border-bottom: 1px solid #27272a;
-    }
-
-    .sidebar-logo-img {
-      width: 150px;
-      max-width: 100%;
-      border-radius: 10px;
-      border: 1px solid #27272a;
-      background: #0a0a0a;
-    }
-
+    .sidebar-logo-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 4px 16px; border-bottom: 1px solid #27272a; }
+    .sidebar-logo-text{ display:flex; flex-direction:column; align-items:center; line-height:1; }
+    .logo-benji{ font-size:22px; font-weight:900; letter-spacing:3px; color:#fff; text-transform:uppercase; }
+    .logo-hq{ font-size:34px; font-weight:900; letter-spacing:4px; color:#f97316; text-transform:uppercase; text-shadow:0 0 20px rgba(249,115,22,0.4); }
     .sidebar-logo-ver {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.9px;
-      text-transform: uppercase;
-      color: #f97316;
-      background: rgba(249, 115, 22, 0.12);
-      border: 1px solid rgba(249, 115, 22, 0.35);
-      padding: 4px 8px;
-      border-radius: 999px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.9px; text-transform: uppercase; color: #f97316;
+      background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.35); padding: 4px 8px; border-radius: 999px;
     }
+    .sidebar-panel-name { font-size: 14px; font-weight: 800; color: #fafafa; letter-spacing: 0.4px; }
 
-    .sidebar-panel-name {
-      font-size: 18px;
-      font-weight: 800;
-      color: #fafafa;
-      letter-spacing: 0.4px;
+    .nav { display: flex; flex-direction: column; gap: 8px; }
+    .nav button {
+      text-align: left; color: #d4d4d8; padding: 11px 12px; border-radius: 10px; border: 1px solid #27272a;
+      background: #111114; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s ease;
     }
-
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .nav a {
-      text-decoration: none;
-      color: #d4d4d8;
-      padding: 11px 12px;
-      border-radius: 10px;
-      border: 1px solid #27272a;
-      background: #111114;
-      font-weight: 700;
-      font-size: 14px;
-      transition: 0.2s ease;
-    }
-
-    .nav a:hover {
-      color: #fff;
-      border-color: #f97316;
-      background: #1a1a1f;
-    }
-
-    .nav a.active {
-      color: #111;
-      background: #f97316;
-      border-color: #f97316;
-    }
+    .nav button:hover { color: #fff; border-color: #f97316; background: #1a1a1f; }
+    .nav button.active { color: #111; background: #f97316; border-color: #f97316; }
 
     .logout-btn {
-      margin-top: auto;
-      border: 1px solid #3f3f46;
-      background: #111114;
-      color: #e4e4e7;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: 0.2s ease;
+      margin-top: auto; border: 1px solid #3f3f46; background: #111114; color: #e4e4e7; padding: 12px;
+      border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s ease;
     }
+    .logout-btn:hover { border-color: #f97316; color: #fff; }
 
-    .logout-btn:hover {
-      border-color: #f97316;
-      color: #fff;
-    }
+    .main { padding: 30px; }
+    .topbar { margin-bottom: 22px; }
+    .title { font-size: 30px; font-weight: 900; letter-spacing: 0.3px; margin-bottom: 6px; }
+    .subtitle { color: #a1a1aa; font-size: 14px; }
 
-    .main {
-      padding: 30px;
-    }
+    .view { display: none; }
+    .view.active { display: block; }
 
-    .topbar {
-      margin-bottom: 22px;
-    }
+    .card { background: #141417; border: 1px solid #27272a; border-radius: 14px; padding: 22px; max-width: 640px; }
+    .card.wide { max-width: none; }
+    .card h3 { font-size: 17px; margin-bottom: 12px; color: #fff7ed; font-weight: 800; letter-spacing: 0.3px; }
+    .muted { color: #a1a1aa; font-size: 13px; margin-bottom: 14px; }
 
-    .title {
-      font-size: 30px;
-      font-weight: 900;
-      letter-spacing: 0.3px;
-      margin-bottom: 6px;
-    }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #fdba74; margin-bottom: 7px; }
 
-    .subtitle {
-      color: #a1a1aa;
-      font-size: 14px;
+    input[type="text"], input[type="number"], textarea, select {
+      width: 100%; background: #0f0f12; color: #f4f4f5; border: 1px solid #3f3f46; border-radius: 10px;
+      padding: 12px; font-size: 14px; outline: none; transition: 0.2s ease;
     }
+    textarea { min-height: 90px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: #f97316; box-shadow: 0 0 0 1px #f97316; }
+    .readonly { background: #111114; color: #f5f5f5; }
 
-    .grid {
-      display: grid;
-      gap: 20px;
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .card {
-      background: #141417;
-      border: 1px solid #27272a;
-      border-radius: 14px;
-      padding: 22px;
-    }
-
-    .card h3 {
-      font-size: 17px;
-      margin-bottom: 12px;
-      color: #fff7ed;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-    }
-
-    .muted {
-      color: #a1a1aa;
-      font-size: 13px;
-      margin-bottom: 14px;
-    }
-
-    .field {
-      margin-bottom: 14px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      color: #fdba74;
-      margin-bottom: 7px;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    textarea,
-    select {
-      width: 100%;
-      background: #0f0f12;
-      color: #f4f4f5;
-      border: 1px solid #3f3f46;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 14px;
-      outline: none;
-      transition: 0.2s ease;
-    }
-
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #f97316;
-      box-shadow: 0 0 0 1px #f97316;
-    }
-
-    .readonly {
-      background: #111114;
-      color: #f5f5f5;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
     .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid rgba(249, 115, 22, 0.35);
-      background: rgba(249, 115, 22, 0.1);
-      color: #fdba74;
-      font-size: 12px;
-      font-weight: 800;
-      border-radius: 999px;
-      padding: 8px 11px;
-      margin-bottom: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
+      display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(249, 115, 22, 0.35);
+      background: rgba(249, 115, 22, 0.1); color: #fdba74; font-size: 12px; font-weight: 800; border-radius: 999px;
+      padding: 8px 11px; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.6px;
     }
 
-    .money-box {
-      border: 1px solid #3f3f46;
-      background: #111114;
-      border-radius: 10px;
-      padding: 14px;
-      font-size: 15px;
-      color: #e4e4e7;
-      margin-bottom: 14px;
-    }
-
-    .money-box strong {
-      color: #fb923c;
-      font-size: 18px;
-    }
+    .money-box { border: 1px solid #3f3f46; background: #111114; border-radius: 10px; padding: 14px; font-size: 15px; color: #e4e4e7; margin-bottom: 14px; }
+    .money-box strong { color: #fb923c; font-size: 18px; }
 
     .btn {
-      border: none;
-      background: #f97316;
-      color: #111;
-      width: 100%;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-weight: 900;
-      letter-spacing: 0.4px;
-      cursor: pointer;
-      transition: 0.2s ease;
+      border: none; background: #f97316; color: #111; width: 100%; border-radius: 10px; padding: 12px 14px;
+      font-weight: 900; letter-spacing: 0.4px; cursor: pointer; transition: 0.2s ease;
     }
+    .btn:hover { background: #ea580c; color: #fff; }
+    .btn:disabled { background: #52525b; color: #d4d4d8; cursor: not-allowed; }
+    .btn.secondary { background: #1f1f23; border: 1px solid #3f3f46; color: #fafafa; font-weight: 800; }
+    .btn.secondary:hover { border-color: #f97316; color: #fff; background: #242428; }
 
-    .btn:hover {
-      background: #ea580c;
-      color: #fff;
-    }
+    .status { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; display: none; }
+    .status.ok { display: block; color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.35); background: rgba(249, 115, 22, 0.12); }
+    .status.err { display: block; color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.12); }
 
-    .btn:disabled {
-      background: #52525b;
-      color: #d4d4d8;
-      cursor: not-allowed;
-    }
+    .small-note { color: #a1a1aa; font-size: 12px; margin-top: 8px; }
 
-    .btn.secondary {
-      background: #1f1f23;
-      border: 1px solid #3f3f46;
-      color: #fafafa;
-      font-weight: 800;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    th, td { padding: 11px 8px; border-bottom: 1px solid #27272a; text-align: left; vertical-align: top; }
+    th { color: #fdba74; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
 
-    .btn.secondary:hover {
-      border-color: #f97316;
-      color: #fff;
-      background: #242428;
-    }
-
-    .status {
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      display: none;
-    }
-
-    .status.ok {
-      display: block;
-      color: #fdba74;
-      border: 1px solid rgba(249, 115, 22, 0.35);
-      background: rgba(249, 115, 22, 0.12);
-    }
-
-    .status.err {
-      display: block;
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      background: rgba(239, 68, 68, 0.12);
-    }
-
-    .small-note {
-      color: #a1a1aa;
-      font-size: 12px;
-      margin-top: 8px;
-    }
-
-    .full {
-      grid-column: 1 / -1;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      margin-top: 8px;
-    }
-
-    th,
-    td {
-      padding: 11px 8px;
-      border-bottom: 1px solid #27272a;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    th {
-      color: #fdba74;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 11px;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .tag.pending {
-      color: #fdba74;
-      background: rgba(249, 115, 22, 0.15);
-      border: 1px solid rgba(249, 115, 22, 0.35);
-    }
-
-    .tag.approved {
-      color: #86efac;
-      background: rgba(34, 197, 94, 0.14);
-      border: 1px solid rgba(34, 197, 94, 0.35);
-    }
-
-    .tag.rejected {
-      color: #fca5a5;
-      background: rgba(239, 68, 68, 0.14);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-    }
+    .tag { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tag.pending { color: #fdba74; background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.35); }
+    .tag.approved { color: #86efac; background: rgba(34, 197, 94, 0.14); border: 1px solid rgba(34, 197, 94, 0.35); }
+    .tag.rejected { color: #fca5a5; background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); }
 
     @media (max-width: 980px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        border-right: none;
-        border-bottom: 1px solid #27272a;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .row {
-        grid-template-columns: 1fr;
-      }
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid #27272a; }
+      .row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -391,15 +106,18 @@
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-logo-wrap">
-        <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="Benji HQ Logo" />
+        <div class="sidebar-logo-text">
+          <span class="logo-benji">BENJI</span>
+          <span class="logo-hq">HQ</span>
+        </div>
         <span class="sidebar-logo-ver">Community Hub v2.0</span>
         <div class="sidebar-panel-name">Fisher Terminal</div>
       </div>
 
       <nav class="nav">
-        <a href="#stock" class="active">Personal Stock</a>
-        <a href="#transfer">Transfer to Manager</a>
-        <a href="#history">Transfer History</a>
+        <button class="active" onclick="switchView('view-stock', this)">Personal Stock</button>
+        <button onclick="switchView('view-transfer', this)">Transfer to Manager</button>
+        <button onclick="switchView('view-history', this)">Transfer History</button>
       </nav>
 
       <button class="logout-btn" onclick="logoutWorker()">LOG OUT</button>
@@ -408,158 +126,144 @@
     <main class="main">
       <div class="topbar">
         <div class="title">Fisher Operations</div>
-        <div class="subtitle">Manage your tuna stock and send transfer tickets to Manager.</div>
+        <div class="subtitle">Manage your tuna stock and send transfer tickets to the Manager.</div>
       </div>
 
-      <div class="grid">
-        <section class="card" id="stock">
-          <h3>Personal Stock Update</h3>
-          <div class="muted">Username is auto-filled from active worker login.</div>
+      <section class="card view active" id="view-stock">
+        <h3>Personal Stock Update</h3>
+        <div class="muted">Username is auto-filled from your worker login.</div>
 
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="activeUsername" class="readonly" readonly />
+        </div>
+
+        <div class="pill">Item: Yellowfin Tuna • Unit Price: 200p</div>
+
+        <div class="money-box">
+          Current Personal Stock:
+          <strong><span id="currentStock">0</span> units</strong>
+        </div>
+
+        <div class="row">
           <div class="field">
-            <label>Username</label>
-            <input type="text" id="activeUsername" class="readonly" readonly />
-          </div>
-
-          <div class="pill">Item: Yellowfin Tuna • Unit Price: 200p</div>
-
-          <div class="money-box">
-            Current Personal Stock:
-            <strong><span id="currentStock">0</span> units</strong>
-          </div>
-
-          <div class="row">
-            <div class="field">
-              <label>Adjustment Type</label>
-              <select id="stockAction">
-                <option value="add">Add Stock</option>
-                <option value="remove">Remove Stock</option>
-                <option value="set">Set Exact Value</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Units</label>
-              <input type="number" id="stockAmount" min="0" placeholder="e.g. 12" />
-            </div>
-          </div>
-
-          <button class="btn secondary" onclick="updatePersonalStock()">Update Personal Stock</button>
-          <div id="stockStatus" class="status"></div>
-        </section>
-
-        <section class="card" id="transfer">
-          <h3>Transfer Ticket to Manager</h3>
-          <div class="muted">Only Yellowfin Tuna is allowed here at fixed price 200p.</div>
-
-          <div class="row">
-            <div class="field">
-              <label>Item</label>
-              <input type="text" value="Yellowfin Tuna" class="readonly" readonly />
-            </div>
-
-            <div class="field">
-              <label>Unit Price</label>
-              <input type="text" value="200p" class="readonly" readonly />
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field">
-              <label>Quantity</label>
-              <input type="number" id="transferQty" min="1" placeholder="Enter quantity..." oninput="recalcTransferTotal()" />
-            </div>
-
-            <div class="field">
-              <label>Total Payout</label>
-              <input type="text" id="transferTotal" class="readonly" value="0p" readonly />
-            </div>
+            <label>Adjustment Type</label>
+            <select id="stockAction">
+              <option value="add">Add Stock</option>
+              <option value="remove">Remove Stock</option>
+              <option value="set">Set Exact Value</option>
+            </select>
           </div>
 
           <div class="field">
-            <label>Notes (Optional)</label>
-            <textarea id="transferNotes" placeholder="Any details for manager..."></textarea>
+            <label>Units</label>
+            <input type="number" id="stockAmount" min="0" placeholder="e.g. 12" />
           </div>
+        </div>
 
-          <button id="sendTransferBtn" class="btn" onclick="submitTransferTicket()">Send Transfer Ticket</button>
-          <div id="transferStatus" class="status"></div>
-          <div class="small-note">Ticket includes your username automatically.</div>
-        </section>
+        <button class="btn secondary" onclick="updatePersonalStock()">Update Personal Stock</button>
+        <div id="stockStatus" class="status"></div>
+      </section>
 
-        <section class="card full" id="history">
-          <h3>Your Transfer History</h3>
-          <div class="muted">Shows Fisher tickets from your active username.</div>
+      <section class="card view" id="view-transfer">
+        <h3>Transfer Ticket to Manager</h3>
+        <div class="muted">Only Yellowfin Tuna is allowed here, at a fixed price of 200p.</div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Ticket</th>
-                <th>Date</th>
-                <th>Qty</th>
-                <th>Total</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="historyRows">
-              <tr>
-                <td colspan="5" style="color:#a1a1aa;">No transfer tickets yet.</td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
-      </div>
+        <div class="row">
+          <div class="field">
+            <label>Item</label>
+            <input type="text" value="Yellowfin Tuna" class="readonly" readonly />
+          </div>
+          <div class="field">
+            <label>Unit Price</label>
+            <input type="text" value="200p" class="readonly" readonly />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Quantity</label>
+            <input type="number" id="transferQty" min="1" placeholder="Enter quantity..." oninput="recalcTransferTotal()" />
+          </div>
+          <div class="field">
+            <label>Total Payout</label>
+            <input type="text" id="transferTotal" class="readonly" value="0p" readonly />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Notes (Optional)</label>
+          <textarea id="transferNotes" placeholder="Any details for the manager..."></textarea>
+        </div>
+
+        <button id="sendTransferBtn" class="btn" onclick="submitTransferTicket()">Send Transfer Ticket</button>
+        <div id="transferStatus" class="status"></div>
+        <div class="small-note">Ticket includes your username automatically, and sends an embed to whichever Discord channel the owner has configured.</div>
+      </section>
+
+      <section class="card wide view" id="view-history">
+        <h3>Your Transfer History</h3>
+        <div class="muted">Shows your Fisher tickets and their approval status.</div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Date</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="historyRows">
+            <tr><td colspan="5" style="color:#a1a1aa;">No transfer tickets yet.</td></tr>
+          </tbody>
+        </table>
+      </section>
     </main>
   </div>
 
   <script>
-    const STOCK_KEY = "benji_fisher_stock_by_user";
-    const TICKETS_KEY = "benji_transfer_tickets";
-    const ACTIVE_USER_KEY = "benji_active_seller_name";
-    const ROLE_KEY = "benji_active_staff_role";
-
+    const API_URL = "/.netlify/functions/api";
     const UNIT_PRICE = 200;
+    const ITEM_NAME = "Yellowfin Tuna";
     const DEFAULT_FROM_LOCATION = "Fisher Dock";
     const DEFAULT_TO_LOCATION = "Manager Warehouse";
 
     let activeUsername = "";
+    let currentStockValue = 0;
 
-    function loadActiveUser() {
-      const stored = localStorage.getItem(ACTIVE_USER_KEY);
-      activeUsername = (stored || "").trim();
-
-      document.getElementById("activeUsername").value = activeUsername || "Unknown Fisher";
-      loadPersonalStock();
-      loadHistory();
+    async function api(action, payload = {}) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ...payload })
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.error || "Request failed");
+      return data;
     }
 
-    function getStockMap() {
-      try {
-        return JSON.parse(localStorage.getItem(STOCK_KEY) || "{}");
-      } catch {
-        return {};
+    // Blocks direct access — you have to have actually logged in with a
+    // Fisher/Management/Owner code on the hub first.
+    function bootAuth() {
+      const username = localStorage.getItem("benji_active_seller_name");
+      const roleKey = localStorage.getItem("benji_active_staff_role");
+      if (!username || !["W_FISH", "W_MGMT", "W_OWNER"].includes(roleKey)) {
+        window.location.href = "../front%20side/index.html";
+        return false;
       }
+      activeUsername = username;
+      return true;
     }
 
-    function saveStockMap(map) {
-      localStorage.setItem(STOCK_KEY, JSON.stringify(map));
-    }
-
-    function getCurrentStockValue() {
-      const map = getStockMap();
-      const key = activeUsername || "unknown_fisher";
-      return Number(map[key] || 0);
-    }
-
-    function setCurrentStockValue(units) {
-      const map = getStockMap();
-      const key = activeUsername || "unknown_fisher";
-      map[key] = Math.max(0, Number(units) || 0);
-      saveStockMap(map);
-      loadPersonalStock();
-    }
-
-    function loadPersonalStock() {
-      document.getElementById("currentStock").textContent = getCurrentStockValue().toLocaleString();
+    function switchView(id, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.classList.add("active");
+      if (id === "view-stock") loadPersonalStock();
+      if (id === "view-history") loadHistory();
     }
 
     function setStatus(elId, type, text) {
@@ -574,13 +278,18 @@
       el.textContent = "";
     }
 
-    function updatePersonalStock() {
-      clearStatus("stockStatus");
-
-      if (!activeUsername) {
-        setStatus("stockStatus", "err", "No active fisher username found. Please log in again.");
-        return;
+    async function loadPersonalStock() {
+      try {
+        const { stock } = await api("getPersonalStock", { username: activeUsername });
+        currentStockValue = Number(stock[ITEM_NAME] || 0);
+        document.getElementById("currentStock").textContent = currentStockValue.toLocaleString();
+      } catch (e) {
+        console.warn("Could not load stock", e);
       }
+    }
+
+    async function updatePersonalStock() {
+      clearStatus("stockStatus");
 
       const action = document.getElementById("stockAction").value;
       const amount = Number(document.getElementById("stockAmount").value);
@@ -590,19 +299,21 @@
         return;
       }
 
-      const current = getCurrentStockValue();
-      let next = current;
-
-      if (action === "add") next = current + amount;
-      else if (action === "remove") next = current - amount;
+      let next = currentStockValue;
+      if (action === "add") next = currentStockValue + amount;
+      else if (action === "remove") next = currentStockValue - amount;
       else next = amount;
-
       if (next < 0) next = 0;
 
-      setCurrentStockValue(next);
-      document.getElementById("stockAmount").value = "";
-
-      setStatus("stockStatus", "ok", "Personal stock updated successfully.");
+      try {
+        await api("savePersonalStock", { username: activeUsername, stock: { [ITEM_NAME]: next } });
+        currentStockValue = next;
+        document.getElementById("currentStock").textContent = next.toLocaleString();
+        document.getElementById("stockAmount").value = "";
+        setStatus("stockStatus", "ok", "Personal stock updated successfully.");
+      } catch (e) {
+        setStatus("stockStatus", "err", e.message || "Could not update stock.");
+      }
     }
 
     function recalcTransferTotal() {
@@ -611,109 +322,8 @@
       document.getElementById("transferTotal").value = total.toLocaleString() + "p";
     }
 
-    function generateTicketId() {
-      return "TRF-" + Date.now().toString().slice(-6) + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
-    }
-
-    function getTickets() {
-      try {
-        const arr = JSON.parse(localStorage.getItem(TICKETS_KEY) || "[]");
-        return Array.isArray(arr) ? arr : [];
-      } catch {
-        return [];
-      }
-    }
-
-    function saveTickets(arr) {
-      localStorage.setItem(TICKETS_KEY, JSON.stringify(arr));
-    }
-
-    function statusClass(s) {
-      const raw = String(s || "pending").toLowerCase();
-      if (raw.includes("approve")) return "approved";
-      if (raw.includes("reject") || raw.includes("decline")) return "rejected";
-      return "pending";
-    }
-
-    function formatDate(iso) {
-      try {
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) return "-";
-        return d.toLocaleString();
-      } catch {
-        return "-";
-      }
-    }
-
-    function loadHistory() {
-      const tbody = document.getElementById("historyRows");
-      const all = getTickets();
-
-      const list = all
-        .filter(t => String(t.requesterRole || "").toLowerCase() === "fisher")
-        .filter(t => !activeUsername || t.requesterUsername === activeUsername)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-      if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="color:#a1a1aa;">No transfer tickets yet.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = list.map(t => {
-        const st = statusClass(t.status);
-        return `
-          <tr>
-            <td>${t.id || "-"}</td>
-            <td>${formatDate(t.createdAt)}</td>
-            <td>${Number(t.amount || 0).toLocaleString()}</td>
-            <td>${Number(t.totalPrice || 0).toLocaleString()}p</td>
-            <td><span class="tag ${st}">${t.status || "pending"}</span></td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    async function pingTransferWebhook(ticket) {
-      const webhook = localStorage.getItem("benji_transfer_webhook");
-      if (!webhook) return;
-
-      const payload = {
-        username: "Benji HQ Transfers",
-        embeds: [{
-          title: "Fisher Transfer Request",
-          color: 0xf97316,
-          fields: [
-            { name: "Ticket", value: String(ticket.id), inline: true },
-            { name: "Worker", value: String(ticket.requesterUsername || "Unknown"), inline: true },
-            { name: "Role", value: "Fisher", inline: true },
-            { name: "Item", value: "Yellowfin Tuna", inline: true },
-            { name: "Quantity", value: String(ticket.amount), inline: true },
-            { name: "Unit Price", value: "200p", inline: true },
-            { name: "Total", value: String(ticket.totalPrice) + "p", inline: true },
-            { name: "Notes", value: String(ticket.notes || "No notes.") }
-          ],
-          timestamp: new Date().toISOString()
-        }]
-      };
-
-      try {
-        await fetch(webhook, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-      } catch {
-        // ignore webhook failure
-      }
-    }
-
     async function submitTransferTicket() {
       clearStatus("transferStatus");
-
-      if (!activeUsername) {
-        setStatus("transferStatus", "err", "No active fisher username found. Please log in again.");
-        return;
-      }
 
       const qty = Number(document.getElementById("transferQty").value);
       const notes = document.getElementById("transferNotes").value.trim();
@@ -723,68 +333,101 @@
         return;
       }
 
-      const current = getCurrentStockValue();
-      if (qty > current) {
-        setStatus("transferStatus", "err", `Not enough personal stock. You have ${current} unit(s).`);
+      if (qty > currentStockValue) {
+        setStatus("transferStatus", "err", `Not enough personal stock. You have ${currentStockValue} unit(s).`);
         return;
       }
 
       const total = qty * UNIT_PRICE;
-      const ticket = {
-        id: generateTicketId(),
-        requesterUsername: activeUsername,
-        requesterRole: "Fisher",
-        item: "Yellowfin Tuna",
-        amount: qty,
-        unitPrice: UNIT_PRICE,
-        totalPrice: total,
-        fromLocation: DEFAULT_FROM_LOCATION,
-        toLocation: DEFAULT_TO_LOCATION,
-        notes: notes || "No notes provided.",
-        status: "Pending",
-        createdAt: new Date().toISOString()
-      };
-
       const btn = document.getElementById("sendTransferBtn");
       btn.disabled = true;
       btn.textContent = "Sending...";
 
       try {
-        const tickets = getTickets();
-        tickets.push(ticket);
-        saveTickets(tickets);
+        const res = await api("createTransferTicket", {
+          requesterUsername: activeUsername,
+          requesterRole: "Fisher",
+          item: ITEM_NAME,
+          amount: qty,
+          unitPrice: UNIT_PRICE,
+          totalPrice: total,
+          fromLocation: DEFAULT_FROM_LOCATION,
+          toLocation: DEFAULT_TO_LOCATION,
+          notes: notes || "No notes provided."
+        });
 
-        setCurrentStockValue(current - qty);
-
-        await pingTransferWebhook(ticket);
+        const newStock = Math.max(0, currentStockValue - qty);
+        await api("savePersonalStock", { username: activeUsername, stock: { [ITEM_NAME]: newStock } });
+        currentStockValue = newStock;
 
         document.getElementById("transferQty").value = "";
         document.getElementById("transferNotes").value = "";
         recalcTransferTotal();
         loadHistory();
 
-        setStatus("transferStatus", "ok", `Transfer ticket sent to Manager. Ticket: ${ticket.id}`);
-      } catch {
-        setStatus("transferStatus", "err", "Failed to create transfer ticket. Try again.");
+        setStatus("transferStatus", "ok", `Transfer ticket sent to Manager. Ticket: ${res.id}`);
+      } catch (e) {
+        setStatus("transferStatus", "err", e.message || "Failed to create transfer ticket. Try again.");
       } finally {
         btn.disabled = false;
         btn.textContent = "Send Transfer Ticket";
       }
     }
 
+    function statusClass(s) {
+      const raw = String(s || "pending").toLowerCase();
+      if (raw.includes("approve")) return "approved";
+      if (raw.includes("declin") || raw.includes("reject")) return "rejected";
+      return "pending";
+    }
+
+    function formatDate(v) {
+      try {
+        const d = new Date(Number(v) || v);
+        if (Number.isNaN(d.getTime())) return "-";
+        return d.toLocaleString();
+      } catch {
+        return "-";
+      }
+    }
+
+    async function loadHistory() {
+      const tbody = document.getElementById("historyRows");
+      tbody.innerHTML = '<tr><td colspan="5" style="color:#a1a1aa;">Loading...</td></tr>';
+
+      try {
+        const { tickets } = await api("listTransferTicketsByUser", { username: activeUsername, role: "Fisher" });
+
+        if (!tickets.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="color:#a1a1aa;">No transfer tickets yet.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = tickets.map(t => `
+          <tr>
+            <td>${t.id || "-"}</td>
+            <td>${formatDate(t.created_at)}</td>
+            <td>${Number(t.amount || 0).toLocaleString()}</td>
+            <td>${Number(t.totalPrice || 0).toLocaleString()}p</td>
+            <td><span class="tag ${statusClass(t.status)}">${t.status || "Pending"}</span></td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:#fca5a5;">${e.message}</td></tr>`;
+      }
+    }
+
     function logoutWorker() {
-      localStorage.removeItem(ACTIVE_USER_KEY);
-      localStorage.removeItem(ROLE_KEY);
+      localStorage.removeItem("benji_active_seller_name");
+      localStorage.removeItem("benji_active_staff_role");
       window.location.href = "../front%20side/index.html";
     }
 
-    window.addEventListener("storage", (e) => {
-      if (e.key === TICKETS_KEY) loadHistory();
-      if (e.key === STOCK_KEY) loadPersonalStock();
-    });
-
     window.onload = () => {
-      loadActiveUser();
+      if (!bootAuth()) return;
+      document.getElementById("activeUsername").value = activeUsername;
+      loadPersonalStock();
+      loadHistory();
       recalcTransferTotal();
     };
   </script>

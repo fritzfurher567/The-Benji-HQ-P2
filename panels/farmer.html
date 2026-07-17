@@ -9,10 +9,13 @@
     body { background: #09090b; color: #f4f4f5; display: flex; min-height: 100vh; }
 
     .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; padding: 22px 0; display: flex; flex-direction: column; }
-    .logo { padding: 0 18px 18px; border-bottom: 1px solid #27272a; }
-    .logo .badge { display:inline-block; border:1px solid #f97316; color:#f97316; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:700; margin-bottom:8px; text-transform:uppercase; }
-    .logo h1 { font-size:24px; font-weight:900; }
-    .logo p { color:#a1a1aa; font-size:12px; margin-top:6px; }
+
+    .sidebar-logo-wrap{ padding: 0 16px 16px; margin: 0 0 14px; border-bottom: 1px solid #27272a; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .sidebar-logo-text{ display:flex; flex-direction:column; align-items:center; line-height:1; }
+    .logo-benji{ font-size:22px; font-weight:900; letter-spacing:3px; color:#fff; text-transform:uppercase; }
+    .logo-hq{ font-size:36px; font-weight:900; letter-spacing:4px; color:#f97316; text-transform:uppercase; text-shadow:0 0 20px rgba(249,115,22,0.4); }
+    .sidebar-logo-ver{ font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #f97316; }
+    .sidebar-panel-name{ font-size: 12px; color: #a1a1aa; }
 
     .nav { padding:14px; display:flex; flex-direction:column; gap:8px; }
     .nav button { background:transparent; border:none; color:#a1a1aa; text-align:left; padding:12px; border-radius:6px; cursor:pointer; font-weight:700; }
@@ -21,10 +24,12 @@
 
     .logout { margin-top:auto; padding:14px; border-top:1px solid #27272a; }
     .logout button { width:100%; background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; border-radius:6px; padding:10px; font-weight:700; cursor:pointer; }
+    .logout button:hover { border-color:#f97316; color:#fff; }
 
     .main { flex:1; padding:30px; overflow:auto; }
     .view { display:none; }
-    .view.active { display:block; }
+    .view.active { display:block; animation: fade 0.2s ease; }
+    @keyframes fade { from { opacity: 0.5; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     .header { margin-bottom:20px; }
     .header h2 { font-size:28px; font-weight:900; }
@@ -32,52 +37,38 @@
 
     .card { background:#141619; border:1px solid #22252a; border-radius:8px; padding:20px; margin-bottom:16px; }
 
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+
     label { display:block; font-size:11px; text-transform:uppercase; color:#a1a1aa; font-weight:700; margin-bottom:6px; }
-    input, select { width:100%; background:#0b0c0e; border:1px solid #2c3036; color:#fff; border-radius:6px; padding:11px; margin-bottom:12px; outline:none; }
-    input:focus, select:focus { border-color:#f97316; box-shadow:0 0 0 1px #f97316; }
+    input, select, textarea { width:100%; background:#0b0c0e; border:1px solid #2c3036; color:#fff; border-radius:6px; padding:11px; margin-bottom:12px; outline:none; font-family:inherit; font-size:14px; }
+    input:focus, select:focus, textarea:focus { border-color:#f97316; box-shadow:0 0 0 1px #f97316; }
+    textarea { resize: vertical; min-height: 90px; }
 
     .btn { border:none; background:#f97316; color:#000; padding:10px 12px; border-radius:6px; font-weight:900; cursor:pointer; }
     .btn:hover { background:#ea580c; color:#fff; }
+    .btn:disabled { background:#4b5563; color:#9ca3af; cursor:not-allowed; }
 
     table { width:100%; border-collapse:collapse; background:#0b0c0e; border-radius:8px; overflow:hidden; }
     th, td { padding:12px; border-bottom:1px solid #27272a; text-align:left; font-size:13px; color:#d4d4d8; }
     th { color:#f97316; font-size:11px; text-transform:uppercase; font-weight:800; }
     tr:last-child td { border-bottom:none; }
 
-    .total { font-size:22px; font-weight:900; color:#f97316; margin-top:6px; }
-    .sidebar-logo-wrap{
-      padding: 0 16px 16px;
-      margin: 0 0 14px;
-      border-bottom: 1px solid #27272a;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .sidebar-logo-img{
-      width: 170px;
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 6px 18px rgba(0,0,0,.35);
-    }
-    .sidebar-logo-ver{
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      color: #f97316;
-    }
-    .sidebar-panel-name{
-      font-size: 12px;
-      color: #a1a1aa;
-    }
+    .status { display:inline-block; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:800; }
+    .status-pending { background:rgba(234,179,8,.15); color:#eab308; }
+    .status-approved { background:rgba(34,197,94,.15); color:#22c55e; }
+    .status-declined { background:rgba(239,68,68,.15); color:#ef4444; }
+
+    .total-box { font-size:20px; font-weight:900; color:#f97316; margin-top:6px; }
   </style>
 </head>
 <body>
   <aside class="sidebar">
     <div class="sidebar-logo-wrap">
-      <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="The Benji HQ V2">
+      <div class="sidebar-logo-text">
+        <span class="logo-benji">BENJI</span>
+        <span class="logo-hq">HQ</span>
+      </div>
       <div class="sidebar-logo-ver">Community Hub v2.0</div>
       <div class="sidebar-panel-name">Farmer Panel</div>
     </div>
@@ -89,7 +80,7 @@
     </div>
 
     <div class="logout">
-      <button onclick="window.location.href='../index.html'">LOG OUT</button>
+      <button onclick="logoutWorker()">LOG OUT</button>
     </div>
   </aside>
 
@@ -97,37 +88,47 @@
     <section id="view-transfer" class="view active">
       <div class="header">
         <h2>Transfer Ticket</h2>
-        <p>Items: Beans, Peppers (auto price calculation). Sent directly to the Manager.</p>
+        <p>Items: Beans, Peppers. Sends a Discord embed with the ticket number, item, quantity, and your notes to whichever channel the owner has configured.</p>
       </div>
 
       <div class="card">
-        <label>Item</label>
-        <select id="item" onchange="calcTotal()"></select>
+        <div class="grid">
+          <div>
+            <label>Item</label>
+            <select id="item" onchange="calcTotal()"></select>
 
-        <label>Amount</label>
-        <input id="amount" type="number" min="1" value="1" oninput="calcTotal()" />
+            <label>Amount</label>
+            <input id="amount" type="number" min="1" value="1" oninput="calcTotal()" />
 
-        <label>From</label>
-        <input value="Inventory" readonly />
+            <label>From</label>
+            <input value="Inventory" readonly />
 
-        <label>To</label>
-        <input value="Manager" readonly />
+            <label>To</label>
+            <input value="Manager" readonly />
+          </div>
 
-        <label>Unit Price</label>
-        <input id="unit-price" readonly />
+          <div>
+            <label>Optional Notes</label>
+            <textarea id="notes" placeholder="Any extra notes for the manager..."></textarea>
 
-        <label>Total Pay</label>
-        <input id="total-price" readonly />
+            <label>Unit Price</label>
+            <input id="unit-price" readonly />
 
-        <div class="total" id="total-label">Total: 0p</div>
-        <button class="btn" onclick="submitTransfer()">Send Transfer to Manager</button>
+            <label>Total Pay</label>
+            <input id="total-price" readonly />
+
+            <div class="total-box" id="total-label">Total: 0p</div>
+          </div>
+        </div>
+
+        <button id="submitTransferBtn" class="btn" style="width:100%;" onclick="submitTransfer()">Send Transfer to Manager</button>
       </div>
     </section>
 
     <section id="view-stock" class="view">
       <div class="header">
         <h2>My Personal Stock</h2>
-        <p>You can only update your own stock.</p>
+        <p>You can only update your own stock. Stored in the database, so it stays with you on any device.</p>
       </div>
 
       <div class="card">
@@ -135,7 +136,7 @@
         <input id="stock-beans" type="number" min="0" />
         <label>Peppers</label>
         <input id="stock-peppers" type="number" min="0" />
-        <button class="btn" onclick="saveMyStock()">Save My Stock</button>
+        <button id="saveStockBtn" class="btn" onclick="saveMyStock()">Save My Stock</button>
       </div>
     </section>
 
@@ -164,26 +165,37 @@
   </main>
 
   <script>
-    const STORAGE = {
-      tickets: "benji_transfer_tickets",
-      transferWebhook: "benji_transfer_webhook",
-      farmerStock: "benji_farmer_stock_by_user"
-    };
+    const API_URL = "/.netlify/functions/api";
 
     const PRICES = {
       "Beans": 10,
       "Peppers": 15
     };
 
-    const farmerName = localStorage.getItem("benji_active_seller_name") || "Farmer";
+    let farmerName = "Farmer";
 
-    function readJSON(key, fallback) {
-      try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
-      catch { return fallback; }
+    async function api(action, payload = {}) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ...payload })
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.error || "Request failed");
+      return data;
     }
 
-    function writeJSON(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
+    // Only lets someone in if index.html actually validated a Farmer/Management/Owner
+    // code for them — typing this URL in directly with no code no longer works.
+    function bootAuth() {
+      const username = localStorage.getItem("benji_active_seller_name");
+      const roleKey = localStorage.getItem("benji_active_staff_role");
+      if (!username || !["W_FARM", "W_MGMT", "W_OWNER"].includes(roleKey)) {
+        window.location.href = "../front%20side/index.html";
+        return false;
+      }
+      farmerName = username;
+      return true;
     }
 
     function switchView(id, btn) {
@@ -217,106 +229,114 @@
       document.getElementById("total-label").textContent = `Total: ${total.toLocaleString()}p`;
     }
 
-    async function sendWebhook(ticket) {
-      const url = localStorage.getItem(STORAGE.transferWebhook) || "";
-      if (!url) return;
-      try {
-        await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            embeds: [{
-              title: `🌾 Farmer Transfer Ticket (${ticket.id})`,
-              color: 16753920,
-              fields: [
-                { name: "Discord Username", value: ticket.requesterUsername, inline: true },
-                { name: "Role", value: ticket.requesterRole, inline: true },
-                { name: "Item", value: ticket.item, inline: true },
-                { name: "Amount", value: String(ticket.amount), inline: true },
-                { name: "Pay", value: `${ticket.totalPrice.toLocaleString()}p`, inline: true },
-                { name: "From", value: ticket.fromLocation, inline: true },
-                { name: "To", value: ticket.toLocation, inline: true }
-              ],
-              timestamp: new Date().toISOString()
-            }]
-          })
-        });
-      } catch (e) {
-        console.warn("Webhook failed", e);
-      }
-    }
-
     async function submitTransfer() {
+      const btn = document.getElementById("submitTransferBtn");
       const item = document.getElementById("item").value;
       const amount = Math.max(1, Number(document.getElementById("amount").value || 1));
+      const notes = document.getElementById("notes").value.trim();
       const unitPrice = PRICES[item] || 0;
       const totalPrice = unitPrice * amount;
 
-      const ticket = {
-        id: `TR-${Math.floor(100000 + Math.random() * 900000)}`,
-        requesterUsername: farmerName,
-        requesterRole: "Farmer",
-        item,
-        amount,
-        unitPrice,
-        totalPrice,
-        fromLocation: "Inventory",
-        toLocation: "Manager",
-        notes: "",
-        status: "Pending",
-        createdAt: new Date().toISOString()
-      };
+      btn.disabled = true;
+      btn.innerText = "SENDING...";
 
-      const tickets = readJSON(STORAGE.tickets, []);
-      tickets.push(ticket);
-      writeJSON(STORAGE.tickets, tickets);
+      try {
+        const res = await api("createTransferTicket", {
+          requesterUsername: farmerName,
+          requesterRole: "Farmer",
+          item,
+          amount,
+          unitPrice,
+          totalPrice,
+          fromLocation: "Inventory",
+          toLocation: "Manager",
+          notes
+        });
 
-      await sendWebhook(ticket);
-      alert(`Ticket ${ticket.id} sent to Manager.`);
-      document.getElementById("amount").value = 1;
-      calcTotal();
-      renderHistory();
+        alert(`Ticket ${res.id} sent to Manager.`);
+        document.getElementById("amount").value = 1;
+        document.getElementById("notes").value = "";
+        calcTotal();
+        renderHistory();
+      } catch (e) {
+        alert(e.message || "Could not create ticket.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Send Transfer to Manager";
+      }
     }
 
-    function loadMyStock() {
-      const byUser = readJSON(STORAGE.farmerStock, {});
-      const mine = byUser[farmerName] || { Beans: 0, Peppers: 0 };
-      document.getElementById("stock-beans").value = mine.Beans || 0;
-      document.getElementById("stock-peppers").value = mine.Peppers || 0;
+    async function loadMyStock() {
+      try {
+        const { stock } = await api("getPersonalStock", { username: farmerName });
+        document.getElementById("stock-beans").value = stock.Beans || 0;
+        document.getElementById("stock-peppers").value = stock.Peppers || 0;
+      } catch (e) {
+        console.warn("Could not load stock", e);
+      }
     }
 
-    function saveMyStock() {
-      const byUser = readJSON(STORAGE.farmerStock, {});
-      byUser[farmerName] = {
+    async function saveMyStock() {
+      const btn = document.getElementById("saveStockBtn");
+      const stock = {
         Beans: Math.max(0, Number(document.getElementById("stock-beans").value || 0)),
         Peppers: Math.max(0, Number(document.getElementById("stock-peppers").value || 0))
       };
-      writeJSON(STORAGE.farmerStock, byUser);
-      alert("Your stock was updated.");
+
+      btn.disabled = true;
+      btn.innerText = "SAVING...";
+      try {
+        await api("savePersonalStock", { username: farmerName, stock });
+        alert("Your stock was updated.");
+      } catch (e) {
+        alert(e.message || "Could not save stock.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Save My Stock";
+      }
     }
 
-    function renderHistory() {
+    function statusBadge(status) {
+      const s = String(status || "Pending");
+      const cls = s === "Approved" ? "status-approved" : s === "Declined" ? "status-declined" : "status-pending";
+      return `<span class="status ${cls}">${s}</span>`;
+    }
+
+    async function renderHistory() {
       const tbody = document.getElementById("history-body");
-      const mine = readJSON(STORAGE.tickets, []).filter(t => t.requesterUsername === farmerName && t.requesterRole === "Farmer");
+      tbody.innerHTML = `<tr><td colspan="6" style="color:#a1a1aa;">Loading...</td></tr>`;
 
-      if (!mine.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="color:#a1a1aa;">No tickets yet.</td></tr>`;
-        return;
+      try {
+        const { tickets } = await api("listTransferTicketsByUser", { username: farmerName, role: "Farmer" });
+
+        if (!tickets.length) {
+          tbody.innerHTML = `<tr><td colspan="6" style="color:#a1a1aa;">No tickets yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = tickets.map(t => `
+          <tr>
+            <td style="font-family:monospace">${t.id}</td>
+            <td>${t.item}</td>
+            <td>${t.amount}</td>
+            <td>${Number(t.totalPrice || 0).toLocaleString()}p</td>
+            <td>${t.toLocation}</td>
+            <td>${statusBadge(t.status)}</td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color:#ef4444;">${e.message}</td></tr>`;
       }
+    }
 
-      tbody.innerHTML = [...mine].reverse().map(t => `
-        <tr>
-          <td style="font-family:monospace">${t.id}</td>
-          <td>${t.item}</td>
-          <td>${t.amount}</td>
-          <td>${Number(t.totalPrice || 0).toLocaleString()}p</td>
-          <td>${t.toLocation}</td>
-          <td>${t.status}</td>
-        </tr>
-      `).join("");
+    function logoutWorker() {
+      localStorage.removeItem("benji_active_seller_name");
+      localStorage.removeItem("benji_active_staff_role");
+      window.location.href = "../front%20side/index.html";
     }
 
     window.onload = () => {
+      if (!bootAuth()) return;
       setup();
       loadMyStock();
       renderHistory();

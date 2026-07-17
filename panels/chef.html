@@ -9,6 +9,14 @@
     body { background: #09090b; color: #f4f4f5; display: flex; min-height: 100vh; }
 
     .sidebar { width: 260px; background: #18181b; border-right: 1px solid #27272a; padding: 22px 0; display: flex; flex-direction: column; }
+
+    .sidebar-logo-wrap{ padding: 0 16px 16px; margin: 0 0 14px; border-bottom: 1px solid #27272a; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .sidebar-logo-text{ display:flex; flex-direction:column; align-items:center; line-height:1; }
+    .logo-benji{ font-size:22px; font-weight:900; letter-spacing:3px; color:#fff; text-transform:uppercase; }
+    .logo-hq{ font-size:36px; font-weight:900; letter-spacing:4px; color:#f97316; text-transform:uppercase; text-shadow:0 0 20px rgba(249,115,22,0.4); }
+    .sidebar-logo-ver{ font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #f97316; }
+    .sidebar-panel-name{ font-size: 12px; color: #a1a1aa; }
+
     .nav { padding:14px; display:flex; flex-direction:column; gap:8px; }
     .nav button { background:transparent; border:none; color:#a1a1aa; text-align:left; padding:12px; border-radius:6px; cursor:pointer; font-weight:700; }
     .nav button:hover { background:#27272a; color:#fff; }
@@ -16,10 +24,12 @@
 
     .logout { margin-top:auto; padding:14px; border-top:1px solid #27272a; }
     .logout button { width:100%; background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; border-radius:6px; padding:10px; font-weight:700; cursor:pointer; }
+    .logout button:hover { border-color:#f97316; color:#fff; }
 
     .main { flex:1; padding:30px; overflow:auto; }
     .view { display:none; }
-    .view.active { display:block; }
+    .view.active { display:block; animation: fade 0.2s ease; }
+    @keyframes fade { from { opacity: 0.5; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     .header { margin-bottom:20px; }
     .header h2 { font-size:28px; font-weight:900; }
@@ -41,51 +51,26 @@
     th { color:#f97316; font-size:11px; text-transform:uppercase; font-weight:800; }
     tr:last-child td { border-bottom:none; }
 
-    .batch-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:12px; }
-    .batch-option { display:none; }
-    .batch-label {
-      display:block; background:#0b0c0e; border:1px solid #2c3036; color:#a1a1aa;
-      text-align:center; padding:14px; border-radius:6px; cursor:pointer; font-weight:700; font-size:15px;
-      transition: all 0.2s;
-    }
-    .batch-label:hover { border-color:#3f3f46; color:#fff; }
-    .batch-option:checked + .batch-label {
-      background: rgba(249,115,22,0.1); border-color:#f97316; color:#f97316; box-shadow: inset 0 0 0 1px #f97316;
-    }
+    .status { display:inline-block; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:800; }
+    .status-pending { background:rgba(234,179,8,.15); color:#eab308; }
+    .status-approved { background:rgba(34,197,94,.15); color:#22c55e; }
+    .status-declined { background:rgba(239,68,68,.15); color:#ef4444; }
 
-    .sidebar-logo-wrap{
-      padding: 0 16px 16px;
-      margin: 0 0 14px;
-      border-bottom: 1px solid #27272a;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .sidebar-logo-img{
-      width: 170px;
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 6px 18px rgba(0,0,0,.35);
-    }
-    .sidebar-logo-ver{
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      color: #f97316;
-    }
-    .sidebar-panel-name{
-      font-size: 12px;
-      color: #a1a1aa;
-    }
+    .quick-row { display:flex; gap:10px; margin-bottom:12px; }
+    .quick-row > * { flex:1; }
+    .quick-btn { background:#0b0c0e; color:#fff; border:1px solid #2c3036; padding:10px; border-radius:6px; cursor:pointer; font-weight:700; }
+    .quick-btn:hover { background:#f97316; color:#000; border-color:#f97316; }
+    .quick-btn.active { background:#f97316; color:#000; border-color:#f97316; }
+    .hint { color:#a1a1aa; font-size:12px; margin-top:-6px; margin-bottom:14px; display:block; }
   </style>
 </head>
 <body>
   <aside class="sidebar">
     <div class="sidebar-logo-wrap">
-      <img class="sidebar-logo-img" src="../front%20side/The%20Benji%20HQ.png" alt="The Benji HQ">
+      <div class="sidebar-logo-text">
+        <span class="logo-benji">BENJI</span>
+        <span class="logo-hq">HQ</span>
+      </div>
       <div class="sidebar-logo-ver">Community Hub v2.0</div>
       <div class="sidebar-panel-name">Chef Panel</div>
     </div>
@@ -97,7 +82,7 @@
     </div>
 
     <div class="logout">
-      <button onclick="window.location.href='../index.html'">LOG OUT</button>
+      <button onclick="logoutWorker()">LOG OUT</button>
     </div>
   </aside>
 
@@ -105,27 +90,22 @@
     <section id="view-transfer" class="view active">
       <div class="header">
         <h2>Kitchen Production</h2>
-        <p>Select a batch size and dispatch the finished Benjis to the Manager.</p>
+        <p>Pick a preset batch size or type your own, then dispatch the finished Benjis to the Manager.</p>
       </div>
 
       <div class="card">
         <label>Batch Quantity</label>
-        <div class="batch-grid">
-          <input type="radio" name="batch" id="batch50" value="50" class="batch-option" checked>
-          <label for="batch50" class="batch-label">50 Benjis</label>
-
-          <input type="radio" name="batch" id="batch100" value="100" class="batch-option">
-          <label for="batch100" class="batch-label">100 Benjis</label>
-
-          <input type="radio" name="batch" id="batch200" value="200" class="batch-option">
-          <label for="batch200" class="batch-label">200 Benjis</label>
-
-          <input type="radio" name="batch" id="batch300" value="300" class="batch-option">
-          <label for="batch300" class="batch-label">300 Benjis</label>
+        <div class="quick-row">
+          <button type="button" class="quick-btn" onclick="setBatch(50)">50</button>
+          <button type="button" class="quick-btn" onclick="setBatch(100)">100</button>
+          <button type="button" class="quick-btn" onclick="setBatch(200)">200</button>
+          <button type="button" class="quick-btn" onclick="setBatch(300)">300</button>
         </div>
+        <input id="batchQty" type="number" min="1" value="50" placeholder="Enter a batch amount..." />
+        <span class="hint">Tap a preset above, or just type any amount — presets aren't a limit.</span>
 
         <label>From</label>
-        <input value="Kitchen" readonly>
+        <input value="Inventory" readonly>
 
         <label>To</label>
         <input value="Manager" readonly>
@@ -140,7 +120,7 @@
     <section id="view-stock" class="view">
       <div class="header">
         <h2>My Personal Stock</h2>
-        <p>You can only update your own stock.</p>
+        <p>You can only update your own stock. Stored in the database, so it stays with you on any device.</p>
       </div>
 
       <div class="card">
@@ -152,7 +132,7 @@
         <input id="stock-dough" type="number" min="0" />
         <label>Flour</label>
         <input id="stock-flour" type="number" min="0" />
-        <button class="btn" onclick="saveMyStock()">Save My Stock</button>
+        <button id="saveStockBtn" class="btn" onclick="saveMyStock()">Save My Stock</button>
       </div>
     </section>
 
@@ -180,21 +160,32 @@
   </main>
 
   <script>
-    const STORAGE = {
-      tickets: "benji_transfer_tickets",
-      transferWebhook: "benji_transfer_webhook",
-      chefStock: "benji_chef_stock_by_user"
-    };
+    const API_URL = "/.netlify/functions/api";
 
-    const chefName = localStorage.getItem("benji_active_seller_name") || "Chef";
+    let chefName = "Chef";
 
-    function readJSON(key, fallback) {
-      try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
-      catch { return fallback; }
+    async function api(action, payload = {}) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ...payload })
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.error || "Request failed");
+      return data;
     }
 
-    function writeJSON(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
+    // Only lets someone in if index.html actually validated a Chef/Management/Owner
+    // code for them — typing this URL in directly with no code no longer works.
+    function bootAuth() {
+      const username = localStorage.getItem("benji_active_seller_name");
+      const roleKey = localStorage.getItem("benji_active_staff_role");
+      if (!username || !["W_CHEF", "W_MGMT", "W_OWNER"].includes(roleKey)) {
+        window.location.href = "../front%20side/index.html";
+        return false;
+      }
+      chefName = username;
+      return true;
     }
 
     function switchView(id, btn) {
@@ -206,115 +197,126 @@
       if (id === "view-history") renderHistory();
     }
 
-    async function sendWebhook(ticket) {
-      const url = localStorage.getItem(STORAGE.transferWebhook) || "";
-      if (!url) return;
-      try {
-        await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            embeds: [{
-              title: `🍳 Chef Transfer Ticket (${ticket.id})`,
-              color: 16753920,
-              fields: [
-                { name: "Discord Username", value: ticket.requesterUsername, inline: true },
-                { name: "Role", value: ticket.requesterRole, inline: true },
-                { name: "Batch", value: `${ticket.amount} Benjis`, inline: true },
-                { name: "From", value: ticket.fromLocation, inline: true },
-                { name: "To", value: ticket.toLocation, inline: true },
-                { name: "Notes", value: ticket.notes || "No additional notes provided.", inline: false }
-              ],
-              timestamp: new Date().toISOString()
-            }]
-          })
-        });
-      } catch (e) {
-        console.warn("Webhook failed", e);
-      }
+    // Presets just fill the box — the chef can still type any number afterward.
+    function setBatch(n) {
+      document.getElementById("batchQty").value = n;
+      document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("active"));
+      event.target.classList.add("active");
     }
 
     async function submitTransfer() {
       const btn = document.getElementById("dispatchBtn");
-      const batchSize = Number(document.querySelector('input[name="batch"]:checked').value);
+      const batchSize = Math.max(1, Number(document.getElementById("batchQty").value || 0));
       const notes = document.getElementById("chefNotes").value.trim();
+
+      if (!batchSize || batchSize <= 0) {
+        alert("Enter a valid batch amount.");
+        return;
+      }
 
       btn.disabled = true;
       btn.innerText = "TRANSMITTING...";
 
-      const ticket = {
-        id: `TR-${Math.floor(100000 + Math.random() * 900000)}`,
-        requesterUsername: chefName,
-        requesterRole: "Chef",
-        item: "Benjis",
-        amount: batchSize,
-        unitPrice: null,
-        totalPrice: null,
-        fromLocation: "Kitchen",
-        toLocation: "Manager",
-        notes,
-        status: "Pending",
-        createdAt: new Date().toISOString()
-      };
-
-      const tickets = readJSON(STORAGE.tickets, []);
-      tickets.push(ticket);
-      writeJSON(STORAGE.tickets, tickets);
-
       try {
-        await sendWebhook(ticket);
-        alert(`Ticket ${ticket.id} sent to Manager.`);
+        const res = await api("createTransferTicket", {
+          requesterUsername: chefName,
+          requesterRole: "Chef",
+          item: "Benjis",
+          amount: batchSize,
+          unitPrice: null,
+          totalPrice: null,
+          fromLocation: "Inventory",
+          toLocation: "Manager",
+          notes
+        });
+
+        alert(`Ticket ${res.id} sent to Manager.`);
         document.getElementById("chefNotes").value = "";
-        document.getElementById("batch50").checked = true;
+        document.getElementById("batchQty").value = 50;
+        document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("active"));
         renderHistory();
+      } catch (e) {
+        alert(e.message || "Could not create ticket.");
       } finally {
         btn.disabled = false;
         btn.innerText = "DISPATCH TO MANAGER";
       }
     }
 
-    function loadMyStock() {
-      const byUser = readJSON(STORAGE.chefStock, {});
-      const mine = byUser[chefName] || { Butter: 0, Salt: 0, "Pastry Dough": 0, Flour: 0 };
-      document.getElementById("stock-butter").value = mine.Butter || 0;
-      document.getElementById("stock-salt").value = mine.Salt || 0;
-      document.getElementById("stock-dough").value = mine["Pastry Dough"] || 0;
-      document.getElementById("stock-flour").value = mine.Flour || 0;
+    async function loadMyStock() {
+      try {
+        const { stock } = await api("getPersonalStock", { username: chefName });
+        document.getElementById("stock-butter").value = stock.Butter || 0;
+        document.getElementById("stock-salt").value = stock.Salt || 0;
+        document.getElementById("stock-dough").value = stock["Pastry Dough"] || 0;
+        document.getElementById("stock-flour").value = stock.Flour || 0;
+      } catch (e) {
+        console.warn("Could not load stock", e);
+      }
     }
 
-    function saveMyStock() {
-      const byUser = readJSON(STORAGE.chefStock, {});
-      byUser[chefName] = {
+    async function saveMyStock() {
+      const btn = document.getElementById("saveStockBtn");
+      const stock = {
         Butter: Math.max(0, Number(document.getElementById("stock-butter").value || 0)),
         Salt: Math.max(0, Number(document.getElementById("stock-salt").value || 0)),
         "Pastry Dough": Math.max(0, Number(document.getElementById("stock-dough").value || 0)),
         Flour: Math.max(0, Number(document.getElementById("stock-flour").value || 0))
       };
-      writeJSON(STORAGE.chefStock, byUser);
-      alert("Your stock was updated.");
+
+      btn.disabled = true;
+      btn.innerText = "SAVING...";
+      try {
+        await api("savePersonalStock", { username: chefName, stock });
+        alert("Your stock was updated.");
+      } catch (e) {
+        alert(e.message || "Could not save stock.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Save My Stock";
+      }
     }
 
-    function renderHistory() {
+    function statusBadge(status) {
+      const s = String(status || "Pending");
+      const cls = s === "Approved" ? "status-approved" : s === "Declined" ? "status-declined" : "status-pending";
+      return `<span class="status ${cls}">${s}</span>`;
+    }
+
+    async function renderHistory() {
       const tbody = document.getElementById("history-body");
-      const mine = readJSON(STORAGE.tickets, []).filter(t => t.requesterUsername === chefName && t.requesterRole === "Chef");
+      tbody.innerHTML = `<tr><td colspan="5" style="color:#a1a1aa;">Loading...</td></tr>`;
 
-      if (!mine.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="color:#a1a1aa;">No tickets yet.</td></tr>`;
-        return;
+      try {
+        const { tickets } = await api("listTransferTicketsByUser", { username: chefName, role: "Chef" });
+
+        if (!tickets.length) {
+          tbody.innerHTML = `<tr><td colspan="5" style="color:#a1a1aa;">No tickets yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = tickets.map(t => `
+          <tr>
+            <td style="font-family:monospace">${t.id}</td>
+            <td>${t.amount} Benjis</td>
+            <td>${t.notes || "-"}</td>
+            <td>${t.toLocation}</td>
+            <td>${statusBadge(t.status)}</td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:#ef4444;">${e.message}</td></tr>`;
       }
+    }
 
-      tbody.innerHTML = [...mine].reverse().map(t => `
-        <tr>
-          <td style="font-family:monospace">${t.id}</td>
-          <td>${t.amount} Benjis</td>
-          <td>${t.notes || "-"}</td>
-          <td>${t.toLocation}</td>
-          <td>${t.status}</td>
-        </tr>
-      `).join("");
+    function logoutWorker() {
+      localStorage.removeItem("benji_active_seller_name");
+      localStorage.removeItem("benji_active_staff_role");
+      window.location.href = "../front%20side/index.html";
     }
 
     window.onload = () => {
+      if (!bootAuth()) return;
       loadMyStock();
       renderHistory();
     };

@@ -36,45 +36,32 @@
     .b-progress { background: rgba(59,130,246,.14); color: #60a5fa; }
     .b-done { background: rgba(34,197,94,.14); color: #22c55e; }
     .sidebar-logo-wrap{
-  padding: 0 16px 16px;
-  margin: 0 0 14px;
-  border-bottom: 1px solid #27272a;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-.sidebar-logo-text{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  line-height:1;
-}
-.logo-benji{
-  font-size:22px;
-  font-weight:900;
-  letter-spacing:3px;
-  color:#fff;
-  text-transform:uppercase;
-}
-.logo-hq{
-  font-size:36px;
-  font-weight:900;
-  letter-spacing:4px;
-  color:#f97316;
-  text-transform:uppercase;
-  text-shadow:0 0 20px rgba(249,115,22,0.4);
-}
+      padding: 0 16px 16px;
+      margin: 0 0 14px;
+      border-bottom: 1px solid #27272a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-logo-text{ display:flex; flex-direction:column; align-items:center; line-height:1; }
+    .logo-benji{ font-size:22px; font-weight:900; letter-spacing:3px; color:#fff; text-transform:uppercase; }
+    .logo-hq{ font-size:36px; font-weight:900; letter-spacing:4px; color:#f97316; text-transform:uppercase; text-shadow:0 0 20px rgba(249,115,22,0.4); }
+    .sidebar-logo-ver{ font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #f97316; }
+    .sidebar-panel-name{ font-size: 12px; color: #a1a1aa; }
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
     <div class="sidebar-logo-wrap">
-  <img class="sidebar-logo-img" src="../The%20Benji%20HQ%20V2.png" alt="The Benji HQ V2">
-  <div class="sidebar-logo-ver">Community Hub v2.0</div>
-  <div class="sidebar-panel-name">Seller Panel</div>
-</div>
+      <div class="sidebar-logo-text">
+        <span class="logo-benji">BENJI</span>
+        <span class="logo-hq">HQ</span>
+      </div>
+      <div class="sidebar-logo-ver">Community Hub v2.0</div>
+      <div class="sidebar-panel-name">Seller Panel</div>
+    </div>
 
     <div class="nav-menu">
       <button class="nav-btn active" onclick="switchTab('orders', this)">📝 Active Orders</button>
@@ -144,8 +131,9 @@
     }
 
     function logout() {
-      localStorage.removeItem("benji_active_worker");
-      window.location.href = "../index.html";
+      localStorage.removeItem("benji_active_seller_name");
+      localStorage.removeItem("benji_active_staff_role");
+      window.location.href = "../front side/index.html";
     }
 
     function statusBadge(status) {
@@ -170,8 +158,8 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td style="color:#fff;font-weight:700;">${o.id}</td>
-            <td style="color:#60a5fa;">${o.customer_discord || "-"}</td>
-            <td>${o.payment_method || "-"}</td>
+            <td style="color:#60a5fa;">${o.customerDiscord || "-"}</td>
+            <td>${o.paymentMethod || "-"}</td>
             <td>${o.qty}x</td>
             <td>${o.tip}p</td>
             <td style="color:#f97316;font-weight:700;">${Number(o.total).toLocaleString()}p</td>
@@ -224,16 +212,21 @@
     }
 
     function bootAuth() {
-      activeWorker = JSON.parse(localStorage.getItem("benji_active_worker") || "null");
-      if (!activeWorker || !["Seller", "Management", "Owner"].includes(activeWorker.role)) {
-        window.location.href = "../index.html";
+      const username = localStorage.getItem("benji_active_seller_name");
+      const roleKey = localStorage.getItem("benji_active_staff_role");
+
+      if (!username || !["W_SELL", "W_MGMT", "W_OWNER"].includes(roleKey)) {
+        window.location.href = "../front side/index.html";
         return;
       }
-      document.getElementById("sellerName").innerText = activeWorker.username || activeWorker.role;
+
+      activeWorker = { username, role: roleKey };
+      document.getElementById("sellerName").innerText = username;
     }
 
     window.onload = async () => {
       bootAuth();
+      if (!activeWorker) return;
       await loadOrders();
       await loadStock();
       setInterval(loadOrders, 5000);
