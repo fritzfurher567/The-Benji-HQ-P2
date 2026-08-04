@@ -10,13 +10,14 @@ exports.handler = async (event) => {
     }
 
     const resolvedRedirectUri = redirectUri || process.env.DISCORD_REDIRECT_URI || "https://thebenjihq.netlify.app/";
+    const canonicalRedirectUri = resolvedRedirectUri.replace(/\/+$/, "") + "/";
 
     const params = new URLSearchParams({
       client_id: process.env.DISCORD_CLIENT_ID,
       client_secret: process.env.DISCORD_CLIENT_SECRET,
       grant_type: "authorization_code",
       code,
-      redirect_uri: resolvedRedirectUri
+      redirect_uri: canonicalRedirectUri
     });
 
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {

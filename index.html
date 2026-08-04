@@ -311,8 +311,7 @@ let currentUser = null;
 function getRedirectUri() {
   if (typeof window === "undefined") return "https://thebenjihq.netlify.app/";
   const origin = window.location.origin || "https://thebenjihq.netlify.app";
-  const path = window.location.pathname || "/";
-  return `${origin}${path.startsWith("/") ? path : `/${path}`}`;
+  return `${origin}/`;
 }
 
 function normalizeDiscordUser(user) {
