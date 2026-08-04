@@ -16,6 +16,12 @@ test('accepts the staff roster codes for their roles', () => {
   assert.equal(validateCodeForRole('W_FARM', 'W_FARM_15'), true);
 });
 
+test('accepts manager aliases so owner registration can use clearer manager codes', () => {
+  assert.equal(validateCodeForRole('W_MGMT', 'W_MANAGER_01'), true);
+  assert.equal(validateCodeForRole('W_MANAGER', 'W_MANAGER_01'), true);
+  assert.equal(validateCodeForRole('W_MANAGER', 'W_MGMT_02'), true);
+});
+
 test('rejects mismatched roles and invalid formats', () => {
   assert.equal(validateCodeForRole('W_MGMT', 'W_SELL_01'), false);
   assert.equal(validateCodeForRole('W_OWNER', 'W_MGMT_01'), false);
