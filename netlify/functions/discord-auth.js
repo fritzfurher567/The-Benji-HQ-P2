@@ -4,17 +4,19 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { code } = JSON.parse(event.body || "{}");
+    const { code, redirectUri } = JSON.parse(event.body || "{}");
     if (!code) {
       return { statusCode: 400, body: JSON.stringify({ ok: false, error: "Invalid OAuth: missing code" }) };
     }
+
+    const resolvedRedirectUri = redirectUri || process.env.DISCORD_REDIRECT_URI || "https://thebenjihq.netlify.app/";
 
     const params = new URLSearchParams({
       client_id: process.env.DISCORD_CLIENT_ID,
       client_secret: process.env.DISCORD_CLIENT_SECRET,
       grant_type: "authorization_code",
       code,
-      redirect_uri: process.env.DISCORD_REDIRECT_URI
+      redirect_uri: resolvedRedirectUri
     });
 
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
@@ -56,13 +58,19 @@ exports.handler = async (event) => {
       };
     }
 
-    const username = me.username + (me.discriminator && me.discriminator !== "0" ? `#${me.discriminator}` : "");
+    const username = me.global_name || me.username || "Discord User";
+    const displayName = me.global_name || me.username || "Discord User";
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         ok: true,
-        user: { id: me.id, username }
+        user: {
+          id: me.id,
+          username,
+          displayName,
+          avatar: me.avatar || null
+        }
       })
     };
   } catch (err) {

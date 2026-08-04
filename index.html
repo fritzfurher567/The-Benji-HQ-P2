@@ -250,10 +250,34 @@
 const API_URL = "/.netlify/functions/api";
 const DISCORD_AUTH_URL = "/.netlify/functions/discord-auth";
 const DISCORD_CLIENT_ID = "1512209739629461554";
-const DISCORD_REDIRECT_URI = "https://thebenjihq.netlify.app";
 const OAUTH_STATE_KEY = "benji_oauth_state";
 
 let currentUser = null;
+
+function getRedirectUri() {
+  if (typeof window === "undefined") return "https://thebenjihq.netlify.app/";
+  const origin = window.location.origin || "https://thebenjihq.netlify.app";
+  const path = window.location.pathname || "/";
+  return `${origin}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function normalizeDiscordUser(user) {
+  if (!user || typeof user !== "object") {
+    return {
+      id: "",
+      username: "Discord User",
+      displayName: "Discord User"
+    };
+  }
+
+  const username = user.username || user.global_name || user.displayName || user.name || "Discord User";
+  return {
+    id: user.id || user.discordId || "",
+    username,
+    displayName: user.displayName || username,
+    avatar: user.avatar || null
+  };
+}
 
 // ===== DIAGNOSTICS =====
 // Shows the *real* failure reason on-screen instead of a vague alert, so we
@@ -320,7 +344,7 @@ function redirectToDiscord() {
 
   const params = new URLSearchParams({
     client_id: DISCORD_CLIENT_ID,
-    redirect_uri: DISCORD_REDIRECT_URI,
+    redirect_uri: getRedirectUri(),
     response_type: "code",
     scope: "identify",
     state
@@ -358,10 +382,11 @@ function calculateTotal() {
 }
 
 function completeLogin(user) {
-  currentUser = user;
-  localStorage.setItem("benji_active_user", JSON.stringify(user));
+  const normalizedUser = normalizeDiscordUser(user);
+  currentUser = normalizedUser;
+  localStorage.setItem("benji_active_user", JSON.stringify(normalizedUser));
   document.getElementById("login-gate").style.display = "none";
-  document.getElementById("logged-in-username").innerText = user.username;
+  document.getElementById("logged-in-username").innerText = normalizedUser.username || "Discord User";
   refreshAllUserData();
 }
 
@@ -572,7 +597,7 @@ async function boot() {
     res = await fetch(DISCORD_AUTH_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({ code, redirectUri: getRedirectUri() })
     });
   } catch (networkErr) {
     showDiag(
@@ -607,8 +632,14 @@ async function boot() {
       data.error || `HTTP ${res.status} with no error message.\n\n` +
       `Common causes: DISCORD_CLIENT_SECRET missing/wrong in Netlify env vars, or the ` +
       `redirect_uri registered in the Discord Developer Portal doesn't exactly match ` +
-      `"${DISCORD_REDIRECT_URI}" (trailing slash matters).`
+      `"${getRedirectUri()}" (trailing slash matters).`
     );
+    if (btn) { btn.disabled = false; btn.innerText = "Login with Discord"; }
+    return;
+  }
+
+  if (!data.user) {
+    showDiag("Discord login rejected", "The auth function did not return a usable user object.");
     if (btn) { btn.disabled = false; btn.innerText = "Login with Discord"; }
     return;
   }
