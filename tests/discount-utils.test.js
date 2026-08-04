@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { normalizeDiscountCode, resolveDiscountForOrder } = require('./discount-utils');
+const { normalizeDiscountCode, resolveDiscountForOrder } = require('../netlify/functions/discount-utils');
 
 test('normalizes code values before matching', () => {
   assert.equal(normalizeDiscountCode(' Benji10 '), 'BENJI10');

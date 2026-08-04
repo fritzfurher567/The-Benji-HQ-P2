@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { validateCodeForRole } = require('./code-utils');
+const { validateCodeForRole } = require('../netlify/functions/code-utils');
 
 test('accepts the owner code supplied for owner logins', () => {
   assert.equal(validateCodeForRole('W_OWNER', 'W_TBHQ_nicho'), true);
