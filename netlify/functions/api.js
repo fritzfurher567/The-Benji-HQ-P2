@@ -7,7 +7,7 @@ const {
   buildTransferWebhookPayload
 } = require("./webhook-utils");
 const { normalizeDiscountCode, resolveDiscountForOrder } = require("./discount-utils");
-const { validateCodeForRole } = require("./code-utils");
+const { validateCodeForRole, getBootstrapOwnerCode, isBootstrapOwnerCode, canRegisterWorker } = require("./code-utils");
 
 const db = createClient({
   url: process.env.TURSO_DATABASE_URL,
@@ -273,8 +273,9 @@ exports.handler = async (event) => {
         const { code } = data;
         if (!code) return fail(400, "Missing code");
         const upper = String(code).trim().toUpperCase();
+        const bootstrapOwnerCode = getBootstrapOwnerCode();
 
-        if (process.env.OWNER_BOOTSTRAP_CODE && upper === process.env.OWNER_BOOTSTRAP_CODE.toUpperCase()) {
+        if (upper === bootstrapOwnerCode) {
           return ok({ worker: { username: "Owner", roleKey: "W_OWNER" } });
         }
 
@@ -289,10 +290,16 @@ exports.handler = async (event) => {
         const { username, discordId, roleKey, code } = data;
         if (!username || !code) return fail(400, "Username and code are required.");
         if (!validateCodeForRole(roleKey, code)) return fail(400, "Code format invalid for selected role. Example: W_SELL_01 to W_SELL_20");
+        if (!canRegisterWorker(roleKey, code)) return fail(400, "Owner access is locked to the bootstrap owner code.");
 
-        const upper = String(code).toUpperCase();
+        const upper = String(code).trim().toUpperCase();
         const existing = await db.execute({ sql: "SELECT code FROM worker_codes WHERE code = ?", args: [upper] });
         if (existing.rows.length) return fail(400, "That code already exists.");
+
+        if (upper === getBootstrapOwnerCode()) {
+          const existingOwner = await db.execute({ sql: "SELECT code FROM worker_codes WHERE roleKey = 'W_OWNER'" });
+          if (existingOwner.rows.length) return fail(400, "The owner code is already registered.");
+        }
 
         await db.execute({
           sql: `INSERT INTO worker_codes (code, username, discordId, roleKey, status, created_at) VALUES (?, ?, ?, ?, 'Active', ?)`,
@@ -310,6 +317,7 @@ exports.handler = async (event) => {
       case "setWorkerStatus": {
         const { code, status } = data;
         if (!code || !status) return fail(400, "Missing code or status");
+        if (isBootstrapOwnerCode(code)) return fail(400, "The owner code is locked and cannot be changed.");
         if (status === "Revoked") {
           await db.execute({
             sql: "UPDATE worker_codes SET status = 'Revoked', fired_at = ?, purge_at = ? WHERE code = ?",

@@ -4,11 +4,34 @@ function normalizeRoleKey(roleKey) {
   return normalizedRole;
 }
 
+function normalizeCode(code) {
+  return String(code || "").trim().toUpperCase();
+}
+
+function getBootstrapOwnerCode() {
+  return "W_TBHQ_NICHO";
+}
+
+function isBootstrapOwnerCode(code) {
+  return normalizeCode(code) === getBootstrapOwnerCode();
+}
+
+function canRegisterWorker(roleKey, code) {
+  const normalizedRole = normalizeRoleKey(roleKey);
+  const normalizedCode = normalizeCode(code);
+
+  if (normalizedRole === "W_OWNER") {
+    return isBootstrapOwnerCode(normalizedCode);
+  }
+
+  return !isBootstrapOwnerCode(normalizedCode);
+}
+
 function validateCodeForRole(roleKey, code) {
-  const normalizedCode = String(code || "").trim().toUpperCase();
+  const normalizedCode = normalizeCode(code);
   const normalizedRole = normalizeRoleKey(roleKey);
 
-  if (normalizedCode === "W_TBHQ_NICHO") {
+  if (isBootstrapOwnerCode(normalizedCode)) {
     return normalizedRole === "W_OWNER";
   }
 
@@ -23,5 +46,8 @@ function validateCodeForRole(roleKey, code) {
 }
 
 module.exports = {
-  validateCodeForRole
+  validateCodeForRole,
+  getBootstrapOwnerCode,
+  isBootstrapOwnerCode,
+  canRegisterWorker
 };
