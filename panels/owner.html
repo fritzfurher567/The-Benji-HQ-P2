@@ -230,6 +230,33 @@
       </div>
 
       <div class="card">
+        <h3>Discount Codes</h3>
+        <label>Code</label>
+        <input id="discount-code-input" placeholder="BENJI10" />
+        <label>Visibility</label>
+        <select id="discount-public-input">
+          <option value="1">Public</option>
+          <option value="0">Private</option>
+        </select>
+        <label>Fake Price</label>
+        <input id="discount-fake-input" type="number" min="0" placeholder="1000" />
+        <label>Real Price</label>
+        <input id="discount-real-input" type="number" min="0" placeholder="800" />
+        <button class="btn" onclick="createDiscountCode()">Add Discount</button>
+        <div id="discount-status" class="muted" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <h3>Existing Discounts</h3>
+        <table>
+          <thead>
+            <tr><th>Code</th><th>Visibility</th><th>Fake Price</th><th>Real Price</th><th>Action</th></tr>
+          </thead>
+          <tbody id="discount-body"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
         <h3>Order Notifications Webhook</h3>
         <label>Discord Webhook URL</label>
         <input id="order-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
@@ -237,8 +264,28 @@
 
       <div class="card">
         <h3>Transfer Ticket Webhook</h3>
-        <label>Discord Webhook URL</label>
+        <label>Default Discord Webhook URL</label>
         <input id="transfer-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
+      </div>
+
+      <div class="card">
+        <h3>Pounds Request Webhook</h3>
+        <label>Discord Webhook URL</label>
+        <input id="pounds-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
+      </div>
+
+      <div class="card">
+        <h3>Role-Based Transfer Webhooks</h3>
+        <label>Gatherer Webhook URL</label>
+        <input id="gatherer-transfer-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
+        <label>Fisher Webhook URL</label>
+        <input id="fisher-transfer-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
+        <label>Farmer Webhook URL</label>
+        <input id="farmer-transfer-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
+        <label>Chef Webhook URL</label>
+        <input id="chef-transfer-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
+        <label>Manager Webhook URL</label>
+        <input id="manager-transfer-webhook-input" placeholder="https://discord.com/api/webhooks/..." />
       </div>
 
       <button class="btn" onclick="saveSettings()">Save Settings</button>
@@ -454,6 +501,12 @@
         const { settings } = await api("getOwnerSettings");
         document.getElementById("order-webhook-input").value = settings.order_webhook_url || "";
         document.getElementById("transfer-webhook-input").value = settings.transfer_webhook_url || "";
+        document.getElementById("pounds-webhook-input").value = settings.pounds_webhook_url || "";
+        document.getElementById("gatherer-transfer-webhook-input").value = settings.gatherer_transfer_webhook_url || "";
+        document.getElementById("fisher-transfer-webhook-input").value = settings.fisher_transfer_webhook_url || "";
+        document.getElementById("farmer-transfer-webhook-input").value = settings.farmer_transfer_webhook_url || "";
+        document.getElementById("chef-transfer-webhook-input").value = settings.chef_transfer_webhook_url || "";
+        document.getElementById("manager-transfer-webhook-input").value = settings.manager_transfer_webhook_url || "";
       } catch (e) {
         alert(e.message);
       }
@@ -462,11 +515,76 @@
     async function saveSettings() {
       const order_webhook_url = document.getElementById("order-webhook-input").value.trim();
       const transfer_webhook_url = document.getElementById("transfer-webhook-input").value.trim();
+      const pounds_webhook_url = document.getElementById("pounds-webhook-input").value.trim();
+      const gatherer_transfer_webhook_url = document.getElementById("gatherer-transfer-webhook-input").value.trim();
+      const fisher_transfer_webhook_url = document.getElementById("fisher-transfer-webhook-input").value.trim();
+      const farmer_transfer_webhook_url = document.getElementById("farmer-transfer-webhook-input").value.trim();
+      const chef_transfer_webhook_url = document.getElementById("chef-transfer-webhook-input").value.trim();
+      const manager_transfer_webhook_url = document.getElementById("manager-transfer-webhook-input").value.trim();
       try {
-        await api("saveOwnerSettings", { order_webhook_url, transfer_webhook_url });
+        await api("saveOwnerSettings", {
+          order_webhook_url,
+          transfer_webhook_url,
+          pounds_webhook_url,
+          gatherer_transfer_webhook_url,
+          fisher_transfer_webhook_url,
+          farmer_transfer_webhook_url,
+          chef_transfer_webhook_url,
+          manager_transfer_webhook_url
+        });
         alert("Settings saved.");
       } catch (e) {
         alert(e.message);
+      }
+    }
+
+    async function createDiscountCode() {
+      const code = document.getElementById("discount-code-input").value.trim().toUpperCase();
+      const isPublic = document.getElementById("discount-public-input").value === "1";
+      const fakePrice = Number(document.getElementById("discount-fake-input").value || 0);
+      const realPrice = Number(document.getElementById("discount-real-input").value || 0);
+      const status = document.getElementById("discount-status");
+      if (!code) return (status.textContent = "Enter a code first.");
+      try {
+        await api("createDiscountCode", { code, isPublic, fakePrice, realPrice });
+        document.getElementById("discount-code-input").value = "";
+        document.getElementById("discount-fake-input").value = "";
+        document.getElementById("discount-real-input").value = "";
+        status.textContent = `Saved discount ${code}.`;
+        await renderDiscounts();
+      } catch (e) {
+        status.textContent = e.message;
+      }
+    }
+
+    async function deleteDiscountCode(code) {
+      try {
+        await api("deleteDiscountCode", { code });
+        await renderDiscounts();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function renderDiscounts() {
+      const tbody = document.getElementById("discount-body");
+      try {
+        const { discounts } = await api("listDiscountCodes");
+        if (!discounts.length) {
+          tbody.innerHTML = `<tr><td colspan="5" class="muted">No discounts yet.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = discounts.map(d => `
+          <tr>
+            <td><strong>${esc(d.code)}</strong></td>
+            <td>${Number(d.isPublic || 0) ? "Public" : "Private"}</td>
+            <td>${esc(Number(d.fakePrice || 0).toLocaleString())}p</td>
+            <td>${esc(Number(d.realPrice || 0).toLocaleString())}p</td>
+            <td><button class="btn btn-danger" onclick="deleteDiscountCode('${esc(d.code)}')">Delete</button></td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" class="muted">${esc(e.message)}</td></tr>`;
       }
     }
 
@@ -480,7 +598,10 @@
       if (id === "view-orders") renderOrders();
       if (id === "view-transfers") renderTransfers();
       if (id === "view-stock") loadStock();
-      if (id === "view-settings") loadSettings();
+      if (id === "view-settings") {
+        loadSettings();
+        renderDiscounts();
+      }
     }
 
     function logoutOwner() {

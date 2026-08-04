@@ -1,4 +1,13 @@
 const { createClient } = require("@libsql/client");
+const {
+  ORANGE,
+  getTransferWebhookSettingKeyForRole,
+  buildOrderWebhookPayload,
+  buildPoundsWebhookPayload,
+  buildTransferWebhookPayload
+} = require("./webhook-utils");
+const { normalizeDiscountCode, resolveDiscountForOrder } = require("./discount-utils");
+const { validateCodeForRole } = require("./code-utils");
 
 const db = createClient({
   url: process.env.TURSO_DATABASE_URL,
@@ -6,6 +15,9 @@ const db = createClient({
 });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_ORDER_WEBHOOK_URL = process.env.BENJI_ORDER_WEBHOOK_URL || "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
+const DEFAULT_POUNDS_WEBHOOK_URL = process.env.BENJI_POUNDS_WEBHOOK_URL || "https://discord.com/api/webhooks/1519403176930054329/t0hT6O936JluOaD476NiwyEzseafVFEPH8rUgxVE0wfPKAZAGLCM2aCDzin2TkOrRSpo";
+const DEFAULT_TRANSFER_WEBHOOK_URL = process.env.BENJI_TRANSFER_WEBHOOK_URL || "https://discord.com/api/webhooks/1518747199293358170/98WSV1uVc6ePnPL60r3KQjLLObEV6hxHR0YMiNiX3sDCfbhuc02tgLtSDtFeYWHH0qU6";
 
 let schemaReady = false;
 async function ensureSchema() {
@@ -17,6 +29,13 @@ async function ensureSchema() {
     id TEXT PRIMARY KEY, customerDiscord TEXT, customerDiscordId TEXT, paymentMethod TEXT,
     qty INTEGER, tip INTEGER, total INTEGER, status TEXT, seller TEXT, meetup TEXT, created_at INTEGER
   )`);
+  try {
+    await db.execute("ALTER TABLE orders ADD COLUMN discountCode TEXT");
+  } catch (e) {
+    if (!String(e.message || "").includes("already exists") && !String(e.message || "").includes("duplicate column")) {
+      console.warn("Could not add discountCode column to orders", e.message);
+    }
+  }
   await db.execute(`CREATE TABLE IF NOT EXISTS bank_load_requests (
     id TEXT PRIMARY KEY, customerDiscord TEXT, customerDiscordId TEXT, amount INTEGER, status TEXT, created_at INTEGER
   )`);
@@ -31,6 +50,11 @@ async function ensureSchema() {
   )`);
   await db.execute(`CREATE TABLE IF NOT EXISTS personal_stock (
     username TEXT, item TEXT, quantity INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (username, item)
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS discount_codes (
+    id TEXT PRIMARY KEY, code TEXT UNIQUE, isPublic INTEGER NOT NULL DEFAULT 1,
+    fakePrice INTEGER NOT NULL DEFAULT 0, realPrice INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER
   )`);
   await db.execute(`CREATE TABLE IF NOT EXISTS app_settings (
     key TEXT PRIMARY KEY, value TEXT
@@ -59,14 +83,6 @@ async function postWebhook(url, payload) {
   } catch (e) {
     console.warn("Webhook dispatch failed", e);
   }
-}
-
-function validateCodeForRole(roleKey, code) {
-  const m = String(code).toUpperCase().match(/^W_(MGMT|SELL|CHEF|FISH|GATH|FARM|OWNER)_(\d{2})$/);
-  if (!m) return false;
-  const num = parseInt(m[2], 10);
-  if (num < 1 || num > 20) return false;
-  return `W_${m[1]}` === roleKey;
 }
 
 async function purgeExpiredWorkers() {
@@ -112,30 +128,17 @@ exports.handler = async (event) => {
       }
 
       case "createOrder": {
-        const { orderId, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, status } = data;
+        const { orderId, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, discountCode, status } = data;
         if (!orderId || !customerDiscordId) return fail(400, "Missing orderId or customerDiscordId");
 
         await db.execute({
-          sql: `INSERT INTO orders (id, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, status, seller, meetup, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', '', ?)`,
-          args: [orderId, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, status || "order_received", Date.now()]
+          sql: `INSERT INTO orders (id, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, discountCode, status, seller, meetup, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '', '', ?)`,
+          args: [orderId, customerDiscord, customerDiscordId, paymentMethod, qty, tip, total, discountCode || "", status || "order_received", Date.now()]
         });
 
-        const webhookUrl = await getSetting("order_webhook_url");
-        await postWebhook(webhookUrl, {
-          embeds: [{
-            title: `🛒 New Order (${orderId})`,
-            color: 0xf97316,
-            fields: [
-              { name: "Customer", value: String(customerDiscord || "Unknown"), inline: true },
-              { name: "Method", value: String(paymentMethod || "-"), inline: true },
-              { name: "Qty", value: `${qty}x`, inline: true },
-              { name: "Tip", value: `${tip}p`, inline: true },
-              { name: "Total", value: `${Number(total).toLocaleString()}p`, inline: true }
-            ],
-            timestamp: new Date().toISOString()
-          }]
-        });
+        const webhookUrl = await getSetting("order_webhook_url", DEFAULT_ORDER_WEBHOOK_URL);
+        await postWebhook(webhookUrl, buildOrderWebhookPayload({ customerDiscord, qty, tip, total, paymentMethod, orderId }));
 
         return ok({ orderId });
       }
@@ -185,6 +188,10 @@ exports.handler = async (event) => {
           sql: `INSERT INTO bank_load_requests (id, customerDiscord, customerDiscordId, amount, status, created_at) VALUES (?, ?, ?, ?, 'pending', ?)`,
           args: [id, customerDiscord, customerDiscordId, amount, Date.now()]
         });
+
+        const webhookUrl = await getSetting("pounds_webhook_url", DEFAULT_POUNDS_WEBHOOK_URL);
+        await postWebhook(webhookUrl, buildPoundsWebhookPayload({ customerDiscord, amount }));
+
         return ok({ id });
       }
 
@@ -221,6 +228,44 @@ exports.handler = async (event) => {
           });
         }
         return ok({});
+      }
+
+      case "listDiscountCodes": {
+        const result = await db.execute("SELECT * FROM discount_codes ORDER BY created_at DESC, code ASC");
+        return ok({ discounts: result.rows });
+      }
+
+      case "createDiscountCode": {
+        const { code, isPublic, fakePrice, realPrice } = data;
+        const normalizedCode = normalizeDiscountCode(code);
+        if (!normalizedCode) return fail(400, "Missing discount code");
+        const id = `DISC-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const publicFlag = isPublic === true || isPublic === 1 || isPublic === "1" ? 1 : 0;
+        await db.execute({
+          sql: `INSERT INTO discount_codes (id, code, isPublic, fakePrice, realPrice, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(code) DO UPDATE SET isPublic = excluded.isPublic, fakePrice = excluded.fakePrice, realPrice = excluded.realPrice, created_at = excluded.created_at`,
+          args: [id, normalizedCode, publicFlag, Math.max(0, Number(fakePrice) || 0), Math.max(0, Number(realPrice) || 0), Date.now()]
+        });
+        return ok({ id });
+      }
+
+      case "deleteDiscountCode": {
+        const { code } = data;
+        const normalizedCode = normalizeDiscountCode(code);
+        if (!normalizedCode) return fail(400, "Missing discount code");
+        await db.execute({ sql: "DELETE FROM discount_codes WHERE code = ?", args: [normalizedCode] });
+        return ok({});
+      }
+
+      case "resolveDiscountCode": {
+        const { code, baseTotal, tip, allowPrivate } = data;
+        const normalizedCode = normalizeDiscountCode(code);
+        if (!normalizedCode) return ok({ applied: false, total: Number(baseTotal || 0) + Number(tip || 0), discountAmount: 0, code: normalizedCode });
+        const result = await db.execute({ sql: "SELECT * FROM discount_codes WHERE code = ?", args: [normalizedCode] });
+        const discount = result.rows[0];
+        const resolved = resolveDiscountForOrder({ code: normalizedCode, baseTotal, tip, discount, allowPrivate: Boolean(allowPrivate) });
+        return ok({ ...resolved, isPublic: discount ? Number(discount.isPublic || 0) : 0 });
       }
 
       // ---------- WORKER CODES ----------
@@ -291,23 +336,9 @@ exports.handler = async (event) => {
           args: [id, requesterUsername, requesterRole, item, amount, unitPrice ?? null, totalPrice ?? null, fromLocation || "", toLocation || "", notes || "", Date.now()]
         });
 
-        const webhookUrl = await getSetting("transfer_webhook_url");
-        await postWebhook(webhookUrl, {
-          embeds: [{
-            title: `🔁 New Transfer Ticket (${id})`,
-            color: 16753920,
-            fields: [
-              { name: "Discord Username", value: String(requesterUsername), inline: true },
-              { name: "Role", value: String(requesterRole), inline: true },
-              { name: "Item", value: String(item), inline: true },
-              { name: "Amount", value: String(amount), inline: true },
-              { name: "Pay", value: totalPrice != null ? `${Number(totalPrice).toLocaleString()}p` : "-", inline: true },
-              { name: "Route", value: `${fromLocation || "-"} -> ${toLocation || "-"}`, inline: false },
-              { name: "Notes", value: notes || "None", inline: false }
-            ],
-            timestamp: new Date().toISOString()
-          }]
-        });
+        const webhookKey = getTransferWebhookSettingKeyForRole(requesterRole);
+        const webhookUrl = await getSetting(webhookKey, await getSetting("transfer_webhook_url", DEFAULT_TRANSFER_WEBHOOK_URL));
+        await postWebhook(webhookUrl, buildTransferWebhookPayload({ requesterUsername, requesterRole, item, amount, totalPrice, fromLocation, toLocation, notes }));
 
         return ok({ id });
       }
@@ -363,16 +394,38 @@ exports.handler = async (event) => {
 
       // ---------- OWNER SETTINGS (webhook URLs never returned outside these two actions) ----------
       case "getOwnerSettings": {
-        const orderWebhook = await getSetting("order_webhook_url", "");
-        const transferWebhook = await getSetting("transfer_webhook_url", "");
+        const orderWebhook = await getSetting("order_webhook_url", DEFAULT_ORDER_WEBHOOK_URL);
+        const transferWebhook = await getSetting("transfer_webhook_url", DEFAULT_TRANSFER_WEBHOOK_URL);
+        const poundsWebhook = await getSetting("pounds_webhook_url", DEFAULT_POUNDS_WEBHOOK_URL);
+        const gathererTransferWebhook = await getSetting("gatherer_transfer_webhook_url", DEFAULT_TRANSFER_WEBHOOK_URL);
+        const fisherTransferWebhook = await getSetting("fisher_transfer_webhook_url", DEFAULT_TRANSFER_WEBHOOK_URL);
+        const farmerTransferWebhook = await getSetting("farmer_transfer_webhook_url", DEFAULT_TRANSFER_WEBHOOK_URL);
+        const chefTransferWebhook = await getSetting("chef_transfer_webhook_url", DEFAULT_TRANSFER_WEBHOOK_URL);
+        const managerTransferWebhook = await getSetting("manager_transfer_webhook_url", DEFAULT_TRANSFER_WEBHOOK_URL);
         const stock = await getSetting("global_stock", "0");
-        return ok({ settings: { order_webhook_url: orderWebhook, transfer_webhook_url: transferWebhook, global_stock: Number(stock) } });
+        return ok({ settings: {
+          order_webhook_url: orderWebhook,
+          transfer_webhook_url: transferWebhook,
+          pounds_webhook_url: poundsWebhook,
+          gatherer_transfer_webhook_url: gathererTransferWebhook,
+          fisher_transfer_webhook_url: fisherTransferWebhook,
+          farmer_transfer_webhook_url: farmerTransferWebhook,
+          chef_transfer_webhook_url: chefTransferWebhook,
+          manager_transfer_webhook_url: managerTransferWebhook,
+          global_stock: Number(stock)
+        } });
       }
 
       case "saveOwnerSettings": {
-        const { order_webhook_url, transfer_webhook_url, global_stock } = data;
+        const { order_webhook_url, transfer_webhook_url, pounds_webhook_url, gatherer_transfer_webhook_url, fisher_transfer_webhook_url, farmer_transfer_webhook_url, chef_transfer_webhook_url, manager_transfer_webhook_url, global_stock } = data;
         if (order_webhook_url !== undefined) await setSetting("order_webhook_url", order_webhook_url);
         if (transfer_webhook_url !== undefined) await setSetting("transfer_webhook_url", transfer_webhook_url);
+        if (pounds_webhook_url !== undefined) await setSetting("pounds_webhook_url", pounds_webhook_url);
+        if (gatherer_transfer_webhook_url !== undefined) await setSetting("gatherer_transfer_webhook_url", gatherer_transfer_webhook_url);
+        if (fisher_transfer_webhook_url !== undefined) await setSetting("fisher_transfer_webhook_url", fisher_transfer_webhook_url);
+        if (farmer_transfer_webhook_url !== undefined) await setSetting("farmer_transfer_webhook_url", farmer_transfer_webhook_url);
+        if (chef_transfer_webhook_url !== undefined) await setSetting("chef_transfer_webhook_url", chef_transfer_webhook_url);
+        if (manager_transfer_webhook_url !== undefined) await setSetting("manager_transfer_webhook_url", manager_transfer_webhook_url);
         if (global_stock !== undefined) await setSetting("global_stock", Number(global_stock));
         return ok({});
       }

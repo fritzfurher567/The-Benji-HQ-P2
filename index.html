@@ -196,6 +196,10 @@
         <input id="tip" class="form-control" type="number" min="0" placeholder="Optional tip..." oninput="calculateTotal()" />
         <span class="hint">Fixed amount in pounds.</span>
 
+        <label class="login-label">Discount Code</label>
+        <input id="discountCode" class="form-control" type="text" placeholder="Enter promo code..." oninput="calculateTotal()" />
+        <div id="discount-feedback" class="hint" style="color:#f97316; min-height: 20px;"></div>
+
         <div class="total-display">
           <span style="color:#a1a1aa;font-weight:700;">Total Due:</span>
           <span id="display-total" class="total-amount">0p</span>
@@ -367,18 +371,37 @@ function setQuantity(amount) {
   calculateTotal();
 }
 
-function calculateTotal() {
+async function calculateTotal() {
   const qty = parseInt(document.getElementById("qty").value || "0", 10);
   const tip = parseInt(document.getElementById("tip").value || "0", 10);
+  const discountCode = document.getElementById("discountCode").value.trim();
   let unitPrice = 350;
   if (qty >= 55) unitPrice = 300;
   else if (qty >= 40) unitPrice = 310;
   else if (qty >= 30) unitPrice = 320;
   else if (qty >= 20) unitPrice = 330;
   else if (qty >= 10) unitPrice = 340;
-  const total = qty * unitPrice + tip;
+  const baseTotal = qty * unitPrice;
+  let total = baseTotal + tip;
+  let feedback = "";
+
+  if (discountCode) {
+    try {
+      const res = await api("resolveDiscountCode", { code: discountCode, baseTotal, tip, allowPrivate: false });
+      if (res.applied) {
+        total = res.total;
+        feedback = `Discount applied: ${res.discountAmount}p off`;
+      } else {
+        feedback = "That code is not valid or not public.";
+      }
+    } catch (e) {
+      feedback = "Unable to validate discount code.";
+    }
+  }
+
   document.getElementById("display-total").innerText = `${total.toLocaleString()}p`;
-  return { qty, tip, unitPrice, total };
+  document.getElementById("discount-feedback").innerText = feedback;
+  return { qty, tip, unitPrice, total, discountCode };
 }
 
 function completeLogin(user) {
@@ -460,7 +483,7 @@ function badgeForStatus(status) {
 
 async function processOrder() {
   if (!currentUser) return alert("You must login with Discord first.");
-  const data = calculateTotal();
+  const data = await calculateTotal();
   if (data.qty <= 0) return alert("Enter a valid quantity.");
 
   const method = document.getElementById("paymentMethod").value;
@@ -486,6 +509,7 @@ async function processOrder() {
       qty: data.qty,
       tip: data.tip,
       total: data.total,
+      discountCode: data.discountCode || "",
       status: "order_received"
     });
 
