@@ -9,56 +9,88 @@ const {
 const { normalizeDiscountCode, resolveDiscountForOrder } = require("./discount-utils");
 const { validateCodeForRole, getBootstrapOwnerCode, isBootstrapOwnerCode, canRegisterWorker } = require("./code-utils");
 
-const db = createClient({
+const hasDbConfig = Boolean(process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN);
+const db = hasDbConfig ? createClient({
   url: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
-});
+}) : null;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_ORDER_WEBHOOK_URL = process.env.BENJI_ORDER_WEBHOOK_URL || "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
 const DEFAULT_POUNDS_WEBHOOK_URL = process.env.BENJI_POUNDS_WEBHOOK_URL || "https://discord.com/api/webhooks/1519403176930054329/t0hT6O936JluOaD476NiwyEzseafVFEPH8rUgxVE0wfPKAZAGLCM2aCDzin2TkOrRSpo";
 const DEFAULT_TRANSFER_WEBHOOK_URL = process.env.BENJI_TRANSFER_WEBHOOK_URL || "https://discord.com/api/webhooks/1518747199293358170/98WSV1uVc6ePnPL60r3KQjLLObEV6hxHR0YMiNiX3sDCfbhuc02tgLtSDtFeYWHH0qU6";
 
+const fallbackState = {
+  workers: [],
+  settings: {},
+  stock: 0
+};
+
 let schemaReady = false;
+function initializeFallbackState() {
+  fallbackState.workers = [];
+  fallbackState.settings = {};
+  fallbackState.stock = 0;
+}
+function getFallbackWorker(code) {
+  return fallbackState.workers.find(w => w.code === String(code || "").trim().toUpperCase());
+}
+function getFallbackSetting(key, fallback = null) {
+  const value = fallbackState.settings[key];
+  return value === undefined ? fallback : value;
+}
+function setFallbackSetting(key, value) {
+  fallbackState.settings[key] = String(value);
+}
 async function ensureSchema() {
   if (schemaReady) return;
-  await db.execute(`CREATE TABLE IF NOT EXISTS platform_user_profiles (
-    discordId TEXT PRIMARY KEY, username TEXT, pounds_balance INTEGER NOT NULL DEFAULT 0
-  )`);
-  await db.execute(`CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY, customerDiscord TEXT, customerDiscordId TEXT, paymentMethod TEXT,
-    qty INTEGER, tip INTEGER, total INTEGER, status TEXT, seller TEXT, meetup TEXT, created_at INTEGER
-  )`);
-  try {
-    await db.execute("ALTER TABLE orders ADD COLUMN discountCode TEXT");
-  } catch (e) {
-    if (!String(e.message || "").includes("already exists") && !String(e.message || "").includes("duplicate column")) {
-      console.warn("Could not add discountCode column to orders", e.message);
-    }
+  if (!db) {
+    initializeFallbackState();
+    schemaReady = true;
+    return;
   }
-  await db.execute(`CREATE TABLE IF NOT EXISTS bank_load_requests (
-    id TEXT PRIMARY KEY, customerDiscord TEXT, customerDiscordId TEXT, amount INTEGER, status TEXT, created_at INTEGER
-  )`);
-  await db.execute(`CREATE TABLE IF NOT EXISTS worker_codes (
-    code TEXT PRIMARY KEY, username TEXT, discordId TEXT, roleKey TEXT, status TEXT,
-    created_at INTEGER, fired_at INTEGER, purge_at INTEGER
-  )`);
-  await db.execute(`CREATE TABLE IF NOT EXISTS transfer_tickets (
-    id TEXT PRIMARY KEY, requesterUsername TEXT, requesterRole TEXT, item TEXT, amount INTEGER,
-    unitPrice INTEGER, totalPrice INTEGER, fromLocation TEXT, toLocation TEXT, notes TEXT,
-    status TEXT, reviewedBy TEXT, created_at INTEGER, reviewed_at INTEGER
-  )`);
-  await db.execute(`CREATE TABLE IF NOT EXISTS personal_stock (
-    username TEXT, item TEXT, quantity INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (username, item)
-  )`);
-  await db.execute(`CREATE TABLE IF NOT EXISTS discount_codes (
-    id TEXT PRIMARY KEY, code TEXT UNIQUE, isPublic INTEGER NOT NULL DEFAULT 1,
-    fakePrice INTEGER NOT NULL DEFAULT 0, realPrice INTEGER NOT NULL DEFAULT 0,
-    created_at INTEGER
-  )`);
-  await db.execute(`CREATE TABLE IF NOT EXISTS app_settings (
-    key TEXT PRIMARY KEY, value TEXT
-  )`);
+  try {
+    await db.execute(`CREATE TABLE IF NOT EXISTS platform_user_profiles (
+      discordId TEXT PRIMARY KEY, username TEXT, pounds_balance INTEGER NOT NULL DEFAULT 0
+    )`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS orders (
+      id TEXT PRIMARY KEY, customerDiscord TEXT, customerDiscordId TEXT, paymentMethod TEXT,
+      qty INTEGER, tip INTEGER, total INTEGER, status TEXT, seller TEXT, meetup TEXT, created_at INTEGER
+    )`);
+    try {
+      await db.execute("ALTER TABLE orders ADD COLUMN discountCode TEXT");
+    } catch (e) {
+      if (!String(e.message || "").includes("already exists") && !String(e.message || "").includes("duplicate column")) {
+        console.warn("Could not add discountCode column to orders", e.message);
+      }
+    }
+    await db.execute(`CREATE TABLE IF NOT EXISTS bank_load_requests (
+      id TEXT PRIMARY KEY, customerDiscord TEXT, customerDiscordId TEXT, amount INTEGER, status TEXT, created_at INTEGER
+    )`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS worker_codes (
+      code TEXT PRIMARY KEY, username TEXT, discordId TEXT, roleKey TEXT, status TEXT,
+      created_at INTEGER, fired_at INTEGER, purge_at INTEGER
+    )`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS transfer_tickets (
+      id TEXT PRIMARY KEY, requesterUsername TEXT, requesterRole TEXT, item TEXT, amount INTEGER,
+      unitPrice INTEGER, totalPrice INTEGER, fromLocation TEXT, toLocation TEXT, notes TEXT,
+      status TEXT, reviewedBy TEXT, created_at INTEGER, reviewed_at INTEGER
+    )`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS personal_stock (
+      username TEXT, item TEXT, quantity INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (username, item)
+    )`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS discount_codes (
+      id TEXT PRIMARY KEY, code TEXT UNIQUE, isPublic INTEGER NOT NULL DEFAULT 1,
+      fakePrice INTEGER NOT NULL DEFAULT 0, realPrice INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER
+    )`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY, value TEXT
+    )`);
+  } catch (e) {
+    console.warn("Database unavailable, using fallback state for owner auth", e.message || e);
+    initializeFallbackState();
+  }
   schemaReady = true;
 }
 
@@ -66,10 +98,15 @@ function ok(body) { return { statusCode: 200, body: JSON.stringify({ ok: true, .
 function fail(statusCode, error) { return { statusCode, body: JSON.stringify({ ok: false, error }) }; }
 
 async function getSetting(key, fallback = null) {
+  if (!db) return getFallbackSetting(key, fallback);
   const r = await db.execute({ sql: "SELECT value FROM app_settings WHERE key = ?", args: [key] });
   return r.rows.length ? r.rows[0].value : fallback;
 }
 async function setSetting(key, value) {
+  if (!db) {
+    setFallbackSetting(key, value);
+    return;
+  }
   await db.execute({
     sql: "INSERT INTO app_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
     args: [key, String(value)]
@@ -86,6 +123,7 @@ async function postWebhook(url, payload) {
 }
 
 async function purgeExpiredWorkers() {
+  if (!db) return;
   const now = Date.now();
   await db.execute({
     sql: "DELETE FROM worker_codes WHERE status = 'Revoked' AND purge_at IS NOT NULL AND purge_at <= ?",
@@ -279,6 +317,12 @@ exports.handler = async (event) => {
           return ok({ worker: { username: "Owner", roleKey: "W_OWNER" } });
         }
 
+        if (!db) {
+          const worker = getFallbackWorker(upper);
+          if (!worker || worker.status !== "Active") return fail(400, "Invalid or revoked code.");
+          return ok({ worker: { username: worker.username, roleKey: worker.roleKey } });
+        }
+
         await purgeExpiredWorkers();
         const result = await db.execute({ sql: "SELECT * FROM worker_codes WHERE code = ? AND status = 'Active'", args: [upper] });
         if (!result.rows.length) return fail(400, "Invalid or revoked code.");
@@ -293,6 +337,15 @@ exports.handler = async (event) => {
         if (!canRegisterWorker(roleKey, code)) return fail(400, "Owner access is locked to the bootstrap owner code.");
 
         const upper = String(code).trim().toUpperCase();
+        if (!db) {
+          if (getFallbackWorker(upper)) return fail(400, "That code already exists.");
+          if (upper === getBootstrapOwnerCode() && fallbackState.workers.some(w => w.roleKey === "W_OWNER")) {
+            return fail(400, "The owner code is already registered.");
+          }
+          fallbackState.workers.push({ code: upper, username, discordId: discordId || "", roleKey, status: "Active", created_at: Date.now() });
+          return ok({});
+        }
+
         const existing = await db.execute({ sql: "SELECT code FROM worker_codes WHERE code = ?", args: [upper] });
         if (existing.rows.length) return fail(400, "That code already exists.");
 
@@ -309,6 +362,10 @@ exports.handler = async (event) => {
       }
 
       case "listWorkers": {
+        if (!db) {
+          await purgeExpiredWorkers();
+          return ok({ workers: fallbackState.workers.slice().sort((a, b) => (b.created_at || 0) - (a.created_at || 0)) });
+        }
         await purgeExpiredWorkers();
         const result = await db.execute("SELECT * FROM worker_codes ORDER BY created_at DESC");
         return ok({ workers: result.rows });
@@ -318,6 +375,14 @@ exports.handler = async (event) => {
         const { code, status } = data;
         if (!code || !status) return fail(400, "Missing code or status");
         if (isBootstrapOwnerCode(code)) return fail(400, "The owner code is locked and cannot be changed.");
+        if (!db) {
+          const worker = getFallbackWorker(code);
+          if (!worker) return fail(400, "Worker not found.");
+          worker.status = status === "Revoked" ? "Revoked" : "Active";
+          worker.fired_at = status === "Revoked" ? Date.now() : null;
+          worker.purge_at = status === "Revoked" ? Date.now() + 7 * DAY_MS : null;
+          return ok({});
+        }
         if (status === "Revoked") {
           await db.execute({
             sql: "UPDATE worker_codes SET status = 'Revoked', fired_at = ?, purge_at = ? WHERE code = ?",

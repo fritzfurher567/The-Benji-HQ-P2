@@ -1,0 +1,27 @@
+{
+  "name": "the-benji-hq-p2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node --test tests/api-code-validation.test.js tests/api-owner-fallback.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fritzfurher567/The-Benji-HQ-P2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fritzfurher567/The-Benji-HQ-P2/issues"
+  },
+  "homepage": "https://github.com/fritzfurher567/The-Benji-HQ-P2#readme",
+  "dependencies": {
+    "@libsql/client": "^0.17.4"
+  }
+}
