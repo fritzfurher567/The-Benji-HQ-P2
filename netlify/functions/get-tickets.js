@@ -1,13 +1,10 @@
-const { createClient } = require('@libsql/client');
+const { db } = require('./db');
 
 exports.handler = async () => {
-    const db = createClient({
-        url: process.env.TURSO_DATABASE_URL,
-        authToken: process.env.TURSO_AUTH_TOKEN
-    });
+    if (!db) return { statusCode: 500, body: JSON.stringify({ error: "Database not configured" }) };
 
     try {
-        const rs = await db.execute("SELECT * FROM tickets WHERE status = 'pending'");
+        const rs = await db.execute("SELECT * FROM transfer_tickets WHERE status = 'Pending' ORDER BY created_at DESC");
         return {
             statusCode: 200,
             body: JSON.stringify(rs.rows)

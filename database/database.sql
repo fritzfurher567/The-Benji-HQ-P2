@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS orders (
   status TEXT,          -- order_received | making_order | order_done
   seller TEXT,
   meetup TEXT,
-  created_at INTEGER
+  created_at INTEGER,
+  discountCode TEXT
 );
 
 -- 3. "Load Pounds" requests from customers
@@ -82,7 +83,17 @@ CREATE TABLE IF NOT EXISTS personal_stock (
   PRIMARY KEY (username, item)
 );
 
--- 7. App-wide key/value settings — this is where the owner's webhook
+-- 7. Discount codes the owner can hand out (public) or keep private
+CREATE TABLE IF NOT EXISTS discount_codes (
+  id TEXT PRIMARY KEY,
+  code TEXT UNIQUE,
+  isPublic INTEGER NOT NULL DEFAULT 1,
+  fakePrice INTEGER NOT NULL DEFAULT 0,
+  realPrice INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER
+);
+
+-- 8. App-wide key/value settings — this is where the owner's webhook
 --    URLs and the global Benji stock number live. Only getOwnerSettings/
 --    saveOwnerSettings in api.js ever read or write the webhook values,
 --    so they never reach a customer's or worker's browser.
