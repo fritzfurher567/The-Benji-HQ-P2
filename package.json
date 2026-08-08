@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "node --test tests/api-code-validation.test.js tests/api-owner-fallback.test.js"
+    "test": "node --test tests/*.test.js"
   },
   "repository": {
     "type": "git",

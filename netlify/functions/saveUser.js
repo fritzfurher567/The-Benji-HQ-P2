@@ -33,7 +33,7 @@ const url = `${process.env.TURSO_DATABASE_URL}/v2/pipeline`;
 };
 
 async function saveUserToDatabase(user) {
-    const response = await ('http://localhost:3000/api/saveUser', {
+    const response = await fetch('/.netlify/functions/saveUser', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

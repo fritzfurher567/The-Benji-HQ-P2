@@ -6,7 +6,7 @@ const {
   buildOrderWebhookPayload,
   buildPoundsWebhookPayload,
   buildTransferWebhookPayload
-} = require('./webhook-utils');
+} = require('../netlify/functions/webhook-utils');
 
 test('routes worker tickets to the matching webhook key', () => {
   assert.equal(getTransferWebhookSettingKeyForRole('Gatherer'), 'gatherer_transfer_webhook_url');

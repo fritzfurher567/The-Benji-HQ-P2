@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Benji HQ | Central Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #06070b;
@@ -81,8 +84,35 @@
     .btn-muted:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
     .main-content { flex-grow: 1; padding: 40px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; }
-    .view-section { display: none; width: 100%; max-width: 950px; }
+    .view-section { display: none; width: 100%; max-width: 950px; animation: fadeUp 0.35s ease; }
     .view-section.active { display: block; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .feature-card {
+      background: linear-gradient(145deg, rgba(255,122,26,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,122,26,0.18);
+      border-radius: 14px;
+      padding: 18px 16px;
+      text-align: center;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,122,26,0.4);
+      box-shadow: 0 12px 32px rgba(255,122,26,0.12);
+    }
+    .feature-icon { font-size: 28px; margin-bottom: 8px; }
+    .feature-title { color: #fff; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; }
+    .feature-desc { color: var(--muted); font-size: 12px; line-height: 1.5; }
 
     .hub-header { text-align: center; margin: 10px 0 28px; }
     .welcome-badge {
@@ -90,8 +120,13 @@
       font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 18px; text-transform: uppercase; background: rgba(255,122,26,0.08);
     }
     .hq-title {
-      font-size: 58px; font-weight: 900; color: #fff; letter-spacing: 2px; margin-bottom: 12px;
-      text-shadow: 0 0 28px rgba(249,115,22,0.3); text-transform: uppercase;
+      font-size: 58px; font-weight: 900; letter-spacing: 2px; margin-bottom: 12px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fff 30%, #ffb980 70%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 28px rgba(249,115,22,0.25));
     }
     .hq-subtext { color: var(--muted); font-size: 16px; max-width: 650px; margin: 0 auto; line-height: 1.6; }
 
@@ -103,6 +138,21 @@
       margin-bottom: 16px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.6;
+    }
+    .card:hover {
+      border-color: rgba(255,122,26,0.22);
+      box-shadow: 0 28px 70px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,122,26,0.08);
     }
     .card h2 { color: #fff; margin-bottom: 14px; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; }
     .row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -133,14 +183,27 @@
     .b-done { background: rgba(34,197,94,.14); color: #22c55e; }
 
     #login-gate {
-      position: fixed; inset: 0; background: radial-gradient(circle at top, rgba(255,122,26,0.16), transparent 50%), #06070b; z-index: 9999; display: flex; flex-direction: column;
+      position: fixed; inset: 0;
+      background: radial-gradient(circle at top, rgba(255,122,26,0.18), transparent 55%), #06070b;
+      z-index: 9999; display: flex; flex-direction: column;
       justify-content: center; align-items: center; color: #fff; text-align: center; padding: 20px;
+    }
+    .login-card {
+      background: linear-gradient(145deg, rgba(20,22,27,0.95), rgba(12,14,18,0.98));
+      border: 1px solid rgba(255,122,26,0.2);
+      border-radius: 20px;
+      padding: 40px 48px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,122,26,0.08);
+      backdrop-filter: blur(12px);
     }
     #login-gate p { color: var(--muted); margin: 14px 0 18px; }
     .discord-btn {
-      background: linear-gradient(135deg, #7289da 0%, #5865f2 100%); color: #fff; border: none; border-radius: 10px; padding: 12px 20px; width: 320px; font-weight: 800; cursor: pointer; box-shadow: 0 12px 24px rgba(88,101,242,0.2);
+      background: linear-gradient(135deg, #7289da 0%, #5865f2 100%); color: #fff; border: none; border-radius: 12px; padding: 14px 24px; width: 100%; font-weight: 800; cursor: pointer; box-shadow: 0 12px 28px rgba(88,101,242,0.25);
+      font-size: 15px; letter-spacing: 0.3px; transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .discord-btn:hover { filter: brightness(1.05); }
+    .discord-btn:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 16px 36px rgba(88,101,242,0.35); }
     .discord-btn:disabled { background: #4b5563; cursor: not-allowed; box-shadow: none; }
 
     #diag-box {
@@ -168,18 +231,27 @@
       .main-content { padding: 24px 16px 40px; }
       .hq-title { font-size: 42px; }
       .row > * { min-width: 100%; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .login-card { padding: 28px 24px; }
     }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
   </style>
 </head>
 <body>
   <div id="login-gate">
-    <header class="hub-header">
-      <div class="welcome-badge">Community Hub V2.1</div>
-      <h1 class="hq-title">BENJI HQ</h1>
-      <p class="hq-subtext">The central command for all operations. Authenticate via Discord to access the marketplace.</p>
-    </header>
-    <button id="discordBtn" class="discord-btn" onclick="redirectToDiscord()">Login with Discord</button>
-    <div id="diag-box"></div>
+    <div class="login-card">
+      <header class="hub-header">
+        <div class="welcome-badge">Community Hub V2.1</div>
+        <h1 class="hq-title">BENJI HQ</h1>
+        <p class="hq-subtext">The central command for all operations. Authenticate via Discord to access the marketplace.</p>
+      </header>
+      <button id="discordBtn" class="discord-btn" onclick="redirectToDiscord()">Login with Discord</button>
+      <div id="diag-box"></div>
+    </div>
   </div>
 
   <aside class="sidebar">
@@ -224,6 +296,24 @@
         <h1 class="hq-title">BENJI HQ</h1>
         <p class="hq-subtext">The central command for all operations. Authenticate via Discord to access the marketplace.</p>
       </header>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🛒</div>
+          <div class="feature-title">Buy Benjis</div>
+          <div class="feature-desc">Place orders with bulk pricing and discount codes</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💰</div>
+          <div class="feature-title">Load Pounds</div>
+          <div class="feature-desc">Request in-game currency top-ups from staff</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👤</div>
+          <div class="feature-title">Track Orders</div>
+          <div class="feature-desc">View your order history and account balance</div>
+        </div>
+      </div>
 
       <div class="card">
         <h2>Process Order</h2>
@@ -616,14 +706,14 @@ async function attemptLogin() {
     localStorage.setItem("benji_active_staff_role", roleKey || "");
 
     const routes = {
-      W_MGMT: "../panels/manager.html",
-      W_MANAGER: "../panels/manager.html",
-      W_SELL: "../panels/seller.html",
-      W_CHEF: "../panels/chef.html",
-      W_FISH: "../panels/fisher.html",
-      W_GATH: "../panels/gatherer.html",
-      W_FARM: "../panels/farmer.html",
-      W_OWNER: "../panels/owner.html"
+      W_MGMT: "panels/manager.html",
+      W_MANAGER: "panels/manager.html",
+      W_SELL: "panels/seller.html",
+      W_CHEF: "panels/chef.html",
+      W_FISH: "panels/fisher.html",
+      W_GATH: "panels/gatherer.html",
+      W_FARM: "panels/farmer.html",
+      W_OWNER: "panels/owner.html"
     };
 
     if (routes[roleKey]) window.location.href = routes[roleKey];

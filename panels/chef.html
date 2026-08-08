@@ -200,7 +200,7 @@
       const username = localStorage.getItem("benji_active_seller_name");
       const roleKey = localStorage.getItem("benji_active_staff_role");
       if (!username || !["W_CHEF", "W_MGMT", "W_OWNER"].includes(roleKey)) {
-        window.location.href = "../front%20side/index.html";
+        window.location.href = "../index.html";
         return false;
       }
       chefName = username;
@@ -331,7 +331,7 @@
     function logoutWorker() {
       localStorage.removeItem("benji_active_seller_name");
       localStorage.removeItem("benji_active_staff_role");
-      window.location.href = "../front%20side/index.html";
+      window.location.href = "../index.html";
     }
 
     window.onload = () => {

@@ -143,7 +143,7 @@
     function logout() {
       localStorage.removeItem("benji_active_seller_name");
       localStorage.removeItem("benji_active_staff_role");
-      window.location.href = "../front side/index.html";
+      window.location.href = "../index.html";
     }
 
     function statusBadge(status) {
@@ -226,7 +226,7 @@
       const roleKey = localStorage.getItem("benji_active_staff_role");
 
       if (!username || !["W_SELL", "W_MGMT", "W_OWNER"].includes(roleKey)) {
-        window.location.href = "../front side/index.html";
+        window.location.href = "../index.html";
         return;
       }
 

@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Box, Calendar, User, Shield, Search, LogOut, RefreshCw, Send, DollarSign, Layers } from 'lucide-react';
 
+const API_BASE = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+  ? 'http://localhost:3000'
+  : '';
+
+async function notifyDiscord(payload) {
+  const res = await fetch(`${API_BASE}/.netlify/functions/notify-discord`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
 // The Comprehensive 100 Staff Codes Database Dictionary Mapping
 const STAFF_CODES_DATABASE = {
   "Managers": ["MGR-X9L2", "MGR-P4T7", "MGR-K1W8", "MGR-V6M3", "MGR-B2R9", "MGR-N8J4", "MGR-C5Q1", "MGR-H7F6", "MGR-Z3D5", "MGR-Y9X2", "MGR-L4P8", "MGR-T1K7", "MGR-W6V3", "MGR-M2B9", "MGR-R8N4", "MGR-J5C1", "MGR-Q7H6", "MGR-F3Z5", "MGR-D9Y2", "MGR-X4L8", "MGR-P1T7", "MGR-K6W3", "MGR-V2M9", "MGR-B8R4", "MGR-N5J1"],
@@ -132,12 +145,7 @@ export default function App() {
     let updatedOrders = [...orders, newOrder];
 
     try {
-      const res = await fetch('http://localhost:3000/api/notify-discord', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: 1 })
-      });
-      const data = await res.json();
+      const data = await notifyDiscord({ quantity: 1 });
       if (data.status === 'sent') {
         newOrder.status = 'sent';
       }
@@ -156,12 +164,7 @@ export default function App() {
     const workingQueue = orders.map(async (order) => {
       if (order.status === 'pending') {
         try {
-          const res = await fetch('http://localhost:3000/api/notify-discord', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ quantity: 1 })
-          });
-          const data = await res.json();
+          const data = await notifyDiscord({ quantity: 1 });
           if (data.status === 'sent') {
             statusChanged = true;
             return { ...order, status: 'sent' };
@@ -188,11 +191,7 @@ export default function App() {
     setGeneratedTicket(tkn);
 
     try {
-      await fetch('http://localhost:3000/api/notify-discord', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: tkn })
-      });
+      await notifyDiscord({ quantity: tkn });
     } catch (e) {
       console.error("Failed to announce balance generation to server hooks.");
     }
@@ -728,11 +727,7 @@ export default function App() {
                         setTransferTickets(prev => [...prev, newTransfer]);
 
                         try {
-                          await ('http://localhost:3000/api/notify-discord', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ quantity: tkt })
-                          });
+                          await notifyDiscord({ quantity: tkt });
                         } catch(e){}
                         alert(`Owner transfer authorization instance generated securely: ${tkt}`);
                       }}

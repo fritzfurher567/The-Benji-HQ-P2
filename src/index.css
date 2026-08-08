@@ -45,8 +45,3 @@ body {
   z-index: 20;
   box-shadow: 0 0 15px rgba(220, 38, 38, 0.3);
 }
-
-
-body {
-  zoom: 125%;
-}
