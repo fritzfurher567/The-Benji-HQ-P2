@@ -1,22 +1,17 @@
-const { createClient } = require('@libsql/client');
+const { db } = require('./db');
 
 exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') return { statusCode: 405 };
 
     const { username, amount, action } = JSON.parse(event.body);
 
-    // Ensure these match your Netlify variable names exactly
-    const db = createClient({
-        url: process.env.TURSO_DATABASE_URL,
-        authToken: process.env.TURSO_AUTH_TOKEN
-    });
+    if (!db) return { statusCode: 500, body: JSON.stringify({ error: "Database not configured" }) };
 
     try {
         const operator = (action === 'add') ? '+' : '-';
 
-        // This assumes you have a table named 'users' with 'balance' and 'username' columns
         await db.execute({
-            sql: `UPDATE users SET balance = balance ${operator} ? WHERE username = ?`,
+            sql: `UPDATE platform_user_profiles SET pounds_balance = pounds_balance ${operator} ? WHERE username = ?`,
             args: [amount, username]
         });
 

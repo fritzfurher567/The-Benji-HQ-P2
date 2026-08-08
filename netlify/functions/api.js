@@ -1,4 +1,3 @@
-const { createClient } = require("@libsql/client");
 const {
   ORANGE,
   getTransferWebhookSettingKeyForRole,
@@ -8,12 +7,7 @@ const {
 } = require("./webhook-utils");
 const { normalizeDiscountCode, resolveDiscountForOrder } = require("./discount-utils");
 const { validateCodeForRole, getBootstrapOwnerCode, isBootstrapOwnerCode, canRegisterWorker } = require("./code-utils");
-
-const hasDbConfig = Boolean(process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN);
-const db = hasDbConfig ? createClient({
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
-}) : null;
+const { db } = require("./db");
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_ORDER_WEBHOOK_URL = process.env.BENJI_ORDER_WEBHOOK_URL || "https://discord.com/api/webhooks/1519403301374787666/CDzN1oODxyQA4zQeCidemB58d4bjVwtFU8XfCPZwW4zBlnuhjKmXSDt7oyZ7GYhBjdxJ";
